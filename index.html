@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
@@ -50,6 +50,7 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
 
 <div id="topBar">
   <span id="topCoins">🪙 0</span>
+  <span id="topDiamonds" style="font-size:15px;font-weight:bold;color:#88eeff;margin-right:auto;">💎 0</span>
   <button onclick="openShop()">Shop</button>
   <button onclick="openSkinCatalog()">Skins</button>
   <button onclick="openLeaderboard()">Leaderboard</button>
@@ -96,7 +97,8 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
 <!-- SHOP -->
 <div id="shopScreen" class="screen" style="display:none;">
   <h2 style="margin:0 0 4px;">🛒 Shop</h2>
-  <p id="shopCoins" style="color:gold;margin:0 0 14px;"></p>
+  <p id="shopCoins" style="color:#88eeff;margin:0 0 4px;font-size:14px;"></p>
+  <p style="color:#aaa;font-size:12px;margin:0 0 14px;">Hintergründe kosten 💎 Diamanten</p>
   <div id="shopItems"></div>
   <br>
   <button onclick="closeShop()">Back</button>
@@ -380,16 +382,14 @@ const SKINS=[
 ];
 
 // ===== BACKGROUNDS =====
-// id, name, emoji, price, draw function key
 const BACKGROUNDS=[
-  {id:"none",   name:"Default",      emoji:"⬛", price:0,   desc:"Plain black"},
-  {id:"stars",  name:"Stars",        emoji:"🌌", price:200, desc:"Moving starfield"},
-  {id:"nebula", name:"Nebula",       emoji:"🔮", price:350, desc:"Purple nebula clouds"},
-  {id:"matrix", name:"Matrix",       emoji:"💚", price:300, desc:"Green code rain"},
-  {id:"sunset", name:"Sunset",       emoji:"🌅", price:250, desc:"Orange gradient sky"},
-  {id:"ocean",  name:"Deep Ocean",   emoji:"🌊", price:300, desc:"Dark blue waves"},
+  {id:"none",   name:"Default",    emoji:"⬛", price:0,   desc:"Plain black"},
+  {id:"stars",  name:"Stars",      emoji:"🌌", price:300, desc:"Moving starfield"},
+  {id:"nebula", name:"Nebula",     emoji:"🔮", price:350, desc:"Purple nebula clouds"},
+  {id:"matrix", name:"Matrix",     emoji:"💚", price:400, desc:"Green code rain"},
+  {id:"sunset", name:"Sunset",     emoji:"🌅", price:450, desc:"Orange gradient sky"},
+  {id:"ocean",  name:"Deep Ocean", emoji:"🌊", price:500, desc:"Dark blue waves"},
 ];
-
 // ===== MUSIC =====
 // beat index 0-3 → hoodtrap_beat_1..4.wav
 // easy→beat1, medium→beat2, hard→beat3, hard4-5→beat4
@@ -481,8 +481,8 @@ let activeBackground='none';
 
 // ===== GAME STATE =====
 let rocket={x:120,y:300,w:44,h:22,speed:7};
-let obstacles=[], coins=[];
-let spawnTimer=0, coinSpawnTimer=0, score=0, gameOver=false;
+let obstacles=[], coins=[], gems=[];
+let spawnTimer=0, coinSpawnTimer=0, gemSpawnTimer=0, score=0, gameOver=false;
 let rockSpeed=3, spawnRate=70, rockSizeMin=24, rockSizeMax=40;
 let currentObjTypes=["rock"];
 
@@ -528,6 +528,7 @@ function updateTopBar(){
   tb.style.display="flex";
   const u=getUser();
   document.getElementById("topCoins").innerText="🪙 "+(u?u.coins:0);
+  document.getElementById("topDiamonds").innerText="💎 "+(u?u.diamonds||0:0);
 }
 
 // ===== MENU BACKGROUND ANIMATION =====
@@ -584,7 +585,7 @@ function doRegister(){
   if(!u||!p){document.getElementById("loginMsg").innerText="Fill all fields";return;}
   let users=getUsers();
   if(users[u]){document.getElementById("loginMsg").innerText="User already exists";return;}
-  users[u]={password:p,coins:0,shop:{stars:false,ownedBgs:["none"],activeBg:"none"},
+  users[u]={password:p,coins:0,diamonds:0,shop:{stars:false,ownedBgs:["none"],activeBg:"none"},
     ownedSkins:[0,1,2,3,4,5,6,7,8,9],activeSkin:0,
     highscores:{easy:[0,0,0,0,0],medium:[0,0,0,0,0],hard:[0,0,0,0,0],ending:Array(20).fill(0)}};
   saveUsers(users);
@@ -599,6 +600,7 @@ function doLogin(){
   // migrate old accounts
   if(!users[u].shop.ownedBgs) users[u].shop.ownedBgs=["none"];
   if(!users[u].shop.activeBg) users[u].shop.activeBg="none";
+  if(users[u].diamonds===undefined) users[u].diamonds=0;
   if(!Array.isArray(users[u].highscores.easy)) users[u].highscores={easy:[0,0,0,0,0],medium:[0,0,0,0,0],hard:[0,0,0,0,0],ending:Array(20).fill(0)};
   if(!Array.isArray(users[u].highscores.ending)) users[u].highscores.ending=Array(20).fill(0);
   saveUsers(users);
@@ -638,6 +640,7 @@ window.onload=function(){
       document.getElementById("rememberMe").checked=true;
       // migrate
       if(!users[ru].shop.ownedBgs){users[ru].shop.ownedBgs=["none"];users[ru].shop.activeBg="none";}
+      if(users[ru].diamonds===undefined) users[ru].diamonds=0;
       if(!Array.isArray(users[ru].highscores.easy)) users[ru].highscores={easy:[0,0,0,0,0],medium:[0,0,0,0,0],hard:[0,0,0,0,0],ending:Array(20).fill(0)};
       if(!Array.isArray(users[ru].highscores.ending)) users[ru].highscores.ending=Array(20).fill(0);
       saveUsers(users);
@@ -707,7 +710,7 @@ function renderSubLevels(){
 // ===== SHOP =====
 function openShop(){
   const u=getUser();
-  document.getElementById("shopCoins").innerText="Your coins: 🪙 "+u.coins;
+  document.getElementById("shopCoins").innerText="💎 "+( u.diamonds||0)+" Diamanten";
   const container=document.getElementById("shopItems");
   container.innerHTML="";
   BACKGROUNDS.forEach(bg=>{
@@ -718,12 +721,12 @@ function openShop(){
     div.innerHTML=`<div style="font-size:36px;">${bg.emoji}</div>
       <p style="margin:4px 0;font-size:14px;">${bg.name}</p>
       <p style="color:#888;font-size:12px;margin:2px 0;">${bg.desc}</p>
-      <p style="color:gold;font-size:12px;margin:2px 0 8px;">${bg.price===0?"Free":bg.price+" 🪙"}</p>`;
+      <p style="color:#88eeff;font-size:12px;margin:2px 0 8px;">${bg.price===0?"Gratis":bg.price+" 💎"}</p>`;
     const btn=document.createElement("button");
     btn.style.cssText="font-size:13px;padding:6px 12px;margin:0;";
-    if(isActive){btn.innerText="Active";btn.disabled=true;}
-    else if(owned){btn.innerText="Use";btn.onclick=()=>activateBg(bg.id);}
-    else{btn.innerText=bg.price===0?"Unlock":"Buy";btn.onclick=()=>buyBg(bg.id);}
+    if(isActive){btn.innerText="Aktiv";btn.disabled=true;}
+    else if(owned){btn.innerText="Nutzen";btn.onclick=()=>activateBg(bg.id);}
+    else{btn.innerText=bg.price===0?"Freischalten":"Kaufen";btn.onclick=()=>buyBg(bg.id);}
     div.appendChild(btn);
     container.appendChild(div);
   });
@@ -734,8 +737,9 @@ function buyBg(id){
   const bg=BACKGROUNDS.find(b=>b.id===id);
   let u=getUser();
   if(u.shop.ownedBgs.includes(id)){activateBg(id);return;}
-  if(u.coins<bg.price){alert("Not enough coins");return;}
-  u.coins-=bg.price;
+  if(bg.price===0){u.shop.ownedBgs.push(id);saveUser(u);activateBg(id);return;}
+  if((u.diamonds||0)<bg.price){alert("Nicht genug Diamanten 💎");return;}
+  u.diamonds-=bg.price;
   u.shop.ownedBgs.push(id);
   saveUser(u);
   updateTopBar();
@@ -1226,7 +1230,7 @@ function startGame(diff, subIdx){
   rockSpeed=cfg.rockSpeed; spawnRate=cfg.spawnRate;
   rockSizeMin=cfg.rockSize[0]; rockSizeMax=cfg.rockSize[1];
   currentObjTypes=cfg.objTypes;
-  obstacles=[];coins=[];spawnTimer=0;coinSpawnTimer=0;score=0;gameOver=false;paused=false;gameRunning=true;
+  obstacles=[];coins=[];gems=[];spawnTimer=0;coinSpawnTimer=0;gemSpawnTimer=0;score=0;gameOver=false;paused=false;gameRunning=true;
   rocket={x:120,y:canvas.height/2,w:44,h:22,speed:sensitivity};
   if(activeBackground==="matrix") initMatrix();
   stopMenuBg();
@@ -1248,6 +1252,8 @@ function gameLoop(){
   if(spawnTimer>=spawnRate){spawnObstacle();spawnTimer=0;}
   coinSpawnTimer++;
   if(coinSpawnTimer>=110){makeCoin();coinSpawnTimer=0;}
+  gemSpawnTimer++;
+  if(gemSpawnTimer>=420){makeGem();gemSpawnTimer=0;}
   // gradual difficulty ramp every 1000 points
   if(score>0&&score%1000===0){
     rockSpeed+=0.3;
@@ -1256,8 +1262,10 @@ function gameLoop(){
   moveRocket();
   updateObstacles();
   moveCoins();
+  moveGems();
   drawObstacles();
   drawCoins();
+  drawGems();
   drawRocket();
   drawHUD();
   score++;
@@ -1381,6 +1389,47 @@ function drawCoins(){
     ctx.fillStyle="#7a5500";ctx.font="bold 11px Arial";ctx.textAlign="center";ctx.textBaseline="middle";
     ctx.fillText("$",c.x,c.y);
     ctx.textAlign="left";ctx.textBaseline="alphabetic";
+  });
+}
+
+// ===== GEMS (DIAMONDS) =====
+function makeGem(){
+  gems.push({x:canvas.width+20,y:Math.random()*(canvas.height-70)+35,r:11,angle:0});
+}
+function moveGems(){
+  for(let i=gems.length-1;i>=0;i--){
+    const g=gems[i];
+    g.x-=rockSpeed*0.65;
+    g.angle+=0.05;
+    if(g.x+g.r<0){gems.splice(i,1);continue;}
+    const dx=rocket.x+rocket.w/2-g.x;
+    const dy=rocket.y+rocket.h/2-g.y;
+    if(Math.sqrt(dx*dx+dy*dy)<g.r+16){
+      gems.splice(i,1);
+      let u=getUser();u.diamonds=(u.diamonds||0)+1;saveUser(u);updateTopBar();
+    }
+  }
+}
+function drawGems(){
+  gems.forEach(g=>{
+    ctx.save();
+    ctx.translate(g.x,g.y);
+    ctx.rotate(g.angle);
+    const r=g.r;
+    // diamond shape
+    ctx.beginPath();
+    ctx.moveTo(0,-r);ctx.lineTo(r*0.7,0);ctx.lineTo(0,r);ctx.lineTo(-r*0.7,0);
+    ctx.closePath();
+    const gg=ctx.createRadialGradient(-r*0.2,-r*0.3,1,0,0,r);
+    gg.addColorStop(0,"#ffffff");
+    gg.addColorStop(0.3,"#88eeff");
+    gg.addColorStop(1,"#0088cc");
+    ctx.fillStyle=gg;ctx.fill();
+    ctx.strokeStyle="#00ccff";ctx.lineWidth=1.5;ctx.stroke();
+    // inner shine
+    ctx.beginPath();ctx.moveTo(-r*0.15,-r*0.5);ctx.lineTo(r*0.25,-r*0.1);ctx.lineTo(0,-r*0.55);ctx.closePath();
+    ctx.fillStyle="rgba(255,255,255,0.5)";ctx.fill();
+    ctx.restore();
   });
 }
 
