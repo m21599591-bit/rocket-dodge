@@ -71,17 +71,17 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
 <div id="menuScreen" class="screen" style="display:none">
   <h2 style="font-size:28px;margin:0 0 4px;letter-spacing:2px;">🚀 ROCKET DODGE</h2>
   <p id="menuUser" style="color:#666;font-size:13px;margin:0 0 18px;"></p>
-  <button onclick="showLevelSelect()" style="font-size:17px;padding:12px 32px;border-color:#00ccff;color:#00ccff;">▶ Play</button><br>
-  <button onclick="openShop()">🛒 Shop</button>
-  <button onclick="openSkinCatalog()">🎨 Skins</button><br>
-  <button onclick="openLeaderboard()">🏆 Leaderboard</button>
-  <button onclick="openSettingsMenu()">⚙️ Settings</button>
+  <button onclick="showLevelSelect()" style="font-size:17px;padding:12px 32px;border-color:#00ccff;color:#00ccff;" data-i18n="play">▶ Spielen</button><br>
+  <button onclick="openShop()" data-i18n="shop">🛒 Shop</button>
+  <button onclick="openSkinCatalog()" data-i18n="skins">🎨 Skins</button><br>
+  <button onclick="openLeaderboard()" data-i18n="leaderboard">🏆 Bestenliste</button>
+  <button onclick="openSettingsMenu()" data-i18n="settings">⚙️ Einstellungen</button>
 </div>
 
 <!-- LEVEL SELECT -->
 <div id="levelScreen" class="screen" style="display:none;">
-  <h2 style="margin:0 0 6px;">Select Difficulty</h2>
-  <p style="color:#888;font-size:13px;margin:0 0 14px;" id="levelSubDesc">Each difficulty has 5 sub-levels</p>
+  <h2 style="margin:0 0 6px;" data-i18n="selectDiff">Schwierigkeit wählen</h2>
+  <p style="color:#888;font-size:13px;margin:0 0 14px;" id="levelSubDesc" data-i18n="diffDesc">Jede Schwierigkeit hat 5 Sub-Level</p>
   <div id="diffRow" style="margin-bottom:14px;">
     <button class="lvl-btn active" id="diffEasy" onclick="selectDiff('easy')">Easy</button>
     <button class="lvl-btn" id="diffMedium" onclick="selectDiff('medium')">Medium</button>
@@ -90,7 +90,7 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
   </div>
   <div id="subLevelRow"></div>
   <br>
-  <button onclick="showScreen('menuScreen')">Back</button>
+  <button onclick="showScreen('menuScreen')" data-i18n="back">Zurück</button>
 </div>
 
 <!-- SHOP -->
@@ -121,7 +121,7 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
 
 <!-- LEADERBOARD -->
 <div id="leaderScreen" class="screen" style="display:none;">
-  <h2 style="margin:0 0 10px;">🏆 Leaderboard</h2>
+  <h2 style="margin:0 0 10px;">🏆 <span data-i18n="leaderboard">Bestenliste</span></h2>
   <div style="margin-bottom:12px;">
     <button class="lvl-btn" onclick="showLeaderTab('easy')">Easy</button>
     <button class="lvl-btn" onclick="showLeaderTab('medium')">Medium</button>
@@ -130,31 +130,34 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
   </div>
   <div id="leaderList" style="min-width:240px;text-align:left;min-height:80px;"></div>
   <br>
-  <button onclick="closeLeaderboard()">Back</button>
+  <button onclick="closeLeaderboard()" data-i18n="back">Zurück</button>
 </div>
 
 <!-- SETTINGS -->
 <div id="settingsScreen" class="screen" style="display:none">
-  <h2 style="margin:0 0 16px;">⚙️ Settings</h2>
-  <p style="margin:6px 0 2px;">Sensitivity</p>
+  <h2 style="margin:0 0 16px;">⚙️ <span data-i18n="settings">Einstellungen</span></h2>
+  <p style="margin:6px 0 2px;" data-i18n="sensitivity">Empfindlichkeit</p>
   <input type="range" id="sensitivitySlider" min="1" max="20" value="7" oninput="updateSensitivity(this.value)">
   <span id="sensVal" style="margin-left:8px;">7</span>
-  <p style="margin:12px 0 2px;">Volume</p>
+  <p style="margin:12px 0 2px;" data-i18n="volume">Lautstärke</p>
   <input type="range" id="volumeSlider" min="0" max="100" value="50" oninput="updateVolume(this.value)">
   <span id="volVal" style="margin-left:8px;">50</span>
-  <p style="margin:16px 0 6px;">Gerät</p>
-  <button id="devicePC"     onclick="setDevice('pc')"     style="margin:3px;">💻 PC</button>
-  <button id="deviceMobile" onclick="setDevice('mobile')" style="margin:3px;">📱 Handy</button>
-  <p style="margin:16px 0 6px;">Tasten</p>
+  <p style="margin:16px 0 6px;" data-i18n="device">Gerät</p>
+  <button id="devicePC"     onclick="setDevice('pc')"     style="margin:3px;" data-i18n="pc">💻 PC</button>
+  <button id="deviceMobile" onclick="setDevice('mobile')" style="margin:3px;" data-i18n="mobile">📱 Handy</button>
+  <p style="margin:16px 0 6px;" data-i18n="language">Sprache</p>
+  <button id="langDE" onclick="setLang('de')" style="margin:3px;">🇩🇪 Deutsch</button>
+  <button id="langEN" onclick="setLang('en')" style="margin:3px;">🇬🇧 English</button>
+  <p style="margin:16px 0 6px;" data-i18n="keys">Tasten</p>
   <div style="display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap;">
     <div>
-      <div style="font-size:12px;color:#aaa;margin-bottom:4px;">⬆ Hoch</div>
+      <div style="font-size:12px;color:#aaa;margin-bottom:4px;" data-i18n="up">⬆ Hoch</div>
       <button id="bindUpBtn" onclick="startBind('up')" style="width:90px;font-size:13px;padding:8px;">
         <span id="bindUpLabel"></span>
       </button>
     </div>
     <div>
-      <div style="font-size:12px;color:#aaa;margin-bottom:4px;">⬇ Runter</div>
+      <div style="font-size:12px;color:#aaa;margin-bottom:4px;" data-i18n="down">⬇ Runter</div>
       <button id="bindDownBtn" onclick="startBind('down')" style="width:90px;font-size:13px;padding:8px;">
         <span id="bindDownLabel"></span>
       </button>
@@ -162,39 +165,42 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
   </div>
   <p id="bindHint" style="font-size:12px;color:#00ccff;min-height:16px;margin:6px 0 0;"></p>
   <br>
-  <button onclick="closeSettings()">Back</button>
+  <button onclick="closeSettings()" data-i18n="back">Zurück</button>
 </div>
 
 <!-- PAUSE MENU -->
 <div id="pauseScreen" class="screen" style="display:none">
-  <h2 style="margin:0 0 16px;">⏸ Paused</h2>
-  <button onclick="resumeGame()">▶ Continue</button><br>
-  <button onclick="openPauseSettings()">⚙️ Settings</button><br>
-  <button onclick="pauseToMenu()">🏠 Main Menu</button>
+  <h2 style="margin:0 0 16px;" data-i18n="paused">⏸ Pausiert</h2>
+  <button onclick="resumeGame()" data-i18n="continue">▶ Weiter</button><br>
+  <button onclick="openPauseSettings()" data-i18n="settings">⚙️ Einstellungen</button><br>
+  <button onclick="pauseToMenu()" data-i18n="mainMenu">🏠 Hauptmenü</button>
 </div>
 
 <!-- PAUSE SETTINGS -->
 <div id="pauseSettingsScreen" class="screen" style="display:none">
-  <h2 style="margin:0 0 16px;">⚙️ Settings</h2>
-  <p style="margin:6px 0 2px;">Sensitivity</p>
+  <h2 style="margin:0 0 16px;">⚙️ <span data-i18n="settings">Einstellungen</span></h2>
+  <p style="margin:6px 0 2px;" data-i18n="sensitivity">Empfindlichkeit</p>
   <input type="range" id="pSensSlider" min="1" max="20" value="7" oninput="updateSensitivity(this.value);document.getElementById('pSensVal').innerText=this.value;">
   <span id="pSensVal" style="margin-left:8px;">7</span>
-  <p style="margin:12px 0 2px;">Volume</p>
+  <p style="margin:12px 0 2px;" data-i18n="volume">Lautstärke</p>
   <input type="range" id="pVolSlider" min="0" max="100" value="50" oninput="updateVolume(this.value);document.getElementById('pVolVal').innerText=this.value;">
   <span id="pVolVal" style="margin-left:8px;">50</span>
-  <p style="margin:16px 0 6px;">Gerät</p>
-  <button id="pDevicePC"     onclick="setDevice('pc')"     style="margin:3px;">💻 PC</button>
-  <button id="pDeviceMobile" onclick="setDevice('mobile')" style="margin:3px;">📱 Handy</button>
-  <p style="margin:16px 0 6px;">Tasten</p>
+  <p style="margin:16px 0 6px;" data-i18n="device">Gerät</p>
+  <button id="pDevicePC"     onclick="setDevice('pc')"     style="margin:3px;" data-i18n="pc">💻 PC</button>
+  <button id="pDeviceMobile" onclick="setDevice('mobile')" style="margin:3px;" data-i18n="mobile">📱 Handy</button>
+  <p style="margin:16px 0 6px;" data-i18n="language">Sprache</p>
+  <button id="pLangDE" onclick="setLang('de')" style="margin:3px;">🇩🇪 Deutsch</button>
+  <button id="pLangEN" onclick="setLang('en')" style="margin:3px;">🇬🇧 English</button>
+  <p style="margin:16px 0 6px;" data-i18n="keys">Tasten</p>
   <div style="display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap;">
     <div>
-      <div style="font-size:12px;color:#aaa;margin-bottom:4px;">⬆ Hoch</div>
+      <div style="font-size:12px;color:#aaa;margin-bottom:4px;" data-i18n="up">⬆ Hoch</div>
       <button id="pBindUpBtn" onclick="startBind('up')" style="width:90px;font-size:13px;padding:8px;">
         <span id="pBindUpLabel"></span>
       </button>
     </div>
     <div>
-      <div style="font-size:12px;color:#aaa;margin-bottom:4px;">⬇ Runter</div>
+      <div style="font-size:12px;color:#aaa;margin-bottom:4px;" data-i18n="down">⬇ Runter</div>
       <button id="pBindDownBtn" onclick="startBind('down')" style="width:90px;font-size:13px;padding:8px;">
         <span id="pBindDownLabel"></span>
       </button>
@@ -202,66 +208,89 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
   </div>
   <p id="pBindHint" style="font-size:12px;color:#00ccff;min-height:16px;margin:6px 0 0;"></p>
   <br>
-  <button onclick="closePauseSettings()">Back</button>
+  <button onclick="closePauseSettings()" data-i18n="back">Zurück</button>
 </div>
 
 <!-- END SCREEN -->
 <div id="endScreen" class="screen" style="display:none">
-  <h2 style="margin:0 0 10px;">💥 Game Over</h2>
+  <h2 style="margin:0 0 10px;" data-i18n="gameOver">💥 Game Over</h2>
   <p id="endScore" style="font-size:20px;margin:4px 0;"></p>
   <p id="endHigh" style="color:#aaa;font-size:14px;margin:4px 0;"></p>
   <p id="endCoinsEarned" style="color:gold;font-size:15px;margin:8px 0 14px;"></p>
-  <button onclick="restartGame()">🔄 Restart</button>
-  <button onclick="goMenu()">🏠 Main Menu</button>
+  <button onclick="restartGame()" data-i18n="restart">🔄 Neustart</button>
+  <button onclick="goMenu()" data-i18n="mainMenu">🏠 Hauptmenü</button>
 </div>
 
 <!-- WIN SCREEN -->
 <div id="winScreen" class="screen" style="display:none">
-  <h2 style="margin:0 0 6px;font-size:26px;">🏆 Du hast es geschafft!</h2>
-  <p style="color:#00ccff;font-size:15px;margin:0 0 4px;">Ending abgeschlossen</p>
+  <h2 style="margin:0 0 6px;font-size:26px;" data-i18n="won">🏆 Du hast es geschafft!</h2>
+  <p style="color:#00ccff;font-size:15px;margin:0 0 4px;" data-i18n="endingDone">Ending abgeschlossen</p>
   <p id="winScore" style="font-size:20px;margin:6px 0;"></p>
   <p id="winCoins" style="color:gold;font-size:15px;margin:4px 0 16px;"></p>
-  <button onclick="restartGame()">🔄 Nochmal</button>
-  <button id="nextLevelBtn" onclick="nextEndingLevel()" style="border-color:#00ccff;color:#00ccff;">▶ Nächstes Level</button>
-  <button onclick="goMenu()">🏠 Hauptmenü</button>
+  <button onclick="restartGame()" data-i18n="playAgain">🔄 Nochmal</button>
+  <button id="nextLevelBtn" onclick="nextEndingLevel()" style="border-color:#00ccff;color:#00ccff;" data-i18n="nextLevel">▶ Nächstes Level</button>
+  <button onclick="goMenu()" data-i18n="mainMenu">🏠 Hauptmenü</button>
 </div>
 
 <script>
 // ===== LANGUAGE =====
 const LANG={
   de:{
-    settings:"⚙️ Einstellungen", sensitivity:"Empfindlichkeit", volume:"Lautstärke",
-    device:"Gerät", keys:"Tasten", up:"⬆ Hoch", down:"⬇ Runter", back:"Zurück",
-    language:"Sprache", continue:"▶ Weiter", mainMenu:"🏠 Hauptmenü",
-    paused:"⏸ Pausiert", gameOver:"💥 Game Over", restart:"🔄 Neustart",
-    bestOnLevel:"Bestes auf diesem Level:", coinsEarned:"Coins verdient:",
-    leaderboard:"🏆 Bestenliste", noEntries:"Noch keine Einträge.",
-    loading:"⏳ Laden...", player:"Spieler", score:"Score",
-    winTitle:"🏆 Du hast es geschafft!", winSub:"Ending abgeschlossen",
-    again:"🔄 Nochmal", nextLevel:"▶ Nächstes Level",
-    shop:"🛒 Shop", skins:"🎨 Skins", play:"▶ Spielen",
+    play:"▶ Spielen", shop:"🛒 Shop", skins:"🎨 Skins", leaderboard:"🏆 Bestenliste", settings:"⚙️ Einstellungen",
     selectDiff:"Schwierigkeit wählen", diffDesc:"Jede Schwierigkeit hat 5 Sub-Level",
     endingDesc:"Ending hat 20 progressiv schwieriger werdende Level",
-    beaten:"Geschafft:", of:"/"
+    back:"Zurück", sensitivity:"Empfindlichkeit", volume:"Lautstärke",
+    device:"Gerät", pc:"💻 PC", mobile:"📱 Handy", keys:"Tasten",
+    up:"⬆ Hoch", down:"⬇ Runter", language:"Sprache",
+    paused:"⏸ Pausiert", continue:"▶ Weiter", mainMenu:"🏠 Hauptmenü",
+    gameOver:"💥 Game Over", restart:"🔄 Neustart",
+    bestOnLevel:"Bestes auf diesem Level:", coinsEarned:"Coins verdient:",
+    loading:"⏳ Laden...", noEntries:"Noch keine Einträge.",
+    player:"Spieler", score:"Score",
+    won:"🏆 Du hast es geschafft!", endingDone:"Ending abgeschlossen",
+    nextLevel:"▶ Nächstes Level", playAgain:"🔄 Nochmal",
+    beatenCount:"Geschafft:", of:"/"," levels":" Level",
+    beaten:"✓ Geschafft", yourCoins:"Deine Coins:",
+    bindHint1:"Drücke eine Taste für '", bindHint2:"'...", saved:"✓ Gespeichert",
+    hoch:"Hoch", runter:"Runter",
+    nextBoost:"nächster Boost:",
   },
   en:{
-    settings:"⚙️ Settings", sensitivity:"Sensitivity", volume:"Volume",
-    device:"Device", keys:"Keys", up:"⬆ Up", down:"⬇ Down", back:"Back",
-    language:"Language", continue:"▶ Continue", mainMenu:"🏠 Main Menu",
-    paused:"⏸ Paused", gameOver:"💥 Game Over", restart:"🔄 Restart",
-    bestOnLevel:"Best on this level:", coinsEarned:"Coins earned:",
-    leaderboard:"🏆 Leaderboard", noEntries:"No entries yet.",
-    loading:"⏳ Loading...", player:"Player", score:"Score",
-    winTitle:"🏆 You did it!", winSub:"Ending completed",
-    again:"🔄 Again", nextLevel:"▶ Next Level",
-    shop:"🛒 Shop", skins:"🎨 Skins", play:"▶ Play",
+    play:"▶ Play", shop:"🛒 Shop", skins:"🎨 Skins", leaderboard:"🏆 Leaderboard", settings:"⚙️ Settings",
     selectDiff:"Select Difficulty", diffDesc:"Each difficulty has 5 sub-levels",
     endingDesc:"Ending has 20 progressively harder levels",
-    beaten:"Beaten:", of:"/"
+    back:"Back", sensitivity:"Sensitivity", volume:"Volume",
+    device:"Device", pc:"💻 PC", mobile:"📱 Mobile", keys:"Keys",
+    up:"⬆ Up", down:"⬇ Down", language:"Language",
+    paused:"⏸ Paused", continue:"▶ Continue", mainMenu:"🏠 Main Menu",
+    gameOver:"💥 Game Over", restart:"🔄 Restart",
+    bestOnLevel:"Best on this level:", coinsEarned:"Coins earned:",
+    loading:"⏳ Loading...", noEntries:"No entries yet.",
+    player:"Player", score:"Score",
+    won:"🏆 You did it!", endingDone:"Ending completed",
+    nextLevel:"▶ Next Level", playAgain:"🔄 Play Again",
+    beatenCount:"Beaten:", of:"/"," levels":" Levels",
+    beaten:"✓ Done", yourCoins:"Your coins:",
+    bindHint1:"Press a key for '", bindHint2:"'...", saved:"✓ Saved",
+    hoch:"Up", runter:"Down",
+    nextBoost:"next boost:",
   }
 };
 let lang=localStorage.getItem("lang")||"de";
-function t(key){return LANG[lang][key]||key;}
+function t(key){return (LANG[lang]||LANG.de)[key]||key;}
+
+function applyLang(){
+  // Top bar & menu
+  const q=(id,txt)=>{const e=document.getElementById(id);if(e)e.innerText=txt;};
+  // Main menu buttons (by text content — use data-i18n approach via querySelectorAll)
+  document.querySelectorAll("[data-i18n]").forEach(el=>{
+    el.innerText=t(el.dataset.i18n);
+  });
+  // Leaderboard back button etc handled by data-i18n
+  // Re-render open screens
+  updateBindLabels();
+  updateDeviceButtons();
+}
 
 function setLang(l){
   lang=l;
@@ -270,32 +299,14 @@ function setLang(l){
   updateLangButtons();
 }
 function updateLangButtons(){
-  ["langDE","pLangDE"].forEach(id=>{const el=document.getElementById(id);if(el)el.style.borderColor=lang==="de"?"#00ccff":"rgba(255,255,255,0.5)";});
-  ["langEN","pLangEN"].forEach(id=>{const el=document.getElementById(id);if(el)el.style.borderColor=lang==="en"?"#00ccff":"rgba(255,255,255,0.5)";});
-}
-function applyLang(){
-  // Settings screens
-  document.querySelectorAll(".i18n-settings").forEach(el=>el.innerText=t("settings"));
-  document.querySelectorAll(".i18n-sensitivity").forEach(el=>el.innerText=t("sensitivity"));
-  document.querySelectorAll(".i18n-volume").forEach(el=>el.innerText=t("volume"));
-  document.querySelectorAll(".i18n-device").forEach(el=>el.innerText=t("device"));
-  document.querySelectorAll(".i18n-keys").forEach(el=>el.innerText=t("keys"));
-  document.querySelectorAll(".i18n-up").forEach(el=>el.innerText=t("up"));
-  document.querySelectorAll(".i18n-down").forEach(el=>el.innerText=t("down"));
-  document.querySelectorAll(".i18n-back").forEach(el=>el.innerText=t("back"));
-  document.querySelectorAll(".i18n-language").forEach(el=>el.innerText=t("language"));
-  document.querySelectorAll(".i18n-continue").forEach(el=>el.innerText=t("continue"));
-  document.querySelectorAll(".i18n-mainmenu").forEach(el=>el.innerText=t("mainMenu"));
-  document.querySelectorAll(".i18n-paused").forEach(el=>el.innerText=t("paused"));
-  document.querySelectorAll(".i18n-gameover").forEach(el=>el.innerText=t("gameOver"));
-  document.querySelectorAll(".i18n-restart").forEach(el=>el.innerText=t("restart"));
-  document.querySelectorAll(".i18n-again").forEach(el=>el.innerText=t("again"));
-  document.querySelectorAll(".i18n-nextlevel").forEach(el=>el.innerText=t("nextLevel"));
-  document.querySelectorAll(".i18n-leaderboard").forEach(el=>el.innerText=t("leaderboard"));
-  document.querySelectorAll(".i18n-selectdiff").forEach(el=>el.innerText=t("selectDiff"));
-  document.querySelectorAll(".i18n-wintitle").forEach(el=>el.innerText=t("winTitle"));
-  document.querySelectorAll(".i18n-winsub").forEach(el=>el.innerText=t("winSub"));
-  updateLangButtons();
+  ["langDE","pLangDE"].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.style.borderColor=lang==="de"?"#00ccff":"rgba(255,255,255,0.5)";
+  });
+  ["langEN","pLangEN"].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.style.borderColor=lang==="en"?"#00ccff":"rgba(255,255,255,0.5)";
+  });
 }
 
 // ===== CANVASES =====
@@ -614,6 +625,8 @@ function afterLogin(){
 window.onload=function(){
   initMenuBg();
   animateMenuBg();
+  applyLang();
+  updateLangButtons();
   const ru=localStorage.getItem("rememberedUser");
   const rp=localStorage.getItem("rememberedPass");
   if(ru&&rp){
@@ -646,7 +659,7 @@ function showLevelSelect(){
 function selectDiff(d){
   selectedDiff=d;
   const desc=document.getElementById("levelSubDesc");
-  if(desc) desc.innerText=d==="ending"?"Ending has 20 progressively harder levels":"Each difficulty has 5 sub-levels";
+  if(desc) desc.innerText=d==="ending"?t("endingDesc"):t("diffDesc");
   renderDiffButtons();
   renderSubLevels();
 }
@@ -668,7 +681,7 @@ function renderSubLevels(){
     const btn=document.createElement("button");
     btn.className="lvl-btn";
     if(isEnding){
-      btn.innerHTML=`${cfg.label}${beaten?'<br><span style="font-size:11px;color:#00cc66;">✓ Geschafft</span>':''}`;
+      btn.innerHTML=`${cfg.label}${beaten?`<br><span style="font-size:11px;color:#00cc66;">${t("beaten")}</span>`:''}`;
       btn.style.margin="4px";
       if(beaten){
         btn.style.border="2px solid #00cc66";
@@ -686,7 +699,7 @@ function renderSubLevels(){
     const beaten=LEVEL_CONFIG.ending.filter((_,i)=>(u.highscores.ending?.[i]||0)>=5000).length;
     const info=document.createElement("p");
     info.style.cssText="color:#aaa;font-size:13px;margin:10px 0 0;";
-    info.innerText=`Geschafft: ${beaten} / ${LEVEL_CONFIG.ending.length} Level`;
+    info.innerText=`${t("beatenCount")} ${beaten} ${t("of")} ${LEVEL_CONFIG.ending.length}${t(" levels")}`;
     row.appendChild(info);
   }
 }
@@ -973,21 +986,21 @@ async function pushScore(diff, newScore){
 
 function openLeaderboard(){
   showScreen("leaderScreen");
-  document.getElementById("leaderList").innerHTML="<p style='color:#888;font-size:13px;'>⏳ Laden...</p>";
+  document.getElementById("leaderList").innerHTML=`<p style='color:#888;font-size:13px;'>${t("loading")}</p>`;
   fetchBoard().then(()=>showLeaderTab('easy'));
 }
 function closeLeaderboard(){showScreen("menuScreen");}
 function showLeaderTab(tab){
   leaderTab=tab;
-  const list=(globalBoard[tab]||[]).slice(0,5);
+  const list=(globalBoard[tab]||[]).slice(0,3);
   let html="";
   if(list.length===0){
-    html="<p style='color:#666;font-size:13px;'>Noch keine Einträge.</p>";
+    html=`<p style='color:#666;font-size:13px;'>${t("noEntries")}</p>`;
   } else {
     html="<table style='width:100%;border-collapse:collapse;font-size:14px;'>";
-    html+="<tr style='color:#888;'><th style='text-align:left;padding:4px 6px;'>#</th><th style='text-align:left;'>Spieler</th><th style='text-align:right;'>Score</th></tr>";
+    html+=`<tr style='color:#888;'><th style='text-align:left;padding:4px 6px;'>#</th><th style='text-align:left;'>${t("player")}</th><th style='text-align:right;'>${t("score")}</th></tr>`;
     list.forEach((p,i)=>{
-      const medal=i===0?"🥇":i===1?"🥈":i===2?"🥉":"";
+      const medal=i===0?"🥇":i===1?"🥈":"🥉";
       const style=p.name===currentUser?"color:#00ccff;font-weight:bold;":"";
       html+=`<tr><td style='padding:3px 6px;color:#666;'>${i+1}</td><td style='${style}'>${medal}${p.name}</td><td style='text-align:right;color:gold;'>${p.score}</td></tr>`;
     });
@@ -997,7 +1010,7 @@ function showLeaderTab(tab){
 }
 
 // ===== SETTINGS =====
-function openSettingsMenu(){showScreen("settingsScreen");updateDeviceButtons();updateBindLabels();}
+function openSettingsMenu(){showScreen("settingsScreen");updateDeviceButtons();updateBindLabels();updateLangButtons();}
 function closeSettings(){bindingTarget=null;showScreen("menuScreen");}
 function updateSensitivity(v){
   sensitivity=parseInt(v);rocket.speed=sensitivity;
@@ -1048,9 +1061,10 @@ function updateBindLabels(){
 function startBind(target){
   bindingTarget=target;
   updateBindLabels();
+  const label=target==="up"?t("hoch"):t("runter");
   ["bindHint","pBindHint"].forEach(id=>{
     const el=document.getElementById(id);
-    if(el)el.innerText="Drücke eine Taste für '"+(target==="up"?"Hoch":"Runter")+"'...";
+    if(el)el.innerText=t("bindHint1")+label+t("bindHint2");
   });
 }
 
@@ -1062,7 +1076,7 @@ document.addEventListener("keydown",e=>{
     bindingTarget=null;
     updateBindLabels();
     ["bindHint","pBindHint"].forEach(id=>{
-      const el=document.getElementById(id);if(el)el.innerText="✓ Gespeichert";
+      const el=document.getElementById(id);if(el)el.innerText=t("saved");
     });
     setTimeout(()=>{
       ["bindHint","pBindHint"].forEach(id=>{
@@ -1110,7 +1124,7 @@ function resumeGame(){
 function openPauseSettings(){
   document.getElementById("pauseScreen").style.display="none";
   document.getElementById("pauseSettingsScreen").style.display="block";
-  updateDeviceButtons();updateBindLabels();
+  updateDeviceButtons();updateBindLabels();updateLangButtons();
 }
 function closePauseSettings(){
   bindingTarget=null;
@@ -1425,8 +1439,8 @@ function winGame(){
   if(u.highscores.ending[currentSubLevel]<5000) u.highscores.ending[currentSubLevel]=5000;
   saveUser(u);updateTopBar();
   pushScore("ending",score);
-  document.getElementById("winScore").innerText="Score: "+score;
-  document.getElementById("winCoins").innerText="Coins verdient: +"+earned+" 🪙 (inkl. 100 Bonus)";
+  document.getElementById("winScore").innerText=t("score")+": "+score;
+  document.getElementById("winCoins").innerText=t("coinsEarned")+" +"+earned+" 🪙 (+100 Bonus)";
   // Nächstes Level Button: verstecken wenn letztes Level
   const nextBtn=document.getElementById("nextLevelBtn");
   nextBtn.style.display=(currentSubLevel<LEVEL_CONFIG.ending.length-1)?"inline-block":"none";
@@ -1449,9 +1463,9 @@ function endGame(){
   // push best score across all sub-levels to global leaderboard
   const bestOverall=Math.max(...u.highscores[currentDiff]);
   pushScore(currentDiff, bestOverall);
-  document.getElementById("endScore").innerText="Score: "+score;
-  document.getElementById("endHigh").innerText="Best on this level: "+u.highscores[currentDiff][currentSubLevel];
-  document.getElementById("endCoinsEarned").innerText="Coins earned: +"+earned+" 🪙";
+  document.getElementById("endScore").innerText=t("score")+": "+score;
+  document.getElementById("endHigh").innerText=t("bestOnLevel")+" "+u.highscores[currentDiff][currentSubLevel];
+  document.getElementById("endCoinsEarned").innerText=t("coinsEarned")+" +"+earned+" 🪙";
   document.getElementById("endScreen").style.display="block";
 }
 
