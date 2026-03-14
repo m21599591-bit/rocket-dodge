@@ -227,6 +227,77 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
 </div>
 
 <script>
+// ===== LANGUAGE =====
+const LANG={
+  de:{
+    settings:"⚙️ Einstellungen", sensitivity:"Empfindlichkeit", volume:"Lautstärke",
+    device:"Gerät", keys:"Tasten", up:"⬆ Hoch", down:"⬇ Runter", back:"Zurück",
+    language:"Sprache", continue:"▶ Weiter", mainMenu:"🏠 Hauptmenü",
+    paused:"⏸ Pausiert", gameOver:"💥 Game Over", restart:"🔄 Neustart",
+    bestOnLevel:"Bestes auf diesem Level:", coinsEarned:"Coins verdient:",
+    leaderboard:"🏆 Bestenliste", noEntries:"Noch keine Einträge.",
+    loading:"⏳ Laden...", player:"Spieler", score:"Score",
+    winTitle:"🏆 Du hast es geschafft!", winSub:"Ending abgeschlossen",
+    again:"🔄 Nochmal", nextLevel:"▶ Nächstes Level",
+    shop:"🛒 Shop", skins:"🎨 Skins", play:"▶ Spielen",
+    selectDiff:"Schwierigkeit wählen", diffDesc:"Jede Schwierigkeit hat 5 Sub-Level",
+    endingDesc:"Ending hat 20 progressiv schwieriger werdende Level",
+    beaten:"Geschafft:", of:"/"
+  },
+  en:{
+    settings:"⚙️ Settings", sensitivity:"Sensitivity", volume:"Volume",
+    device:"Device", keys:"Keys", up:"⬆ Up", down:"⬇ Down", back:"Back",
+    language:"Language", continue:"▶ Continue", mainMenu:"🏠 Main Menu",
+    paused:"⏸ Paused", gameOver:"💥 Game Over", restart:"🔄 Restart",
+    bestOnLevel:"Best on this level:", coinsEarned:"Coins earned:",
+    leaderboard:"🏆 Leaderboard", noEntries:"No entries yet.",
+    loading:"⏳ Loading...", player:"Player", score:"Score",
+    winTitle:"🏆 You did it!", winSub:"Ending completed",
+    again:"🔄 Again", nextLevel:"▶ Next Level",
+    shop:"🛒 Shop", skins:"🎨 Skins", play:"▶ Play",
+    selectDiff:"Select Difficulty", diffDesc:"Each difficulty has 5 sub-levels",
+    endingDesc:"Ending has 20 progressively harder levels",
+    beaten:"Beaten:", of:"/"
+  }
+};
+let lang=localStorage.getItem("lang")||"de";
+function t(key){return LANG[lang][key]||key;}
+
+function setLang(l){
+  lang=l;
+  localStorage.setItem("lang",l);
+  applyLang();
+  updateLangButtons();
+}
+function updateLangButtons(){
+  ["langDE","pLangDE"].forEach(id=>{const el=document.getElementById(id);if(el)el.style.borderColor=lang==="de"?"#00ccff":"rgba(255,255,255,0.5)";});
+  ["langEN","pLangEN"].forEach(id=>{const el=document.getElementById(id);if(el)el.style.borderColor=lang==="en"?"#00ccff":"rgba(255,255,255,0.5)";});
+}
+function applyLang(){
+  // Settings screens
+  document.querySelectorAll(".i18n-settings").forEach(el=>el.innerText=t("settings"));
+  document.querySelectorAll(".i18n-sensitivity").forEach(el=>el.innerText=t("sensitivity"));
+  document.querySelectorAll(".i18n-volume").forEach(el=>el.innerText=t("volume"));
+  document.querySelectorAll(".i18n-device").forEach(el=>el.innerText=t("device"));
+  document.querySelectorAll(".i18n-keys").forEach(el=>el.innerText=t("keys"));
+  document.querySelectorAll(".i18n-up").forEach(el=>el.innerText=t("up"));
+  document.querySelectorAll(".i18n-down").forEach(el=>el.innerText=t("down"));
+  document.querySelectorAll(".i18n-back").forEach(el=>el.innerText=t("back"));
+  document.querySelectorAll(".i18n-language").forEach(el=>el.innerText=t("language"));
+  document.querySelectorAll(".i18n-continue").forEach(el=>el.innerText=t("continue"));
+  document.querySelectorAll(".i18n-mainmenu").forEach(el=>el.innerText=t("mainMenu"));
+  document.querySelectorAll(".i18n-paused").forEach(el=>el.innerText=t("paused"));
+  document.querySelectorAll(".i18n-gameover").forEach(el=>el.innerText=t("gameOver"));
+  document.querySelectorAll(".i18n-restart").forEach(el=>el.innerText=t("restart"));
+  document.querySelectorAll(".i18n-again").forEach(el=>el.innerText=t("again"));
+  document.querySelectorAll(".i18n-nextlevel").forEach(el=>el.innerText=t("nextLevel"));
+  document.querySelectorAll(".i18n-leaderboard").forEach(el=>el.innerText=t("leaderboard"));
+  document.querySelectorAll(".i18n-selectdiff").forEach(el=>el.innerText=t("selectDiff"));
+  document.querySelectorAll(".i18n-wintitle").forEach(el=>el.innerText=t("winTitle"));
+  document.querySelectorAll(".i18n-winsub").forEach(el=>el.innerText=t("winSub"));
+  updateLangButtons();
+}
+
 // ===== CANVASES =====
 const menuBg=document.getElementById("menuBg");
 const mctx=menuBg.getContext("2d");
@@ -908,7 +979,7 @@ function openLeaderboard(){
 function closeLeaderboard(){showScreen("menuScreen");}
 function showLeaderTab(tab){
   leaderTab=tab;
-  const list=(globalBoard[tab]||[]).slice(0,10);
+  const list=(globalBoard[tab]||[]).slice(0,5);
   let html="";
   if(list.length===0){
     html="<p style='color:#666;font-size:13px;'>Noch keine Einträge.</p>";
