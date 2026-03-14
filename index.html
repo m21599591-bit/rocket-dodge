@@ -115,6 +115,33 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
   <div id="shopItems"></div>
   <br>
   <button onclick="closeShop()">Back</button>
+  <br><br>
+  <button onclick="openAdminPin()" style="font-size:11px;padding:4px 8px;opacity:0.3;border-color:rgba(255,255,255,0.2);">⚙</button>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="adminScreen" class="screen" style="display:none;min-width:320px;">
+  <h2 style="margin:0 0 4px;">🔐 Admin Panel</h2>
+  <p style="color:#aaa;font-size:12px;margin:0 0 16px;">Spieler auswählen und Währung vergeben</p>
+  <div style="margin-bottom:12px;">
+    <select id="adminPlayerSelect" style="padding:8px;border-radius:8px;background:#111;color:white;border:1px solid #444;font-size:14px;width:100%;max-width:240px;">
+    </select>
+  </div>
+  <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:10px;">
+    <div>
+      <p style="font-size:12px;color:#aaa;margin:0 0 4px;">🪙 Coins</p>
+      <input id="adminCoinsInput" type="number" min="0" value="100" style="width:90px;padding:6px;border-radius:6px;background:#111;color:gold;border:1px solid #555;font-size:14px;">
+    </div>
+    <div>
+      <p style="font-size:12px;color:#aaa;margin:0 0 4px;">💎 Diamanten</p>
+      <input id="adminGemsInput" type="number" min="0" value="0" style="width:90px;padding:6px;border-radius:6px;background:#111;color:#88eeff;border:1px solid #555;font-size:14px;">
+    </div>
+  </div>
+  <button onclick="adminGive()" style="border-color:#00cc66;color:#00cc66;margin:4px;">✓ Vergeben</button>
+  <button onclick="adminGiveAll()" style="border-color:#ffaa00;color:#ffaa00;margin:4px;">🌍 Allen vergeben</button>
+  <p id="adminMsg" style="color:#00cc66;font-size:13px;min-height:18px;margin:8px 0 0;"></p>
+  <br>
+  <button onclick="closeAdmin()">Zurück</button>
 </div>
 
 <!-- SKIN CATALOG -->
@@ -526,7 +553,7 @@ function getUser(){return getUsers()[currentUser];}
 function saveUser(u){let all=getUsers();all[currentUser]=u;saveUsers(all);}
 
 const ALL_SCREENS=["loginScreen","menuScreen","levelScreen","shopScreen","skinScreen",
-  "leaderScreen","settingsScreen","pauseScreen","pauseSettingsScreen","endScreen"];
+  "leaderScreen","settingsScreen","pauseScreen","pauseSettingsScreen","endScreen","winScreen","adminScreen"];
 
 function showScreen(id){
   ALL_SCREENS.forEach(s=>{
@@ -747,6 +774,50 @@ function openShop(){
   showScreen("shopScreen");
 }
 function closeShop(){showScreen("menuScreen");}
+
+// ===== ADMIN =====
+function openAdminPin(){
+  const pin=prompt("PIN eingeben:");
+  if(pin!=="1208"){if(pin!==null)alert("Falscher PIN");return;}
+  openAdmin();
+}
+function openAdmin(){
+  const users=getUsers();
+  const sel=document.getElementById("adminPlayerSelect");
+  sel.innerHTML="";
+  Object.keys(users).forEach(name=>{
+    const opt=document.createElement("option");
+    opt.value=name;opt.innerText=name+(name===currentUser?" (du)":"");
+    sel.appendChild(opt);
+  });
+  document.getElementById("adminMsg").innerText="";
+  showScreen("adminScreen");
+}
+function adminGive(){
+  const target=document.getElementById("adminPlayerSelect").value;
+  const coins=parseInt(document.getElementById("adminCoinsInput").value)||0;
+  const gems=parseInt(document.getElementById("adminGemsInput").value)||0;
+  let users=getUsers();
+  if(!users[target]){alert("Spieler nicht gefunden");return;}
+  users[target].coins=(users[target].coins||0)+coins;
+  users[target].diamonds=(users[target].diamonds||0)+gems;
+  saveUsers(users);
+  if(target===currentUser) updateTopBar();
+  document.getElementById("adminMsg").innerText=`✓ ${target} +${coins}🪙 +${gems}💎`;
+}
+function adminGiveAll(){
+  const coins=parseInt(document.getElementById("adminCoinsInput").value)||0;
+  const gems=parseInt(document.getElementById("adminGemsInput").value)||0;
+  let users=getUsers();
+  Object.keys(users).forEach(name=>{
+    users[name].coins=(users[name].coins||0)+coins;
+    users[name].diamonds=(users[name].diamonds||0)+gems;
+  });
+  saveUsers(users);
+  updateTopBar();
+  document.getElementById("adminMsg").innerText=`✓ Alle Spieler +${coins}🪙 +${gems}💎`;
+}
+function closeAdmin(){openShop();}
 function convertCoins(cost, gems){
   let u=getUser();
   if((u.coins||0)<cost){alert("Nicht genug Coins 🪙");return;}
