@@ -717,6 +717,10 @@ function setDevice(mode){
   isMobile=mode==="mobile";
   localStorage.setItem("deviceMode",mode);
   updateDeviceButtons();
+  // wenn gerade im Spiel → sofort anwenden
+  if(gameRunning){
+    document.getElementById("touchControls").style.display=isMobile?"flex":"none";
+  }
 }
 function updateDeviceButtons(){
   ["devicePC","pDevicePC"].forEach(id=>{
