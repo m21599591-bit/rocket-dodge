@@ -525,6 +525,7 @@ let obstacles=[], coins=[], gems=[];
 let spawnTimer=0, coinSpawnTimer=0, gemSpawnTimer=0, score=0, gameOver=false;
 let rockSpeed=3, spawnRate=70, rockSizeMin=24, rockSizeMax=40;
 let currentObjTypes=["rock"];
+let sessionCoins=0, sessionGems=0; // während der Runde gesammelt
 
 // ===== KEYS =====
 let keys={};
@@ -565,7 +566,8 @@ function showScreen(id){
 function updateTopBar(){
   const tb=document.getElementById("topBar");
   if(!currentUser){tb.style.display="none";return;}
-  tb.style.display="flex";
+  // Nur anzeigen wenn nicht gerade im Spiel
+  if(!gameRunning) tb.style.display="flex";
   const u=getUser();
   document.getElementById("topCoins").innerText="🪙 "+(u?u.coins:0);
   document.getElementById("topDiamonds").innerText="💎 "+(u?u.diamonds||0:0);
@@ -1352,6 +1354,7 @@ function startGame(diff, subIdx){
   rockSizeMin=cfg.rockSize[0]; rockSizeMax=cfg.rockSize[1];
   currentObjTypes=cfg.objTypes;
   obstacles=[];coins=[];gems=[];spawnTimer=0;coinSpawnTimer=0;gemSpawnTimer=0;score=0;gameOver=false;paused=false;gameRunning=true;
+  sessionCoins=0;sessionGems=0;
   rocket={x:120,y:canvas.height/2,w:44,h:22,speed:sensitivity};
   if(activeBackground==="matrix") initMatrix();
   stopMenuBg();
@@ -1497,6 +1500,7 @@ function moveCoins(){
     if(Math.sqrt(dx*dx+dy*dy)<c.r+16){
       coins.splice(i,1);
       let u=getUser();u.coins+=5;saveUser(u);updateTopBar();
+      sessionCoins+=5;
     }
   }
 }
@@ -1528,6 +1532,7 @@ function moveGems(){
     if(Math.sqrt(dx*dx+dy*dy)<g.r+16){
       gems.splice(i,1);
       let u=getUser();u.diamonds=(u.diamonds||0)+1;saveUser(u);updateTopBar();
+      sessionGems+=1;
     }
   }
 }
@@ -1610,7 +1615,7 @@ function winGame(){
   saveUser(u);updateTopBar();
   pushScore("ending",score);
   document.getElementById("winScore").innerText=t("score")+": "+score;
-  document.getElementById("winCoins").innerText=t("coinsEarned")+" +"+earned+" 🪙 (+100 Bonus)";
+  document.getElementById("winCoins").innerText=`${t("coinsEarned")} +${earned}🪙  |  gesammelt: +${sessionCoins}🪙 +${sessionGems}💎`;
   // Nächstes Level Button: verstecken wenn letztes Level
   const nextBtn=document.getElementById("nextLevelBtn");
   nextBtn.style.display=(currentSubLevel<LEVEL_CONFIG.ending.length-1)?"inline-block":"none";
@@ -1636,7 +1641,7 @@ function endGame(){
   pushScore(currentDiff, bestOverall);
   document.getElementById("endScore").innerText=t("score")+": "+score;
   document.getElementById("endHigh").innerText=t("bestOnLevel")+" "+u.highscores[currentDiff][currentSubLevel];
-  document.getElementById("endCoinsEarned").innerText=t("coinsEarned")+" +"+earned+" 🪙";
+  document.getElementById("endCoinsEarned").innerText=`${t("coinsEarned")} +${earned}🪙  |  gesammelt: +${sessionCoins}🪙 +${sessionGems}💎`;
   document.getElementById("endScreen").style.display="block";
   document.getElementById("topBar").style.display="flex";
 }
