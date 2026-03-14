@@ -634,76 +634,67 @@ function skinAction(){
 function closeSkinCatalog(){showScreen("menuScreen");}
 
 // ===== GLOBAL LEADERBOARD (JSONBin.io) =====
-// Setup: 1) go to https://jsonbin.io  2) create free account
-// 3) create a new Bin with this JSON: {"easy":[],"medium":[],"hard":[]}
-// 4) paste your Bin ID and API key below
 const JSONBIN_ID  = "69b59554aa77b81da9e486fb";
 const JSONBIN_KEY = "$2a$10$HyIsElDNxY90F8GVtLCqZOtQTzJU1s1QkTANr6S0bygFSfTNlqQX.";
-
 const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_ID}`;
 
 let globalBoard = {easy:[], medium:[], hard:[]};
-let boardLoaded = false;
 
 async function fetchBoard(){
-  if(JSONBIN_ID==="DEIN_BIN_ID_HIER") return; // not configured yet
   try{
-    const r=await fetch(JSONBIN_URL+"/latest",{headers:{"X-Access-Key":JSONBIN_KEY}});
+    const r=await fetch(JSONBIN_URL+"/latest",{
+      headers:{"X-Access-Key":JSONBIN_KEY,"X-Bin-Meta":false}
+    });
+    if(!r.ok) throw new Error("HTTP "+r.status);
     const j=await r.json();
-    globalBoard=j.record||{easy:[],medium:[],hard:[]};
-    boardLoaded=true;
-  }catch(e){console.warn("Leaderboard fetch failed",e);}
+    // JSONBin v3 wraps in {record:{...}} but with X-Bin-Meta:false returns record directly
+    globalBoard=(j.record||j)||{easy:[],medium:[],hard:[]};
+    if(!globalBoard.easy) globalBoard={easy:[],medium:[],hard:[]};
+  }catch(e){console.warn("Leaderboard fetch failed:",e);}
 }
 
-async function pushScore(diff, score){
-  if(JSONBIN_ID==="DEIN_BIN_ID_HIER") return;
-  await fetchBoard();
-  const list=globalBoard[diff]||[];
-  const existing=list.find(e=>e.name===currentUser);
-  if(existing){
-    if(score<=existing.score) return; // not a new best
-    existing.score=score;
-  } else {
-    list.push({name:currentUser,score});
-  }
-  list.sort((a,b)=>b.score-a.score);
-  globalBoard[diff]=list.slice(0,50); // keep top 50
+async function pushScore(diff, newScore){
   try{
+    await fetchBoard();
+    const list=globalBoard[diff]||[];
+    const existing=list.find(e=>e.name===currentUser);
+    if(existing){
+      if(newScore<=existing.score) return;
+      existing.score=newScore;
+    } else {
+      list.push({name:currentUser,score:newScore});
+    }
+    list.sort((a,b)=>b.score-a.score);
+    globalBoard[diff]=list.slice(0,50);
     await fetch(JSONBIN_URL,{
       method:"PUT",
       headers:{"Content-Type":"application/json","X-Access-Key":JSONBIN_KEY},
       body:JSON.stringify(globalBoard)
     });
-  }catch(e){console.warn("Leaderboard push failed",e);}
+  }catch(e){console.warn("Leaderboard push failed:",e);}
 }
 
 function openLeaderboard(){
   showScreen("leaderScreen");
-  document.getElementById("leaderList").innerHTML="<p style='color:#888;font-size:13px;'>Loading...</p>";
+  document.getElementById("leaderList").innerHTML="<p style='color:#888;font-size:13px;'>⏳ Laden...</p>";
   fetchBoard().then(()=>showLeaderTab('easy'));
 }
 function closeLeaderboard(){showScreen("menuScreen");}
 function showLeaderTab(tab){
   leaderTab=tab;
+  const list=(globalBoard[tab]||[]).slice(0,10);
   let html="";
-  if(JSONBIN_ID==="DEIN_BIN_ID_HIER"){
-    html=`<p style='color:salmon;font-size:13px;'>⚠️ JSONBin nicht konfiguriert.<br>
-    Öffne index.html und trage JSONBIN_ID und JSONBIN_KEY ein.<br>
-    <a href='https://jsonbin.io' target='_blank' style='color:#00ccff;'>jsonbin.io → kostenlos registrieren</a></p>`;
+  if(list.length===0){
+    html="<p style='color:#666;font-size:13px;'>Noch keine Einträge.</p>";
   } else {
-    const list=(globalBoard[tab]||[]).slice(0,10);
-    if(list.length===0){
-      html="<p style='color:#666;font-size:13px;'>Noch keine Einträge.</p>";
-    } else {
-      html="<table style='width:100%;border-collapse:collapse;font-size:14px;'>";
-      html+="<tr style='color:#888;'><th style='text-align:left;padding:4px 6px;'>#</th><th style='text-align:left;'>Spieler</th><th style='text-align:right;'>Score</th></tr>";
-      list.forEach((p,i)=>{
-        const medal=i===0?"🥇":i===1?"🥈":i===2?"🥉":"";
-        const isMe=p.name===currentUser?"color:#00ccff;font-weight:bold;":"";
-        html+=`<tr><td style='padding:3px 6px;color:#666;'>${i+1}</td><td style='${isMe}'>${medal}${p.name}</td><td style='text-align:right;color:gold;'>${p.score}</td></tr>`;
-      });
-      html+="</table>";
-    }
+    html="<table style='width:100%;border-collapse:collapse;font-size:14px;'>";
+    html+="<tr style='color:#888;'><th style='text-align:left;padding:4px 6px;'>#</th><th style='text-align:left;'>Spieler</th><th style='text-align:right;'>Score</th></tr>";
+    list.forEach((p,i)=>{
+      const medal=i===0?"🥇":i===1?"🥈":i===2?"🥉":"";
+      const style=p.name===currentUser?"color:#00ccff;font-weight:bold;":"";
+      html+=`<tr><td style='padding:3px 6px;color:#666;'>${i+1}</td><td style='${style}'>${medal}${p.name}</td><td style='text-align:right;color:gold;'>${p.score}</td></tr>`;
+    });
+    html+="</table>";
   }
   document.getElementById("leaderList").innerHTML=html;
 }
