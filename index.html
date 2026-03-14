@@ -588,15 +588,35 @@ function renderSubLevels(){
   const u=getUser();
   const row=document.getElementById("subLevelRow");
   row.innerHTML="";
+  // Für Ending: zähle wie viele Level geschafft (= highscore >= 5000)
+  const isEnding=selectedDiff==="ending";
   LEVEL_CONFIG[selectedDiff].forEach((cfg,i)=>{
-    const hs=u.highscores[selectedDiff][i]||0;
+    const hs=u.highscores[selectedDiff]?u.highscores[selectedDiff][i]||0:0;
+    const beaten=isEnding&&hs>=5000;
     const btn=document.createElement("button");
     btn.className="lvl-btn";
-    btn.innerHTML=`${cfg.label}<br><span style="font-size:11px;color:#aaa;">Best: ${hs}</span>`;
-    btn.style.margin="4px";
+    if(isEnding){
+      btn.innerHTML=`${cfg.label}${beaten?'<br><span style="font-size:11px;color:#00cc66;">✓ Geschafft</span>':''}`;
+      btn.style.margin="4px";
+      if(beaten){
+        btn.style.border="2px solid #00cc66";
+        btn.style.boxShadow="0 0 8px rgba(0,204,102,0.6)";
+      }
+    } else {
+      btn.innerHTML=`${cfg.label}<br><span style="font-size:11px;color:#aaa;">Best: ${hs}</span>`;
+      btn.style.margin="4px";
+    }
     btn.onclick=()=>startGame(selectedDiff,i);
     row.appendChild(btn);
   });
+  // Ending: zeige Gesamtfortschritt
+  if(isEnding){
+    const beaten=LEVEL_CONFIG.ending.filter((_,i)=>(u.highscores.ending?.[i]||0)>=5000).length;
+    const info=document.createElement("p");
+    info.style.cssText="color:#aaa;font-size:13px;margin:10px 0 0;";
+    info.innerText=`Geschafft: ${beaten} / ${LEVEL_CONFIG.ending.length} Level`;
+    row.appendChild(info);
+  }
 }
 
 // ===== SHOP =====
@@ -1329,6 +1349,8 @@ function winGame(){
   u.coins+=earned;
   if(!Array.isArray(u.highscores.ending)) u.highscores.ending=Array(20).fill(0);
   if(score>u.highscores.ending[currentSubLevel]) u.highscores.ending[currentSubLevel]=score;
+  // mark as beaten (mindestens 5000)
+  if(u.highscores.ending[currentSubLevel]<5000) u.highscores.ending[currentSubLevel]=5000;
   saveUser(u);updateTopBar();
   pushScore("ending",score);
   document.getElementById("winScore").innerText="Score: "+score;
