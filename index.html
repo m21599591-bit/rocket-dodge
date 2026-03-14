@@ -1267,6 +1267,7 @@ function pauseToMenu(){
   if(!menuAnimId) animateMenuBg();
   showScreen("menuScreen");
   updateTopBar();
+  document.getElementById("topBar").style.display="flex";
 }
 
 // ===== BACKGROUND RENDERERS =====
@@ -1357,7 +1358,7 @@ function startGame(diff, subIdx){
   menuBg.style.display="none";
   canvas.style.display="block";
   showScreen(null);
-  document.getElementById("topBar").style.display="flex";
+  document.getElementById("topBar").style.display="none";
   document.getElementById("touchControls").style.display=isMobile?"flex":"none";
   if(animId) cancelAnimationFrame(animId);
   playBeat(getBeatIndex(diff,subIdx));
@@ -1614,6 +1615,7 @@ function winGame(){
   const nextBtn=document.getElementById("nextLevelBtn");
   nextBtn.style.display=(currentSubLevel<LEVEL_CONFIG.ending.length-1)?"inline-block":"none";
   document.getElementById("winScreen").style.display="block";
+  document.getElementById("topBar").style.display="flex";
 }
 
 function endGame(){
@@ -1636,6 +1638,7 @@ function endGame(){
   document.getElementById("endHigh").innerText=t("bestOnLevel")+" "+u.highscores[currentDiff][currentSubLevel];
   document.getElementById("endCoinsEarned").innerText=t("coinsEarned")+" +"+earned+" 🪙";
   document.getElementById("endScreen").style.display="block";
+  document.getElementById("topBar").style.display="flex";
 }
 
 function nextEndingLevel(){
