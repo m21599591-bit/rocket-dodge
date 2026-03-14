@@ -222,6 +222,7 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
   <p id="winScore" style="font-size:20px;margin:6px 0;"></p>
   <p id="winCoins" style="color:gold;font-size:15px;margin:4px 0 16px;"></p>
   <button onclick="restartGame()">🔄 Nochmal</button>
+  <button id="nextLevelBtn" onclick="nextEndingLevel()" style="border-color:#00ccff;color:#00ccff;">▶ Nächstes Level</button>
   <button onclick="goMenu()">🏠 Hauptmenü</button>
 </div>
 
@@ -1355,6 +1356,9 @@ function winGame(){
   pushScore("ending",score);
   document.getElementById("winScore").innerText="Score: "+score;
   document.getElementById("winCoins").innerText="Coins verdient: +"+earned+" 🪙 (inkl. 100 Bonus)";
+  // Nächstes Level Button: verstecken wenn letztes Level
+  const nextBtn=document.getElementById("nextLevelBtn");
+  nextBtn.style.display=(currentSubLevel<LEVEL_CONFIG.ending.length-1)?"inline-block":"none";
   document.getElementById("winScreen").style.display="block";
 }
 
@@ -1378,6 +1382,11 @@ function endGame(){
   document.getElementById("endHigh").innerText="Best on this level: "+u.highscores[currentDiff][currentSubLevel];
   document.getElementById("endCoinsEarned").innerText="Coins earned: +"+earned+" 🪙";
   document.getElementById("endScreen").style.display="block";
+}
+
+function nextEndingLevel(){
+  document.getElementById("winScreen").style.display="none";
+  startGame("ending", currentSubLevel+1);
 }
 
 function restartGame(){
