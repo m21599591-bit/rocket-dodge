@@ -122,10 +122,10 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
 <!-- ADMIN PANEL -->
 <div id="adminScreen" class="screen" style="display:none;min-width:320px;">
   <h2 style="margin:0 0 4px;">🔐 Admin Panel</h2>
-  <p style="color:#aaa;font-size:12px;margin:0 0 16px;">Spieler auswählen und Währung vergeben</p>
+  <p style="color:#aaa;font-size:12px;margin:0 0 16px;">Belohnungen werden beim nächsten Login abgeholt</p>
   <div style="margin-bottom:12px;">
-    <select id="adminPlayerSelect" style="padding:8px;border-radius:8px;background:#111;color:white;border:1px solid #444;font-size:14px;width:100%;max-width:240px;">
-    </select>
+    <p style="font-size:12px;color:#aaa;margin:0 0 4px;">Spielername (oder leer lassen für "Allen vergeben")</p>
+    <input id="adminPlayerSelect" type="text" placeholder="Username..." style="padding:8px;border-radius:8px;background:#111;color:white;border:1px solid #444;font-size:14px;width:100%;max-width:240px;">
   </div>
   <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:10px;">
     <div>
@@ -137,8 +137,8 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
       <input id="adminGemsInput" type="number" min="0" value="0" style="width:90px;padding:6px;border-radius:6px;background:#111;color:#88eeff;border:1px solid #555;font-size:14px;">
     </div>
   </div>
-  <button onclick="adminGive()" style="border-color:#00cc66;color:#00cc66;margin:4px;">✓ Vergeben</button>
-  <button onclick="adminGiveAll()" style="border-color:#ffaa00;color:#ffaa00;margin:4px;">🌍 Allen vergeben</button>
+  <button onclick="adminGive()" style="border-color:#00cc66;color:#00cc66;margin:4px;">✓ Senden</button>
+  <button onclick="adminGiveAll()" style="border-color:#ffaa00;color:#ffaa00;margin:4px;">🌍 Allen senden</button>
   <p id="adminMsg" style="color:#00cc66;font-size:13px;min-height:18px;margin:8px 0 0;"></p>
   <br>
   <button onclick="closeAdmin()">Zurück</button>
@@ -662,6 +662,8 @@ function afterLogin(){
   selectedSkinId=u.activeSkin||0;
   document.getElementById("menuUser").innerText="👤 "+currentUser;
   showScreen("menuScreen");
+  // Pending rewards vom Server abholen
+  claimPendingRewards();
 }
 
 window.onload=function(){
@@ -776,46 +778,69 @@ function openShop(){
 function closeShop(){showScreen("menuScreen");}
 
 // ===== ADMIN =====
+async function claimPendingRewards(){
+  try{
+    await fetchBoard();
+    if(!Array.isArray(globalBoard.pendingRewards)||globalBoard.pendingRewards.length===0) return;
+    // Finde rewards für diesen Spieler oder "all"
+    const mine=globalBoard.pendingRewards.filter(r=>r.target===currentUser||r.target==="all");
+    if(mine.length===0) return;
+    let totalCoins=0, totalGems=0;
+    mine.forEach(r=>{totalCoins+=r.coins||0;totalGems+=r.gems||0;});
+    let u=getUser();
+    u.coins=(u.coins||0)+totalCoins;
+    u.diamonds=(u.diamonds||0)+totalGems;
+    saveUser(u);
+    updateTopBar();
+    // Entferne geclaimte rewards (nur "all"-rewards bleiben bis sie abgelaufen sind — wir tracken per claimedBy)
+    // Einfachste Lösung: entferne spezifische, markiere "all" als von diesem User geclaimed
+    globalBoard.pendingRewards=globalBoard.pendingRewards.filter(r=>{
+      if(r.target===currentUser) return false; // spezifisch → weg
+      if(r.target==="all"){
+        if(!r.claimedBy) r.claimedBy=[];
+        if(r.claimedBy.includes(currentUser)) return true; // schon geclaimed, behalten für andere
+        r.claimedBy.push(currentUser);
+        return true;
+      }
+      return true;
+    });
+    await pushBin();
+    if(totalCoins>0||totalGems>0){
+      setTimeout(()=>alert(`🎁 Du hast eine Belohnung erhalten!\n+${totalCoins}🪙 Coins\n+${totalGems}💎 Diamanten`),500);
+    }
+  }catch(e){console.warn("claimPendingRewards failed:",e);}
+}
+
 function openAdminPin(){
   const pin=prompt("PIN eingeben:");
   if(pin!=="1208"){if(pin!==null)alert("Falscher PIN");return;}
   openAdmin();
 }
 function openAdmin(){
-  const users=getUsers();
-  const sel=document.getElementById("adminPlayerSelect");
-  sel.innerHTML="";
-  Object.keys(users).forEach(name=>{
-    const opt=document.createElement("option");
-    opt.value=name;opt.innerText=name+(name===currentUser?" (du)":"");
-    sel.appendChild(opt);
-  });
   document.getElementById("adminMsg").innerText="";
   showScreen("adminScreen");
 }
-function adminGive(){
-  const target=document.getElementById("adminPlayerSelect").value;
+async function adminGive(){
+  const target=document.getElementById("adminPlayerSelect").value.trim();
   const coins=parseInt(document.getElementById("adminCoinsInput").value)||0;
   const gems=parseInt(document.getElementById("adminGemsInput").value)||0;
-  let users=getUsers();
-  if(!users[target]){alert("Spieler nicht gefunden");return;}
-  users[target].coins=(users[target].coins||0)+coins;
-  users[target].diamonds=(users[target].diamonds||0)+gems;
-  saveUsers(users);
-  if(target===currentUser) updateTopBar();
-  document.getElementById("adminMsg").innerText=`✓ ${target} +${coins}🪙 +${gems}💎`;
+  if(!target){adminGiveAll();return;}
+  document.getElementById("adminMsg").innerText="⏳ Wird gesendet...";
+  await fetchBoard();
+  if(!Array.isArray(globalBoard.pendingRewards)) globalBoard.pendingRewards=[];
+  globalBoard.pendingRewards.push({target, coins, gems, ts:Date.now()});
+  await pushBin();
+  document.getElementById("adminMsg").innerText=`✓ Belohnung für "${target}" gespeichert: +${coins}🪙 +${gems}💎`;
 }
-function adminGiveAll(){
+async function adminGiveAll(){
   const coins=parseInt(document.getElementById("adminCoinsInput").value)||0;
   const gems=parseInt(document.getElementById("adminGemsInput").value)||0;
-  let users=getUsers();
-  Object.keys(users).forEach(name=>{
-    users[name].coins=(users[name].coins||0)+coins;
-    users[name].diamonds=(users[name].diamonds||0)+gems;
-  });
-  saveUsers(users);
-  updateTopBar();
-  document.getElementById("adminMsg").innerText=`✓ Alle Spieler +${coins}🪙 +${gems}💎`;
+  document.getElementById("adminMsg").innerText="⏳ Wird gesendet...";
+  await fetchBoard();
+  if(!Array.isArray(globalBoard.pendingRewards)) globalBoard.pendingRewards=[];
+  globalBoard.pendingRewards.push({target:"all", coins, gems, claimedBy:[], ts:Date.now()});
+  await pushBin();
+  document.getElementById("adminMsg").innerText=`✓ Belohnung für ALLE gespeichert: +${coins}🪙 +${gems}💎`;
 }
 function closeAdmin(){openShop();}
 function convertCoins(cost, gems){
@@ -1045,17 +1070,25 @@ async function fetchBoard(){
     });
     if(!r.ok) throw new Error("HTTP "+r.status);
     const j=await r.json();
-    console.log("JSONBin response:",j);
-    // v3 always returns {record:{...}, metadata:{...}}
     const data=j.record||j;
     globalBoard={
       easy: Array.isArray(data.easy)?data.easy:[],
       medium: Array.isArray(data.medium)?data.medium:[],
       hard: Array.isArray(data.hard)?data.hard:[],
-      ending: Array.isArray(data.ending)?data.ending:[]
+      ending: Array.isArray(data.ending)?data.ending:[],
+      pendingRewards: Array.isArray(data.pendingRewards)?data.pendingRewards:[]
     };
-    console.log("globalBoard loaded:",globalBoard);
   }catch(e){console.warn("Leaderboard fetch failed:",e);}
+}
+
+async function pushBin(){
+  try{
+    await fetch(JSONBIN_URL,{
+      method:"PUT",
+      headers:{"Content-Type":"application/json","X-Access-Key":JSONBIN_KEY},
+      body:JSON.stringify(globalBoard)
+    });
+  }catch(e){console.warn("Bin push failed:",e);}
 }
 
 async function pushScore(diff, newScore){
@@ -1071,14 +1104,7 @@ async function pushScore(diff, newScore){
     }
     list.sort((a,b)=>b.score-a.score);
     globalBoard[diff]=list.slice(0,50);
-    console.log("Pushing to JSONBin:",globalBoard);
-    const r=await fetch(JSONBIN_URL,{
-      method:"PUT",
-      headers:{"Content-Type":"application/json","X-Access-Key":JSONBIN_KEY},
-      body:JSON.stringify(globalBoard)
-    });
-    const result=await r.json();
-    console.log("Push result:",result);
+    await pushBin();
   }catch(e){console.warn("Leaderboard push failed:",e);}
 }
 
