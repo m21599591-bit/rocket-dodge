@@ -128,6 +128,9 @@ input[type=range]{width:160px;vertical-align:middle;}
   <p style="margin:12px 0 2px;">Volume</p>
   <input type="range" id="volumeSlider" min="0" max="100" value="50" oninput="updateVolume(this.value)">
   <span id="volVal" style="margin-left:8px;">50</span>
+  <p style="margin:16px 0 6px;">Gerät</p>
+  <button id="devicePC"     onclick="setDevice('pc')"     style="margin:3px;">💻 PC</button>
+  <button id="deviceMobile" onclick="setDevice('mobile')" style="margin:3px;">📱 Handy</button>
   <br><br>
   <button onclick="closeSettings()">Back</button>
 </div>
@@ -149,6 +152,9 @@ input[type=range]{width:160px;vertical-align:middle;}
   <p style="margin:12px 0 2px;">Volume</p>
   <input type="range" id="pVolSlider" min="0" max="100" value="50" oninput="updateVolume(this.value);document.getElementById('pVolVal').innerText=this.value;">
   <span id="pVolVal" style="margin-left:8px;">50</span>
+  <p style="margin:16px 0 6px;">Gerät</p>
+  <button id="pDevicePC"     onclick="setDevice('pc')"     style="margin:3px;">💻 PC</button>
+  <button id="pDeviceMobile" onclick="setDevice('mobile')" style="margin:3px;">📱 Handy</button>
   <br><br>
   <button onclick="closePauseSettings()">Back</button>
 </div>
@@ -691,7 +697,7 @@ function showLeaderTab(tab){
 }
 
 // ===== SETTINGS =====
-function openSettingsMenu(){showScreen("settingsScreen");}
+function openSettingsMenu(){showScreen("settingsScreen");updateDeviceButtons();}
 function closeSettings(){showScreen("menuScreen");}
 function updateSensitivity(v){
   sensitivity=parseInt(v);rocket.speed=sensitivity;
@@ -703,6 +709,24 @@ function updateVolume(v){
   if(currentBeat) currentBeat.volume=volume/100;
   ["volVal","pVolVal"].forEach(id=>{const el=document.getElementById(id);if(el)el.innerText=v;});
   ["volumeSlider","pVolSlider"].forEach(id=>{const el=document.getElementById(id);if(el)el.value=v;});
+}
+
+let isMobile=localStorage.getItem("deviceMode")==="mobile";
+
+function setDevice(mode){
+  isMobile=mode==="mobile";
+  localStorage.setItem("deviceMode",mode);
+  updateDeviceButtons();
+}
+function updateDeviceButtons(){
+  ["devicePC","pDevicePC"].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.style.borderColor=!isMobile?"#00ccff":"rgba(255,255,255,0.5)";
+  });
+  ["deviceMobile","pDeviceMobile"].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.style.borderColor=isMobile?"#00ccff":"rgba(255,255,255,0.5)";
+  });
 }
 
 // ===== PAUSE =====
@@ -720,6 +744,7 @@ function resumeGame(){
 function openPauseSettings(){
   document.getElementById("pauseScreen").style.display="none";
   document.getElementById("pauseSettingsScreen").style.display="block";
+  updateDeviceButtons();
 }
 function closePauseSettings(){
   document.getElementById("pauseSettingsScreen").style.display="none";
@@ -828,7 +853,7 @@ function startGame(diff, subIdx){
   canvas.style.display="block";
   showScreen(null);
   document.getElementById("topBar").style.display="flex";
-  document.getElementById("touchControls").style.display="flex";
+  document.getElementById("touchControls").style.display=isMobile?"flex":"none";
   if(animId) cancelAnimationFrame(animId);
   playBeat(getBeatIndex(diff,subIdx));
   animId=requestAnimationFrame(gameLoop);
