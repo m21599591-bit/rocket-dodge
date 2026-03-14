@@ -143,7 +143,23 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
   <p style="margin:16px 0 6px;">Gerät</p>
   <button id="devicePC"     onclick="setDevice('pc')"     style="margin:3px;">💻 PC</button>
   <button id="deviceMobile" onclick="setDevice('mobile')" style="margin:3px;">📱 Handy</button>
-  <br><br>
+  <p style="margin:16px 0 6px;">Tasten</p>
+  <div style="display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap;">
+    <div>
+      <div style="font-size:12px;color:#aaa;margin-bottom:4px;">⬆ Hoch</div>
+      <button id="bindUpBtn" onclick="startBind('up')" style="width:90px;font-size:13px;padding:8px;">
+        <span id="bindUpLabel"></span>
+      </button>
+    </div>
+    <div>
+      <div style="font-size:12px;color:#aaa;margin-bottom:4px;">⬇ Runter</div>
+      <button id="bindDownBtn" onclick="startBind('down')" style="width:90px;font-size:13px;padding:8px;">
+        <span id="bindDownLabel"></span>
+      </button>
+    </div>
+  </div>
+  <p id="bindHint" style="font-size:12px;color:#00ccff;min-height:16px;margin:6px 0 0;"></p>
+  <br>
   <button onclick="closeSettings()">Back</button>
 </div>
 
@@ -167,7 +183,23 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
   <p style="margin:16px 0 6px;">Gerät</p>
   <button id="pDevicePC"     onclick="setDevice('pc')"     style="margin:3px;">💻 PC</button>
   <button id="pDeviceMobile" onclick="setDevice('mobile')" style="margin:3px;">📱 Handy</button>
-  <br><br>
+  <p style="margin:16px 0 6px;">Tasten</p>
+  <div style="display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap;">
+    <div>
+      <div style="font-size:12px;color:#aaa;margin-bottom:4px;">⬆ Hoch</div>
+      <button id="pBindUpBtn" onclick="startBind('up')" style="width:90px;font-size:13px;padding:8px;">
+        <span id="pBindUpLabel"></span>
+      </button>
+    </div>
+    <div>
+      <div style="font-size:12px;color:#aaa;margin-bottom:4px;">⬇ Runter</div>
+      <button id="pBindDownBtn" onclick="startBind('down')" style="width:90px;font-size:13px;padding:8px;">
+        <span id="pBindDownLabel"></span>
+      </button>
+    </div>
+  </div>
+  <p id="pBindHint" style="font-size:12px;color:#00ccff;min-height:16px;margin:6px 0 0;"></p>
+  <br>
   <button onclick="closePauseSettings()">Back</button>
 </div>
 
@@ -327,10 +359,6 @@ let currentObjTypes=["rock"];
 
 // ===== KEYS =====
 let keys={};
-document.addEventListener("keydown",e=>{
-  keys[e.key]=true;
-  if(e.key==="Escape"&&gameRunning&&!gameOver) togglePause();
-});
 document.addEventListener("keyup",e=>{ keys[e.key]=false; });
 
 // Touch controls
@@ -709,8 +737,8 @@ function showLeaderTab(tab){
 }
 
 // ===== SETTINGS =====
-function openSettingsMenu(){showScreen("settingsScreen");updateDeviceButtons();}
-function closeSettings(){showScreen("menuScreen");}
+function openSettingsMenu(){showScreen("settingsScreen");updateDeviceButtons();updateBindLabels();}
+function closeSettings(){bindingTarget=null;showScreen("menuScreen");}
 function updateSensitivity(v){
   sensitivity=parseInt(v);rocket.speed=sensitivity;
   ["sensVal","pSensVal"].forEach(id=>{const el=document.getElementById(id);if(el)el.innerText=v;});
@@ -724,6 +752,68 @@ function updateVolume(v){
 }
 
 let isMobile=localStorage.getItem("deviceMode")==="mobile";
+
+// ===== KEY BINDINGS =====
+let keyBindings={
+  up:   localStorage.getItem("bindUp")  ||"ArrowUp",
+  down: localStorage.getItem("bindDown")||"ArrowDown"
+};
+let bindingTarget=null; // 'up' or 'down'
+
+function keyLabel(k){
+  if(k==="ArrowUp")   return "↑ Pfeil";
+  if(k==="ArrowDown") return "↓ Pfeil";
+  if(k==="ArrowLeft") return "← Pfeil";
+  if(k==="ArrowRight")return "→ Pfeil";
+  if(k===" ")         return "Space";
+  return k.length===1?k.toUpperCase():k;
+}
+
+function updateBindLabels(){
+  ["bindUpLabel","pBindUpLabel"].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.innerText=keyLabel(keyBindings.up);
+  });
+  ["bindDownLabel","pBindDownLabel"].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.innerText=keyLabel(keyBindings.down);
+  });
+  // highlight active buttons
+  ["bindUpBtn","pBindUpBtn"].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.style.borderColor=bindingTarget==="up"?"#ff4":"rgba(255,255,255,0.5)";
+  });
+  ["bindDownBtn","pBindDownBtn"].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.style.borderColor=bindingTarget==="down"?"#ff4":"rgba(255,255,255,0.5)";
+  });
+}
+
+function startBind(target){
+  bindingTarget=target;
+  updateBindLabels();
+  ["bindHint","pBindHint"].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.innerText="Drücke eine Taste für '"+(target==="up"?"Hoch":"Runter")+"'...";
+  });
+}
+
+document.addEventListener("keydown",e=>{
+  if(bindingTarget){
+    e.preventDefault();
+    keyBindings[bindingTarget]=e.key;
+    localStorage.setItem("bind"+bindingTarget.charAt(0).toUpperCase()+bindingTarget.slice(1),e.key);
+    bindingTarget=null;
+    updateBindLabels();
+    ["bindHint","pBindHint"].forEach(id=>{
+      const el=document.getElementById(id);if(el)el.innerText="✓ Gespeichert";
+    });
+    setTimeout(()=>{
+      ["bindHint","pBindHint"].forEach(id=>{
+        const el=document.getElementById(id);if(el)el.innerText="";
+      });
+    },1200);
+    return;
+  }
+  keys[e.key]=true;
+  if(e.key==="Escape"&&gameRunning&&!gameOver) togglePause();
+});
 
 function setDevice(mode){
   isMobile=mode==="mobile";
@@ -760,9 +850,10 @@ function resumeGame(){
 function openPauseSettings(){
   document.getElementById("pauseScreen").style.display="none";
   document.getElementById("pauseSettingsScreen").style.display="block";
-  updateDeviceButtons();
+  updateDeviceButtons();updateBindLabels();
 }
 function closePauseSettings(){
+  bindingTarget=null;
   document.getElementById("pauseSettingsScreen").style.display="none";
   document.getElementById("pauseScreen").style.display="block";
 }
@@ -1054,8 +1145,8 @@ function drawCoins(){
 
 // ===== ROCKET =====
 function moveRocket(){
-  if(keys["ArrowUp"]||keys["w"]||keys["W"]) rocket.y-=rocket.speed;
-  if(keys["ArrowDown"]||keys["s"]||keys["S"]) rocket.y+=rocket.speed;
+  if(keys[keyBindings.up]||keys["w"]||keys["W"]) rocket.y-=rocket.speed;
+  if(keys[keyBindings.down]||keys["s"]||keys["S"]) rocket.y+=rocket.speed;
   if(rocket.y<0) rocket.y=0;
   if(rocket.y+rocket.h>canvas.height) rocket.y=canvas.height-rocket.h;
 }
