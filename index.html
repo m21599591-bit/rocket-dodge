@@ -395,21 +395,19 @@ function skinPrice(skin){
 
 // ===== FLAME SKINS =====
 const FLAME_SKINS=[
-  {id:0,name:"Standard",c1:"#ff6600",c2:"#ff3300",c3:"#ffaa00",free:true},
-  {id:1,name:"Blau",c1:"#0088ff",c2:"#0044cc",c3:"#88ccff",free:false},
-  {id:2,name:"Grün",c1:"#00ff44",c2:"#00aa22",c3:"#aaffcc",free:false},
-  {id:3,name:"Lila",c1:"#cc00ff",c2:"#8800cc",c3:"#ee88ff",free:false},
-  {id:4,name:"Weiß",c1:"#ffffff",c2:"#ccddff",c3:"#aabbff",free:false},
-  {id:5,name:"Rot",c1:"#ff0000",c2:"#cc0000",c3:"#ff8888",free:false},
-  {id:6,name:"Cyan",c1:"#00ffff",c2:"#00aacc",c3:"#aaffff",free:false},
-  {id:7,name:"Gold",c1:"#ffdd00",c2:"#cc9900",c3:"#fff0aa",free:false},
-  {id:8,name:"Pink",c1:"#ff44aa",c2:"#cc0077",c3:"#ffaadd",free:false},
-  {id:9,name:"Regenbogen",c1:"#ff0000",c2:"#00ff00",c3:"#0000ff",free:false},
+  {id:0,name:"Standard",c1:"#ff6600",c2:"#ff3300",c3:"#ffaa00"},
+  {id:1,name:"Blau",c1:"#0088ff",c2:"#0044cc",c3:"#88ccff"},
+  {id:2,name:"Grün",c1:"#00ff44",c2:"#00aa22",c3:"#aaffcc"},
+  {id:3,name:"Lila",c1:"#cc00ff",c2:"#8800cc",c3:"#ee88ff"},
+  {id:4,name:"Weiß",c1:"#ffffff",c2:"#ccddff",c3:"#aabbff"},
+  {id:5,name:"Rot",c1:"#ff0000",c2:"#cc0000",c3:"#ff8888"},
+  {id:6,name:"Cyan",c1:"#00ffff",c2:"#00aacc",c3:"#aaffff"},
+  {id:7,name:"Gold",c1:"#ffdd00",c2:"#cc9900",c3:"#fff0aa"},
+  {id:8,name:"Pink",c1:"#ff44aa",c2:"#cc0077",c3:"#ffaadd"},
+  {id:9,name:"Regenbogen",c1:"#ff0000",c2:"#00ff00",c3:"#0000ff"},
 ];
-function flamePrice(f){
-  if(f.free) return 0;
-  return 1000+(f.id-1)*100;
-}
+// id0=100💎, id1=200💎, ..., id9=1000💎
+function flamePrice(f){return (f.id+1)*100;}
 
 // ===== BACKGROUNDS =====
 const BACKGROUNDS=[
@@ -574,7 +572,7 @@ function doRegister(){
     password:p,coins:0,diamonds:0,
     shop:{stars:false,ownedBgs:["none"],activeBg:"none"},
     ownedSkins:[0,1,2,3,4,5,6,7,8,9],activeSkin:0,
-    ownedFlames:[0],activeFlame:0,
+    ownedFlames:[],activeFlame:0,
     highscores:{easy:[0,0,0,0,0],medium:[0,0,0,0,0],hard:[0,0,0,0,0],ending:Array(20).fill(0)}
   };
   saveUsers(users);
@@ -586,7 +584,7 @@ function migrateUser(u){
   if(!u.shop.ownedBgs) u.shop.ownedBgs=["none"];
   if(!u.shop.activeBg) u.shop.activeBg="none";
   if(u.diamonds===undefined) u.diamonds=0;
-  if(!u.ownedFlames) u.ownedFlames=[0];
+  if(!u.ownedFlames) u.ownedFlames=[];
   if(u.activeFlame===undefined) u.activeFlame=0;
   if(!Array.isArray(u.highscores?.easy)) u.highscores={easy:[0,0,0,0,0],medium:[0,0,0,0,0],hard:[0,0,0,0,0],ending:Array(20).fill(0)};
   if(!Array.isArray(u.highscores.ending)) u.highscores.ending=Array(20).fill(0);
@@ -912,7 +910,7 @@ function renderFlameGrid(){
   const grid=document.getElementById("skinGrid");
   grid.innerHTML="";
   FLAME_SKINS.forEach(f=>{
-    const owned=(u.ownedFlames||[0]).includes(f.id);
+    const owned=(u.ownedFlames||[]).includes(f.id);
     const isActive=(u.activeFlame||0)===f.id;
     const cell=document.createElement("div");
     cell.style.cssText="background:#0d0d0d;border-radius:8px;padding:5px;cursor:pointer;display:flex;flex-direction:column;align-items:center;border:2px solid "+(isActive?"#ff3333":"#2a2a2a")+";";
@@ -933,7 +931,7 @@ function renderFlameGrid(){
 function selectFlamePreview(id){
   previewFlameId=id;
   const f=FLAME_SKINS[id];const u=getUser();
-  const owned=(u.ownedFlames||[0]).includes(id);
+  const owned=(u.ownedFlames||[]).includes(id);
   const isActive=(u.activeFlame||0)===id;
   const pc=document.getElementById("skinPreviewCanvas");
   const px=pc.getContext("2d");px.clearRect(0,0,80,80);
@@ -941,11 +939,11 @@ function selectFlamePreview(id){
   g.addColorStop(0,f.c1);g.addColorStop(0.4,f.c2);g.addColorStop(0.7,f.c3);g.addColorStop(1,"rgba(0,0,0,0)");
   px.fillStyle=g;px.beginPath();px.moveTo(70,40);px.lineTo(40,20);px.lineTo(10,40);px.lineTo(40,60);px.closePath();px.fill();
   document.getElementById("skinPreviewName").innerText=f.name;
-  document.getElementById("skinPreviewPrice").innerText=f.free?"Gratis":flamePrice(f)+"🪙";
+  document.getElementById("skinPreviewPrice").innerText=flamePrice(f)+"💎";
   const btn=document.getElementById("skinActionBtn");btn.style.display="inline-block";
   if(isActive){btn.innerText="✓ Aktiv";btn.disabled=true;}
   else if(owned){btn.innerText="Nutzen";btn.disabled=false;}
-  else{btn.innerText="Kaufen ("+flamePrice(f)+"🪙)";btn.disabled=false;}
+  else{btn.innerText="Kaufen ("+flamePrice(f)+"💎)";btn.disabled=false;}
 }
 
 function skinAction(){
@@ -962,11 +960,11 @@ function skinAction(){
 }
 function flameAction(){
   let u=getUser();
-  const owned=(u.ownedFlames||[0]).includes(previewFlameId);
+  const owned=(u.ownedFlames||[]).includes(previewFlameId);
   if(!owned){
     const price=flamePrice(FLAME_SKINS[previewFlameId]);
-    if(u.coins<price){alert("Not enough coins");return;}
-    u.coins-=price;if(!u.ownedFlames)u.ownedFlames=[0];u.ownedFlames.push(previewFlameId);saveUser(u);updateTopBar();
+    if((u.diamonds||0)<price){alert("Nicht genug Diamanten 💎");return;}
+    u.diamonds-=price;if(!u.ownedFlames)u.ownedFlames=[];u.ownedFlames.push(previewFlameId);saveUser(u);updateTopBar();
   }
   u=getUser();u.activeFlame=previewFlameId;saveUser(u);selectedFlameId=previewFlameId;
   openSkinCatalog();switchSkinTab('flames');
