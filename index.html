@@ -81,11 +81,12 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
 <!-- LEVEL SELECT -->
 <div id="levelScreen" class="screen" style="display:none;">
   <h2 style="margin:0 0 6px;">Select Difficulty</h2>
-  <p style="color:#888;font-size:13px;margin:0 0 14px;">Each difficulty has 5 sub-levels</p>
+  <p style="color:#888;font-size:13px;margin:0 0 14px;" id="levelSubDesc">Each difficulty has 5 sub-levels</p>
   <div id="diffRow" style="margin-bottom:14px;">
     <button class="lvl-btn active" id="diffEasy" onclick="selectDiff('easy')">Easy</button>
     <button class="lvl-btn" id="diffMedium" onclick="selectDiff('medium')">Medium</button>
     <button class="lvl-btn" id="diffHard" onclick="selectDiff('hard')">Hard</button>
+    <button class="lvl-btn" id="diffEnding" onclick="selectDiff('ending')" style="border-color:rgba(255,50,50,0.5);color:#ff8888;">Ending</button>
   </div>
   <div id="subLevelRow"></div>
   <br>
@@ -125,6 +126,7 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
     <button class="lvl-btn" onclick="showLeaderTab('easy')">Easy</button>
     <button class="lvl-btn" onclick="showLeaderTab('medium')">Medium</button>
     <button class="lvl-btn" onclick="showLeaderTab('hard')">Hard</button>
+    <button class="lvl-btn" onclick="showLeaderTab('ending')" style="color:#ff8888;">Ending</button>
   </div>
   <div id="leaderList" style="min-width:240px;text-align:left;min-height:80px;"></div>
   <br>
@@ -322,6 +324,7 @@ function getBeatIndex(diff,subIdx){
   if(diff==="easy") return 0;
   if(diff==="medium") return 1;
   if(diff==="hard"&&subIdx<=2) return 2;
+  if(diff==="ending") return subIdx<10?3:3; // always beat 4 for ending
   return 3;
 }
 
@@ -349,6 +352,28 @@ const LEVEL_CONFIG={
     {label:"Hard 3", rockSpeed:14, spawnRate:17, rockSize:[28,50], objTypes:["rock","spike","ball","laser","zigzag","homing"]},
     {label:"Hard 4", rockSpeed:16, spawnRate:14, rockSize:[30,52], objTypes:["spike","ball","laser","zigzag","homing","wall"]},
     {label:"Hard 5", rockSpeed:18, spawnRate:11, rockSize:[30,54], objTypes:["spike","ball","laser","zigzag","homing","wall"]},
+  ],
+  ending:[
+    {label:"End 1",  rockSpeed:8,  spawnRate:35, rockSize:[24,44], objTypes:["rock","spike","ball","homing","wall"]},
+    {label:"End 2",  rockSpeed:9,  spawnRate:32, rockSize:[25,45], objTypes:["rock","spike","ball","laser","homing","wall"]},
+    {label:"End 3",  rockSpeed:10, spawnRate:29, rockSize:[26,46], objTypes:["rock","spike","ball","laser","zigzag","homing","wall"]},
+    {label:"End 4",  rockSpeed:11, spawnRate:27, rockSize:[26,47], objTypes:["rock","spike","ball","laser","zigzag","homing","wall"]},
+    {label:"End 5",  rockSpeed:12, spawnRate:25, rockSize:[27,48], objTypes:["spike","ball","laser","zigzag","homing","wall"]},
+    {label:"End 6",  rockSpeed:13, spawnRate:22, rockSize:[27,49], objTypes:["spike","ball","laser","zigzag","homing","wall"]},
+    {label:"End 7",  rockSpeed:14, spawnRate:20, rockSize:[28,50], objTypes:["spike","ball","laser","zigzag","homing","wall"]},
+    {label:"End 8",  rockSpeed:15, spawnRate:18, rockSize:[28,51], objTypes:["spike","ball","laser","zigzag","homing","wall"]},
+    {label:"End 9",  rockSpeed:16, spawnRate:16, rockSize:[29,52], objTypes:["spike","ball","laser","zigzag","homing","wall"]},
+    {label:"End 10", rockSpeed:17, spawnRate:14, rockSize:[29,52], objTypes:["spike","ball","laser","zigzag","homing","wall"]},
+    {label:"End 11", rockSpeed:18, spawnRate:13, rockSize:[30,53], objTypes:["spike","ball","laser","zigzag","homing","wall"]},
+    {label:"End 12", rockSpeed:19, spawnRate:12, rockSize:[30,53], objTypes:["spike","ball","laser","zigzag","homing","wall"]},
+    {label:"End 13", rockSpeed:20, spawnRate:11, rockSize:[30,54], objTypes:["spike","ball","laser","zigzag","homing","wall"]},
+    {label:"End 14", rockSpeed:21, spawnRate:10, rockSize:[31,54], objTypes:["spike","ball","laser","zigzag","homing","wall"]},
+    {label:"End 15", rockSpeed:22, spawnRate:9,  rockSize:[31,55], objTypes:["spike","ball","laser","zigzag","homing","wall"]},
+    {label:"End 16", rockSpeed:24, spawnRate:8,  rockSize:[32,55], objTypes:["spike","ball","laser","zigzag","homing","wall"]},
+    {label:"End 17", rockSpeed:26, spawnRate:7,  rockSize:[32,56], objTypes:["spike","ball","laser","zigzag","homing","wall"]},
+    {label:"End 18", rockSpeed:28, spawnRate:6,  rockSize:[33,57], objTypes:["spike","ball","laser","zigzag","homing","wall"]},
+    {label:"End 19", rockSpeed:30, spawnRate:5,  rockSize:[34,58], objTypes:["spike","ball","laser","zigzag","homing","wall"]},
+    {label:"End 20", rockSpeed:32, spawnRate:4,  rockSize:[35,60], objTypes:["spike","ball","laser","zigzag","homing","wall"]},
   ],
 };
 
@@ -468,7 +493,7 @@ function doRegister(){
   if(users[u]){document.getElementById("loginMsg").innerText="User already exists";return;}
   users[u]={password:p,coins:0,shop:{stars:false,ownedBgs:["none"],activeBg:"none"},
     ownedSkins:[0,1,2,3,4,5,6,7,8,9],activeSkin:0,
-    highscores:{easy:[0,0,0,0,0],medium:[0,0,0,0,0],hard:[0,0,0,0,0]}};
+    highscores:{easy:[0,0,0,0,0],medium:[0,0,0,0,0],hard:[0,0,0,0,0],ending:Array(20).fill(0)}};
   saveUsers(users);
   document.getElementById("loginMsg").innerText="Account created! Now login.";
 }
@@ -481,7 +506,8 @@ function doLogin(){
   // migrate old accounts
   if(!users[u].shop.ownedBgs) users[u].shop.ownedBgs=["none"];
   if(!users[u].shop.activeBg) users[u].shop.activeBg="none";
-  if(!Array.isArray(users[u].highscores.easy)) users[u].highscores={easy:[0,0,0,0,0],medium:[0,0,0,0,0],hard:[0,0,0,0,0]};
+  if(!Array.isArray(users[u].highscores.easy)) users[u].highscores={easy:[0,0,0,0,0],medium:[0,0,0,0,0],hard:[0,0,0,0,0],ending:Array(20).fill(0)};
+  if(!Array.isArray(users[u].highscores.ending)) users[u].highscores.ending=Array(20).fill(0);
   saveUsers(users);
   currentUser=u;
   if(document.getElementById("rememberMe").checked){
@@ -517,7 +543,8 @@ window.onload=function(){
       document.getElementById("rememberMe").checked=true;
       // migrate
       if(!users[ru].shop.ownedBgs){users[ru].shop.ownedBgs=["none"];users[ru].shop.activeBg="none";}
-      if(!Array.isArray(users[ru].highscores.easy)) users[ru].highscores={easy:[0,0,0,0,0],medium:[0,0,0,0,0],hard:[0,0,0,0,0]};
+      if(!Array.isArray(users[ru].highscores.easy)) users[ru].highscores={easy:[0,0,0,0,0],medium:[0,0,0,0,0],hard:[0,0,0,0,0],ending:Array(20).fill(0)};
+      if(!Array.isArray(users[ru].highscores.ending)) users[ru].highscores.ending=Array(20).fill(0);
       saveUsers(users);
       afterLogin();
       return;
@@ -536,11 +563,13 @@ function showLevelSelect(){
 }
 function selectDiff(d){
   selectedDiff=d;
+  const desc=document.getElementById("levelSubDesc");
+  if(desc) desc.innerText=d==="ending"?"Ending has 20 progressively harder levels":"Each difficulty has 5 sub-levels";
   renderDiffButtons();
   renderSubLevels();
 }
 function renderDiffButtons(){
-  ['easy','medium','hard'].forEach(d=>{
+  ['easy','medium','hard','ending'].forEach(d=>{
     const btn=document.getElementById("diff"+d.charAt(0).toUpperCase()+d.slice(1));
     if(btn) btn.className='lvl-btn'+(d===selectedDiff?' active':'');
   });
@@ -607,25 +636,76 @@ function activateBg(id){
 // legacy compat
 function buyStars(){buyBg("stars");}
 
-// ===== SKIN CATALOG =====
+// skin price: free skins = 0, paid skins start at 50 and increase by 50 each
+function skinPrice(skin){
+  if(skin.free) return 0;
+  // count how many paid skins come before this one
+  const paidIndex=SKINS.filter(s=>!s.free).findIndex(s=>s.id===skin.id);
+  return (paidIndex+1)*50;
+}
+let flameTime=0;
+
 function drawRocketShape(c, skin, x, y, w, h){
   const body=skin.body||skin.color||"#e8a000";
   const fin =skin.fin ||"#cc3300";
   const glow=skin.glow||"#ff6600";
+  // animate only when drawing on game canvas (ctx), not preview
+  const t=(c===ctx)?(flameTime+=0.18):0;
   c.save();
-  // --- flame ---
-  const flameGrad=c.createRadialGradient(x,y+h*0.5,0,x,y+h*0.5,w*0.55);
-  flameGrad.addColorStop(0,"#ffffff");
-  flameGrad.addColorStop(0.3,glow);
-  flameGrad.addColorStop(1,"rgba(0,0,0,0)");
-  c.fillStyle=flameGrad;
+
+  // --- ENGINE EXHAUST (layered flames) ---
+  const ex=x+w*0.08; // exhaust exit point
+  const ey=y+h*0.5;
+
+  // outer flame — wide, transparent
+  const f1len=w*(0.7+Math.sin(t)*0.12);
+  const f1g=c.createLinearGradient(ex,ey,ex-f1len,ey);
+  f1g.addColorStop(0,"rgba(255,255,255,0.95)");
+  f1g.addColorStop(0.15,glow);
+  f1g.addColorStop(0.5,"rgba(255,80,0,0.6)");
+  f1g.addColorStop(1,"rgba(255,30,0,0)");
+  c.fillStyle=f1g;
   c.beginPath();
-  c.moveTo(x,y+h*0.35);
-  c.lineTo(x-w*0.45,y+h*0.3);
-  c.lineTo(x-w*0.55,y+h*0.5);
-  c.lineTo(x-w*0.45,y+h*0.7);
-  c.lineTo(x,y+h*0.65);
+  c.moveTo(ex, ey-h*0.22);
+  c.bezierCurveTo(ex-f1len*0.4, ey-h*(0.18+Math.sin(t*1.3)*0.04),
+                  ex-f1len*0.7, ey-h*(0.08+Math.sin(t*0.9)*0.03),
+                  ex-f1len, ey);
+  c.bezierCurveTo(ex-f1len*0.7, ey+h*(0.08+Math.sin(t*1.1)*0.03),
+                  ex-f1len*0.4, ey+h*(0.18+Math.sin(t*0.7)*0.04),
+                  ex, ey+h*0.22);
   c.closePath();c.fill();
+
+  // middle flame — narrower, brighter
+  const f2len=w*(0.45+Math.sin(t*1.4)*0.08);
+  const f2g=c.createLinearGradient(ex,ey,ex-f2len,ey);
+  f2g.addColorStop(0,"rgba(255,255,255,1)");
+  f2g.addColorStop(0.2,"#ffee00");
+  f2g.addColorStop(0.6,"rgba(255,120,0,0.7)");
+  f2g.addColorStop(1,"rgba(255,60,0,0)");
+  c.fillStyle=f2g;
+  c.beginPath();
+  c.moveTo(ex, ey-h*0.13);
+  c.bezierCurveTo(ex-f2len*0.5, ey-h*(0.1+Math.sin(t*1.7)*0.03),
+                  ex-f2len*0.8, ey-h*0.04,
+                  ex-f2len, ey);
+  c.bezierCurveTo(ex-f2len*0.8, ey+h*0.04,
+                  ex-f2len*0.5, ey+h*(0.1+Math.sin(t*1.2)*0.03),
+                  ex, ey+h*0.13);
+  c.closePath();c.fill();
+
+  // inner core — white hot
+  const f3len=w*(0.22+Math.sin(t*2)*0.04);
+  const f3g=c.createLinearGradient(ex,ey,ex-f3len,ey);
+  f3g.addColorStop(0,"rgba(255,255,255,1)");
+  f3g.addColorStop(0.5,"rgba(255,240,180,0.9)");
+  f3g.addColorStop(1,"rgba(255,200,0,0)");
+  c.fillStyle=f3g;
+  c.beginPath();
+  c.moveTo(ex, ey-h*0.06);
+  c.lineTo(ex-f3len, ey);
+  c.lineTo(ex, ey+h*0.06);
+  c.closePath();c.fill();
+
   // --- bottom fin ---
   c.fillStyle=fin;
   c.beginPath();
@@ -646,21 +726,21 @@ function drawRocketShape(c, skin, x, y, w, h){
   bodyGrad.addColorStop(1,body);
   c.fillStyle=bodyGrad;
   c.beginPath();
-  c.moveTo(x+w,y+h*0.5);       // nose tip
-  c.lineTo(x+w*0.55,y+h*0.08); // top shoulder
-  c.lineTo(x+w*0.1, y+h*0.2);  // top back
-  c.lineTo(x+w*0.1, y+h*0.8);  // bottom back
-  c.lineTo(x+w*0.55,y+h*0.92); // bottom shoulder
+  c.moveTo(x+w,y+h*0.5);
+  c.lineTo(x+w*0.55,y+h*0.08);
+  c.lineTo(x+w*0.1, y+h*0.2);
+  c.lineTo(x+w*0.1, y+h*0.8);
+  c.lineTo(x+w*0.55,y+h*0.92);
   c.closePath();c.fill();
   // --- outline ---
   c.strokeStyle="rgba(0,0,0,0.5)";c.lineWidth=1;c.stroke();
-  // --- window ---
+  // --- windows ---
   c.fillStyle="rgba(255,255,255,0.9)";
   c.beginPath();c.ellipse(x+w*0.68,y+h*0.38,w*0.1,h*0.1,0,0,Math.PI*2);c.fill();
   c.fillStyle="rgba(255,255,255,0.5)";
   c.beginPath();c.ellipse(x+w*0.68,y+h*0.6,w*0.07,h*0.07,0,0,Math.PI*2);c.fill();
   // --- glow outline ---
-  c.strokeStyle=glow;c.lineWidth=1.5;c.globalAlpha=0.6;
+  c.strokeStyle=glow;c.lineWidth=1.5;c.globalAlpha=0.5;
   c.beginPath();
   c.moveTo(x+w,y+h*0.5);
   c.lineTo(x+w*0.55,y+h*0.08);
@@ -701,7 +781,7 @@ function openSkinCatalog(){
     const c=document.createElement("canvas");c.width=44;c.height=28;
     drawSkinOnCanvas(c.getContext("2d"),skin,2,2,40,24);
     const lbl=document.createElement("div");lbl.style.cssText="font-size:10px;margin-top:3px;color:#bbb;";lbl.innerText=skin.name;
-    if(!owned){const pr=document.createElement("div");pr.style.cssText="font-size:9px;color:gold;";pr.innerText="50🪙";cell.appendChild(pr);}
+    if(!owned){const pr=document.createElement("div");pr.style.cssText="font-size:9px;color:gold;";pr.innerText=skinPrice(skin)+"🪙";cell.appendChild(pr);}
     cell.appendChild(c);cell.appendChild(lbl);
     cell.onclick=()=>selectSkinPreview(skin.id);
     grid.appendChild(cell);
@@ -718,18 +798,19 @@ function renderSkinPreview(id){
   const px=pc.getContext("2d");px.clearRect(0,0,80,80);
   drawSkinOnCanvas(px,skin,10,26,60,28);
   document.getElementById("skinPreviewName").innerText=skin.name;
-  document.getElementById("skinPreviewPrice").innerText=skin.free?"Free":"50 🪙";
+  document.getElementById("skinPreviewPrice").innerText=skin.free?"Free":skinPrice(skin)+" 🪙";
   const btn=document.getElementById("skinActionBtn");btn.style.display="inline-block";
   if(active){btn.innerText="✓ In Use";btn.disabled=true;}
   else if(owned){btn.innerText="Use";btn.disabled=false;}
-  else{btn.innerText="Buy (50🪙)";btn.disabled=false;}
+  else{btn.innerText="Buy ("+skinPrice(skin)+"🪙)";btn.disabled=false;}
 }
 function skinAction(){
   let u=getUser();
   const owned=u.ownedSkins.includes(previewSkinId);
   if(!owned){
-    if(u.coins<50){alert("Not enough coins");return;}
-    u.coins-=50;u.ownedSkins.push(previewSkinId);saveUser(u);updateTopBar();
+    const price=skinPrice(SKINS[previewSkinId]);
+    if(u.coins<price){alert("Not enough coins");return;}
+    u.coins-=price;u.ownedSkins.push(previewSkinId);saveUser(u);updateTopBar();
   }
   u=getUser();u.activeSkin=previewSkinId;saveUser(u);
   selectedSkinId=previewSkinId;
@@ -742,7 +823,7 @@ const JSONBIN_ID  = "69b59787aa77b81da9e48d95";
 const JSONBIN_KEY = "$2a$10$tN0QTuYw6vRr5emhhyVnlO1fx1CHyMdk8nrkcBOMA0/FEroWv1MzO";
 const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_ID}`;
 
-let globalBoard = {easy:[], medium:[], hard:[]};
+let globalBoard = {easy:[], medium:[], hard:[], ending:[]};
 
 async function fetchBoard(){
   try{
@@ -757,7 +838,8 @@ async function fetchBoard(){
     globalBoard={
       easy: Array.isArray(data.easy)?data.easy:[],
       medium: Array.isArray(data.medium)?data.medium:[],
-      hard: Array.isArray(data.hard)?data.hard:[]
+      hard: Array.isArray(data.hard)?data.hard:[],
+      ending: Array.isArray(data.ending)?data.ending:[]
     };
     console.log("globalBoard loaded:",globalBoard);
   }catch(e){console.warn("Leaderboard fetch failed:",e);}
@@ -1255,7 +1337,10 @@ function endGame(){
   let u=getUser();
   const earned=Math.floor(score/40)*5;
   u.coins+=earned;
-  if(!Array.isArray(u.highscores[currentDiff])) u.highscores[currentDiff]=[0,0,0,0,0];
+  if(!Array.isArray(u.highscores[currentDiff])){
+    const len=currentDiff==="ending"?20:5;
+    u.highscores[currentDiff]=Array(len).fill(0);
+  }
   if(score>u.highscores[currentDiff][currentSubLevel]) u.highscores[currentDiff][currentSubLevel]=score;
   saveUser(u);updateTopBar();
   // push best score across all sub-levels to global leaderboard
