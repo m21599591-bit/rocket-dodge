@@ -16,6 +16,8 @@ input[type=range]{width:160px;vertical-align:middle;}
 #topBar{position:absolute;top:0;left:0;width:100%;background:rgba(0,0,0,0.8);padding:7px 16px;z-index:20;display:none;font-size:16px;display:none;align-items:center;gap:8px;}
 #topCoins{margin-right:auto;font-size:17px;font-weight:bold;color:gold;}
 #topBar button{padding:4px 12px;font-size:13px;margin:0 2px;}
+#touchControls{position:absolute;bottom:24px;right:24px;z-index:25;display:none;flex-direction:column;gap:12px;}
+#touchControls button{width:72px;height:72px;font-size:32px;border-radius:50%;border:3px solid white;background:rgba(255,255,255,0.25);color:white;cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:none;}
 .lvl-btn{display:inline-block;margin:4px;padding:8px 14px;font-size:14px;cursor:pointer;border-radius:8px;border:2px solid rgba(255,255,255,0.35);background:rgba(0,0,0,0.5);color:white;transition:all 0.15s;}
 .lvl-btn:hover{background:rgba(255,255,255,0.1);}
 .lvl-btn.active{border-color:#00ccff;color:#00ccff;}
@@ -28,6 +30,11 @@ input[type=range]{width:160px;vertical-align:middle;}
 <body>
 <canvas id="menuBg"></canvas>
 <canvas id="game" style="display:none;"></canvas>
+
+<div id="touchControls">
+  <button id="btnUp">▲</button>
+  <button id="btnDown">▼</button>
+</div>
 
 <div id="topBar">
   <span id="topCoins">🪙 0</span>
@@ -262,25 +269,25 @@ function getBeatIndex(diff,subIdx){
 // objTypes: array of obstacle type names that can spawn on this level
 const LEVEL_CONFIG={
   easy:[
-    {label:"Easy 1", rockSpeed:3,  spawnRate:70, rockSize:[24,40], objTypes:["rock"]},
-    {label:"Easy 2", rockSpeed:3.8,spawnRate:62, rockSize:[26,44], objTypes:["rock","spike"]},
-    {label:"Easy 3", rockSpeed:4.5,spawnRate:55, rockSize:[28,46], objTypes:["rock","spike"]},
-    {label:"Easy 4", rockSpeed:5.2,spawnRate:48, rockSize:[28,48], objTypes:["rock","spike","ball"]},
-    {label:"Easy 5", rockSpeed:6,  spawnRate:42, rockSize:[30,50], objTypes:["rock","spike","ball"]},
+    {label:"Easy 1", rockSpeed:2,  spawnRate:90, rockSize:[20,36], objTypes:["rock"]},
+    {label:"Easy 2", rockSpeed:2.8,spawnRate:80, rockSize:[22,40], objTypes:["rock","spike"]},
+    {label:"Easy 3", rockSpeed:3.5,spawnRate:70, rockSize:[24,42], objTypes:["rock","spike"]},
+    {label:"Easy 4", rockSpeed:4.2,spawnRate:62, rockSize:[26,44], objTypes:["rock","spike","ball"]},
+    {label:"Easy 5", rockSpeed:5,  spawnRate:55, rockSize:[28,46], objTypes:["rock","spike","ball"]},
   ],
   medium:[
-    {label:"Med 1",  rockSpeed:7,  spawnRate:38, rockSize:[26,46], objTypes:["rock","spike","ball"]},
-    {label:"Med 2",  rockSpeed:8,  spawnRate:33, rockSize:[28,48], objTypes:["rock","spike","ball","laser"]},
-    {label:"Med 3",  rockSpeed:9,  spawnRate:28, rockSize:[28,50], objTypes:["rock","spike","ball","laser"]},
-    {label:"Med 4",  rockSpeed:10, spawnRate:24, rockSize:[30,52], objTypes:["rock","spike","ball","laser","zigzag"]},
-    {label:"Med 5",  rockSpeed:11, spawnRate:20, rockSize:[30,54], objTypes:["rock","spike","ball","laser","zigzag"]},
+    {label:"Med 1",  rockSpeed:5.5,spawnRate:50, rockSize:[24,42], objTypes:["rock","spike","ball"]},
+    {label:"Med 2",  rockSpeed:6.5,spawnRate:44, rockSize:[26,44], objTypes:["rock","spike","ball","laser"]},
+    {label:"Med 3",  rockSpeed:7.5,spawnRate:38, rockSize:[26,46], objTypes:["rock","spike","ball","laser"]},
+    {label:"Med 4",  rockSpeed:8.5,spawnRate:32, rockSize:[28,48], objTypes:["rock","spike","ball","laser","zigzag"]},
+    {label:"Med 5",  rockSpeed:9.5,spawnRate:27, rockSize:[28,50], objTypes:["rock","spike","ball","laser","zigzag"]},
   ],
   hard:[
-    {label:"Hard 1", rockSpeed:13, spawnRate:18, rockSize:[28,50], objTypes:["rock","spike","ball","laser","zigzag"]},
-    {label:"Hard 2", rockSpeed:15, spawnRate:15, rockSize:[28,52], objTypes:["rock","spike","ball","laser","zigzag","homing"]},
-    {label:"Hard 3", rockSpeed:17, spawnRate:13, rockSize:[30,54], objTypes:["rock","spike","ball","laser","zigzag","homing"]},
-    {label:"Hard 4", rockSpeed:19, spawnRate:11, rockSize:[30,56], objTypes:["spike","ball","laser","zigzag","homing","wall"]},
-    {label:"Hard 5", rockSpeed:22, spawnRate:9,  rockSize:[32,58], objTypes:["spike","ball","laser","zigzag","homing","wall"]},
+    {label:"Hard 1", rockSpeed:10, spawnRate:24, rockSize:[26,46], objTypes:["rock","spike","ball","laser","zigzag"]},
+    {label:"Hard 2", rockSpeed:12, spawnRate:20, rockSize:[28,48], objTypes:["rock","spike","ball","laser","zigzag","homing"]},
+    {label:"Hard 3", rockSpeed:14, spawnRate:17, rockSize:[28,50], objTypes:["rock","spike","ball","laser","zigzag","homing"]},
+    {label:"Hard 4", rockSpeed:16, spawnRate:14, rockSize:[30,52], objTypes:["spike","ball","laser","zigzag","homing","wall"]},
+    {label:"Hard 5", rockSpeed:18, spawnRate:11, rockSize:[30,54], objTypes:["spike","ball","laser","zigzag","homing","wall"]},
   ],
 };
 
@@ -307,6 +314,22 @@ document.addEventListener("keydown",e=>{
   if(e.key==="Escape"&&gameRunning&&!gameOver) togglePause();
 });
 document.addEventListener("keyup",e=>{ keys[e.key]=false; });
+
+// Touch controls
+function setupTouch(btnId, key){
+  const btn=document.getElementById(btnId);
+  if(!btn) return;
+  const on =e=>{e.preventDefault();keys[key]=true;};
+  const off=e=>{e.preventDefault();keys[key]=false;};
+  btn.addEventListener("touchstart", on,  {passive:false});
+  btn.addEventListener("touchend",   off, {passive:false});
+  btn.addEventListener("touchcancel",off, {passive:false});
+  btn.addEventListener("mousedown",  on);
+  btn.addEventListener("mouseup",    off);
+  btn.addEventListener("mouseleave", off);
+}
+setupTouch("btnUp",   "ArrowUp");
+setupTouch("btnDown", "ArrowDown");
 
 // ===== HELPERS =====
 function getUsers(){return JSON.parse(localStorage.getItem("users")||"{}");}
@@ -592,28 +615,78 @@ function skinAction(){
 }
 function closeSkinCatalog(){showScreen("menuScreen");}
 
-// ===== LEADERBOARD =====
-function openLeaderboard(){showLeaderTab('easy');showScreen("leaderScreen");}
+// ===== GLOBAL LEADERBOARD (JSONBin.io) =====
+// Setup: 1) go to https://jsonbin.io  2) create free account
+// 3) create a new Bin with this JSON: {"easy":[],"medium":[],"hard":[]}
+// 4) paste your Bin ID and API key below
+const JSONBIN_ID  = "DEIN_BIN_ID_HIER";   // z.B. "6650a1234abc..."
+const JSONBIN_KEY = "DEIN_API_KEY_HIER";   // X-Access-Key from JSONBin
+
+const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_ID}`;
+
+let globalBoard = {easy:[], medium:[], hard:[]};
+let boardLoaded = false;
+
+async function fetchBoard(){
+  if(JSONBIN_ID==="DEIN_BIN_ID_HIER") return; // not configured yet
+  try{
+    const r=await fetch(JSONBIN_URL+"/latest",{headers:{"X-Access-Key":JSONBIN_KEY}});
+    const j=await r.json();
+    globalBoard=j.record||{easy:[],medium:[],hard:[]};
+    boardLoaded=true;
+  }catch(e){console.warn("Leaderboard fetch failed",e);}
+}
+
+async function pushScore(diff, score){
+  if(JSONBIN_ID==="DEIN_BIN_ID_HIER") return;
+  await fetchBoard();
+  const list=globalBoard[diff]||[];
+  const existing=list.find(e=>e.name===currentUser);
+  if(existing){
+    if(score<=existing.score) return; // not a new best
+    existing.score=score;
+  } else {
+    list.push({name:currentUser,score});
+  }
+  list.sort((a,b)=>b.score-a.score);
+  globalBoard[diff]=list.slice(0,50); // keep top 50
+  try{
+    await fetch(JSONBIN_URL,{
+      method:"PUT",
+      headers:{"Content-Type":"application/json","X-Access-Key":JSONBIN_KEY},
+      body:JSON.stringify(globalBoard)
+    });
+  }catch(e){console.warn("Leaderboard push failed",e);}
+}
+
+function openLeaderboard(){
+  showScreen("leaderScreen");
+  document.getElementById("leaderList").innerHTML="<p style='color:#888;font-size:13px;'>Loading...</p>";
+  fetchBoard().then(()=>showLeaderTab('easy'));
+}
 function closeLeaderboard(){showScreen("menuScreen");}
 function showLeaderTab(tab){
   leaderTab=tab;
-  const users=getUsers();
-  let list=[];
-  for(let u in users){
-    const hs=users[u].highscores;
-    let best=0;
-    if(hs&&Array.isArray(hs[tab])) best=Math.max(...hs[tab]);
-    else if(hs&&typeof hs[tab]==='number') best=hs[tab];
-    list.push({name:u,score:best});
+  let html="";
+  if(JSONBIN_ID==="DEIN_BIN_ID_HIER"){
+    html=`<p style='color:salmon;font-size:13px;'>⚠️ JSONBin nicht konfiguriert.<br>
+    Öffne index.html und trage JSONBIN_ID und JSONBIN_KEY ein.<br>
+    <a href='https://jsonbin.io' target='_blank' style='color:#00ccff;'>jsonbin.io → kostenlos registrieren</a></p>`;
+  } else {
+    const list=(globalBoard[tab]||[]).slice(0,10);
+    if(list.length===0){
+      html="<p style='color:#666;font-size:13px;'>Noch keine Einträge.</p>";
+    } else {
+      html="<table style='width:100%;border-collapse:collapse;font-size:14px;'>";
+      html+="<tr style='color:#888;'><th style='text-align:left;padding:4px 6px;'>#</th><th style='text-align:left;'>Spieler</th><th style='text-align:right;'>Score</th></tr>";
+      list.forEach((p,i)=>{
+        const medal=i===0?"🥇":i===1?"🥈":i===2?"🥉":"";
+        const isMe=p.name===currentUser?"color:#00ccff;font-weight:bold;":"";
+        html+=`<tr><td style='padding:3px 6px;color:#666;'>${i+1}</td><td style='${isMe}'>${medal}${p.name}</td><td style='text-align:right;color:gold;'>${p.score}</td></tr>`;
+      });
+      html+="</table>";
+    }
   }
-  list.sort((a,b)=>b.score-a.score);
-  let html="<table style='width:100%;border-collapse:collapse;font-size:14px;'>";
-  html+="<tr style='color:#888;'><th style='text-align:left;padding:4px 6px;'>#</th><th style='text-align:left;'>Player</th><th style='text-align:right;'>Best</th></tr>";
-  list.slice(0,10).forEach((p,i)=>{
-    const medal=i===0?"🥇":i===1?"🥈":i===2?"🥉":"";
-    html+=`<tr><td style='padding:3px 6px;color:#666;'>${i+1}</td><td>${medal}${p.name}</td><td style='text-align:right;color:gold;'>${p.score}</td></tr>`;
-  });
-  html+="</table>";
   document.getElementById("leaderList").innerHTML=html;
 }
 
@@ -656,6 +729,7 @@ function pauseToMenu(){
   paused=false;gameRunning=false;gameOver=true;
   if(animId){cancelAnimationFrame(animId);animId=null;}
   stopMusic();
+  document.getElementById("touchControls").style.display="none";
   document.getElementById("pauseScreen").style.display="none";
   document.getElementById("pauseSettingsScreen").style.display="none";
   canvas.style.display="none";
@@ -754,6 +828,7 @@ function startGame(diff, subIdx){
   canvas.style.display="block";
   showScreen(null);
   document.getElementById("topBar").style.display="flex";
+  document.getElementById("touchControls").style.display="flex";
   if(animId) cancelAnimationFrame(animId);
   playBeat(getBeatIndex(diff,subIdx));
   animId=requestAnimationFrame(gameLoop);
@@ -767,10 +842,10 @@ function gameLoop(){
   if(spawnTimer>=spawnRate){spawnObstacle();spawnTimer=0;}
   coinSpawnTimer++;
   if(coinSpawnTimer>=110){makeCoin();coinSpawnTimer=0;}
-  // gradual difficulty ramp
-  if(score>0&&score%600===0){
-    rockSpeed=Math.min(rockSpeed*1.04+0.2, rockSpeed+0.4);
-    if(spawnRate>8) spawnRate=Math.max(8,spawnRate-0.5);
+  // gradual difficulty ramp every 1000 points
+  if(score>0&&score%1000===0){
+    rockSpeed+=0.3;
+    if(spawnRate>10) spawnRate=Math.max(10,spawnRate-2);
   }
   moveRocket();
   updateObstacles();
@@ -954,11 +1029,11 @@ function drawRocket(){
 // ===== HUD =====
 function drawHUD(){
   const cfg=LEVEL_CONFIG[currentDiff][currentSubLevel];
-  ctx.fillStyle="rgba(0,0,0,0.45)";ctx.fillRect(10,8,200,52);
+  ctx.fillStyle="rgba(0,0,0,0.45)";ctx.fillRect(10,8,220,56);
   ctx.fillStyle="white";ctx.font="bold 20px Arial";ctx.textAlign="left";
   ctx.fillText("Score: "+score,18,30);
   ctx.font="13px Arial";ctx.fillStyle="#aaa";
-  ctx.fillText(cfg.label,18,50);
+  ctx.fillText(cfg.label+"  |  next boost: "+(1000-score%1000),18,50);
   ctx.textAlign="left";
 }
 
@@ -973,6 +1048,9 @@ function endGame(){
   if(!Array.isArray(u.highscores[currentDiff])) u.highscores[currentDiff]=[0,0,0,0,0];
   if(score>u.highscores[currentDiff][currentSubLevel]) u.highscores[currentDiff][currentSubLevel]=score;
   saveUser(u);updateTopBar();
+  // push best score across all sub-levels to global leaderboard
+  const bestOverall=Math.max(...u.highscores[currentDiff]);
+  pushScore(currentDiff, bestOverall);
   document.getElementById("endScore").innerText="Score: "+score;
   document.getElementById("endHigh").innerText="Best on this level: "+u.highscores[currentDiff][currentSubLevel];
   document.getElementById("endCoinsEarned").innerText="Coins earned: +"+earned+" 🪙";
@@ -985,6 +1063,7 @@ function restartGame(){
 }
 function goMenu(){
   document.getElementById("endScreen").style.display="none";
+  document.getElementById("touchControls").style.display="none";
   stopMusic();
   canvas.style.display="none";
   menuBg.style.display="block";
