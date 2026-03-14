@@ -634,7 +634,7 @@ function skinAction(){
 function closeSkinCatalog(){showScreen("menuScreen");}
 
 // ===== GLOBAL LEADERBOARD (JSONBin.io) =====
-const JSONBIN_ID  = "69b59554aa77b81da9e486fb";
+const JSONBIN_ID  = "69b59787aa77b81da9e48d95";
 const JSONBIN_KEY = "$2a$10$HyIsElDNxY90F8GVtLCqZOtQTzJU1s1QkTANr6S0bygFSfTNlqQX.";
 const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_ID}`;
 
@@ -643,13 +643,19 @@ let globalBoard = {easy:[], medium:[], hard:[]};
 async function fetchBoard(){
   try{
     const r=await fetch(JSONBIN_URL+"/latest",{
-      headers:{"X-Access-Key":JSONBIN_KEY,"X-Bin-Meta":false}
+      headers:{"X-Access-Key":JSONBIN_KEY}
     });
     if(!r.ok) throw new Error("HTTP "+r.status);
     const j=await r.json();
-    // JSONBin v3 wraps in {record:{...}} but with X-Bin-Meta:false returns record directly
-    globalBoard=(j.record||j)||{easy:[],medium:[],hard:[]};
-    if(!globalBoard.easy) globalBoard={easy:[],medium:[],hard:[]};
+    console.log("JSONBin response:",j);
+    // v3 always returns {record:{...}, metadata:{...}}
+    const data=j.record||j;
+    globalBoard={
+      easy: Array.isArray(data.easy)?data.easy:[],
+      medium: Array.isArray(data.medium)?data.medium:[],
+      hard: Array.isArray(data.hard)?data.hard:[]
+    };
+    console.log("globalBoard loaded:",globalBoard);
   }catch(e){console.warn("Leaderboard fetch failed:",e);}
 }
 
@@ -666,11 +672,14 @@ async function pushScore(diff, newScore){
     }
     list.sort((a,b)=>b.score-a.score);
     globalBoard[diff]=list.slice(0,50);
-    await fetch(JSONBIN_URL,{
+    console.log("Pushing to JSONBin:",globalBoard);
+    const r=await fetch(JSONBIN_URL,{
       method:"PUT",
       headers:{"Content-Type":"application/json","X-Access-Key":JSONBIN_KEY},
       body:JSON.stringify(globalBoard)
     });
+    const result=await r.json();
+    console.log("Push result:",result);
   }catch(e){console.warn("Leaderboard push failed:",e);}
 }
 
