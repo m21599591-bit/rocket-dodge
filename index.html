@@ -503,7 +503,7 @@ function doRegister(){
   let users=getUsers();
   if(users[u]){document.getElementById("loginMsg").innerText="User already exists";return;}
   users[u]={password:p,coins:0,shop:{stars:false,ownedBgs:["none"],activeBg:"none"},
-    ownedSkins:[0,1,2,3,4,5,6,7,8,9],activeSkin:0,
+    ownedSkins:SKINS.map(s=>s.id),activeSkin:0,
     highscores:{easy:[0,0,0,0,0],medium:[0,0,0,0,0],hard:[0,0,0,0,0],ending:Array(20).fill(0)}};
   saveUsers(users);
   document.getElementById("loginMsg").innerText="Account created! Now login.";
@@ -519,6 +519,7 @@ function doLogin(){
   if(!users[u].shop.activeBg) users[u].shop.activeBg="none";
   if(!Array.isArray(users[u].highscores.easy)) users[u].highscores={easy:[0,0,0,0,0],medium:[0,0,0,0,0],hard:[0,0,0,0,0],ending:Array(20).fill(0)};
   if(!Array.isArray(users[u].highscores.ending)) users[u].highscores.ending=Array(20).fill(0);
+  users[u].ownedSkins=SKINS.map(s=>s.id); // alle skins gratis
   saveUsers(users);
   currentUser=u;
   if(document.getElementById("rememberMe").checked){
@@ -556,6 +557,7 @@ window.onload=function(){
       if(!users[ru].shop.ownedBgs){users[ru].shop.ownedBgs=["none"];users[ru].shop.activeBg="none";}
       if(!Array.isArray(users[ru].highscores.easy)) users[ru].highscores={easy:[0,0,0,0,0],medium:[0,0,0,0,0],hard:[0,0,0,0,0],ending:Array(20).fill(0)};
       if(!Array.isArray(users[ru].highscores.ending)) users[ru].highscores.ending=Array(20).fill(0);
+      users[ru].ownedSkins=SKINS.map(s=>s.id); // alle skins gratis
       saveUsers(users);
       afterLogin();
       return;
@@ -668,12 +670,7 @@ function activateBg(id){
 function buyStars(){buyBg("stars");}
 
 // skin price: free skins = 0, paid skins start at 50 and increase by 50 each
-function skinPrice(skin){
-  if(skin.free) return 0;
-  // count how many paid skins come before this one
-  const paidIndex=SKINS.filter(s=>!s.free).findIndex(s=>s.id===skin.id);
-  return (paidIndex+1)*50;
-}
+function skinPrice(skin){ return 0; }
 let flameTime=0;
 
 function drawRocketShape(c, skin, x, y, w, h){
