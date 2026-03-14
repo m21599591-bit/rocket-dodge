@@ -215,6 +215,16 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
   <button onclick="goMenu()">🏠 Main Menu</button>
 </div>
 
+<!-- WIN SCREEN -->
+<div id="winScreen" class="screen" style="display:none">
+  <h2 style="margin:0 0 6px;font-size:26px;">🏆 Du hast es geschafft!</h2>
+  <p style="color:#00ccff;font-size:15px;margin:0 0 4px;">Ending abgeschlossen</p>
+  <p id="winScore" style="font-size:20px;margin:6px 0;"></p>
+  <p id="winCoins" style="color:gold;font-size:15px;margin:4px 0 16px;"></p>
+  <button onclick="restartGame()">🔄 Nochmal</button>
+  <button onclick="goMenu()">🏠 Hauptmenü</button>
+</div>
+
 <script>
 // ===== CANVASES =====
 const menuBg=document.getElementById("menuBg");
@@ -1145,6 +1155,7 @@ function gameLoop(){
   drawRocket();
   drawHUD();
   score++;
+  if(currentDiff==="ending"&&score>=5000){winGame();return;}
   animId=requestAnimationFrame(gameLoop);
 }
 
@@ -1292,10 +1303,39 @@ function drawHUD(){
   ctx.fillText("Score: "+score,18,30);
   ctx.font="13px Arial";ctx.fillStyle="#aaa";
   ctx.fillText(cfg.label+"  |  next boost: "+(1000-score%1000),18,50);
+  // Ending Fortschritt oben mittig
+  if(currentDiff==="ending"){
+    const pct=Math.min(100,Math.floor(score/5000*100));
+    const label=pct+"%";
+    ctx.font="bold 18px Arial";ctx.textAlign="center";
+    ctx.fillStyle="rgba(0,0,0,0.5)";
+    const tw=ctx.measureText(label).width;
+    ctx.fillRect(canvas.width/2-tw/2-10,6,tw+20,30);
+    // Farbverlauf grün→gelb→rot je nach Fortschritt
+    const hue=Math.floor(120-pct*1.2);
+    ctx.fillStyle=`hsl(${hue},100%,60%)`;
+    ctx.fillText(label,canvas.width/2,26);
+  }
   ctx.textAlign="left";
 }
 
 // ===== END GAME =====
+function winGame(){
+  gameOver=true;gameRunning=false;
+  if(animId){cancelAnimationFrame(animId);animId=null;}
+  stopMusic();
+  let u=getUser();
+  const earned=Math.floor(score/40)*5+100; // bonus 100 coins für Ending
+  u.coins+=earned;
+  if(!Array.isArray(u.highscores.ending)) u.highscores.ending=Array(20).fill(0);
+  if(score>u.highscores.ending[currentSubLevel]) u.highscores.ending[currentSubLevel]=score;
+  saveUser(u);updateTopBar();
+  pushScore("ending",score);
+  document.getElementById("winScore").innerText="Score: "+score;
+  document.getElementById("winCoins").innerText="Coins verdient: +"+earned+" 🪙 (inkl. 100 Bonus)";
+  document.getElementById("winScreen").style.display="block";
+}
+
 function endGame(){
   gameOver=true;gameRunning=false;
   if(animId){cancelAnimationFrame(animId);animId=null;}
@@ -1320,10 +1360,12 @@ function endGame(){
 
 function restartGame(){
   document.getElementById("endScreen").style.display="none";
+  document.getElementById("winScreen").style.display="none";
   startGame(currentDiff,currentSubLevel);
 }
 function goMenu(){
   document.getElementById("endScreen").style.display="none";
+  document.getElementById("winScreen").style.display="none";
   document.getElementById("touchControls").style.display="none";
   stopMusic();
   canvas.style.display="none";
