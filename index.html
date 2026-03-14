@@ -1022,6 +1022,18 @@ document.addEventListener("keydown",e=>{
 });
 document.addEventListener("keyup",e=>{keys[e.key]=false;});
 
+// Mouse buttons: left=up, right=down
+document.addEventListener("mousedown",e=>{
+  if(!gameRunning||gameOver||paused) return;
+  if(e.button===0) keys["__mouseUp"]=true;
+  if(e.button===2) keys["__mouseDown"]=true;
+});
+document.addEventListener("mouseup",e=>{
+  if(e.button===0) keys["__mouseUp"]=false;
+  if(e.button===2) keys["__mouseDown"]=false;
+});
+document.addEventListener("contextmenu",e=>{if(gameRunning&&!gameOver)e.preventDefault();});
+
 function setDevice(mode){
   isMobile=mode==="mobile";localStorage.setItem("deviceMode",mode);updateDeviceButtons();
   if(gameRunning) document.getElementById("touchControls").style.display=isMobile?"flex":"none";
@@ -1181,8 +1193,8 @@ function gameLoop(){
 
 // ===== ROCKET MOVEMENT =====
 function moveRocket(){
-  const upKey=keys[keyBindings.up]||keys["w"]||keys["W"]||keys["__up"];
-  const downKey=keys[keyBindings.down]||keys["s"]||keys["S"]||keys["__down"];
+  const upKey=keys[keyBindings.up]||keys["w"]||keys["W"]||keys["__up"]||keys["__mouseUp"];
+  const downKey=keys[keyBindings.down]||keys["s"]||keys["S"]||keys["__down"]||keys["__mouseDown"];
   if(upKey) rocket.y-=rocket.speed;
   if(downKey) rocket.y+=rocket.speed;
   rocket.y=Math.max(0,Math.min(canvas.height-rocket.h,rocket.y));
