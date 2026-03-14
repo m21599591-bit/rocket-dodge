@@ -97,8 +97,21 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
 <!-- SHOP -->
 <div id="shopScreen" class="screen" style="display:none;">
   <h2 style="margin:0 0 4px;">🛒 Shop</h2>
-  <p id="shopCoins" style="color:#88eeff;margin:0 0 4px;font-size:14px;"></p>
-  <p style="color:#aaa;font-size:12px;margin:0 0 14px;">Hintergründe kosten 💎 Diamanten</p>
+  <div style="display:flex;gap:16px;justify-content:center;margin:0 0 10px;font-size:14px;">
+    <span id="shopCoins" style="color:gold;">🪙 0</span>
+    <span id="shopDiamonds" style="color:#88eeff;">💎 0</span>
+  </div>
+  <!-- Umtausch -->
+  <div style="background:rgba(255,255,255,0.05);border-radius:12px;padding:10px 14px;margin:0 0 14px;border:1px solid rgba(136,238,255,0.2);">
+    <p style="margin:0 0 8px;font-size:13px;color:#88eeff;">🔄 Coins → Diamanten</p>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;">
+      <button onclick="convertCoins(10,1)"   style="font-size:12px;padding:5px 10px;">10🪙 → 1💎</button>
+      <button onclick="convertCoins(100,10)"  style="font-size:12px;padding:5px 10px;">100🪙 → 10💎</button>
+      <button onclick="convertCoins(1000,100)" style="font-size:12px;padding:5px 10px;">1000🪙 → 100💎</button>
+      <button onclick="convertCoins(10000,1000)" style="font-size:12px;padding:5px 10px;">10000🪙 → 1000💎</button>
+    </div>
+  </div>
+  <p style="color:#aaa;font-size:12px;margin:0 0 10px;">Hintergründe kosten 💎 Diamanten</p>
   <div id="shopItems"></div>
   <br>
   <button onclick="closeShop()">Back</button>
@@ -710,7 +723,8 @@ function renderSubLevels(){
 // ===== SHOP =====
 function openShop(){
   const u=getUser();
-  document.getElementById("shopCoins").innerText="💎 "+( u.diamonds||0)+" Diamanten";
+  document.getElementById("shopCoins").innerText="🪙 "+(u.coins||0);
+  document.getElementById("shopDiamonds").innerText="💎 "+(u.diamonds||0);
   const container=document.getElementById("shopItems");
   container.innerHTML="";
   BACKGROUNDS.forEach(bg=>{
@@ -733,6 +747,15 @@ function openShop(){
   showScreen("shopScreen");
 }
 function closeShop(){showScreen("menuScreen");}
+function convertCoins(cost, gems){
+  let u=getUser();
+  if((u.coins||0)<cost){alert("Nicht genug Coins 🪙");return;}
+  u.coins-=cost;
+  u.diamonds=(u.diamonds||0)+gems;
+  saveUser(u);
+  updateTopBar();
+  openShop();
+}
 function buyBg(id){
   const bg=BACKGROUNDS.find(b=>b.id===id);
   let u=getUser();
