@@ -58,28 +58,28 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
 
 <!-- LOGIN -->
 <div id="loginScreen" class="screen">
-  <h2 style="font-size:28px;margin:0 0 6px;letter-spacing:2px;">🚀 ROCKET DODGE</h2>
-  <p style="color:#888;font-size:13px;margin:0 0 18px;">Login or create an account</p>
-  <input id="usernameInput" placeholder="Username"><br>
-  <input id="passwordInput" type="password" placeholder="Password"><br>
-  <label style="font-size:13px;color:#aaa;"><input type="checkbox" id="rememberMe"> Always use this account</label><br><br>
-  <button onclick="doRegister()">Register</button>
-  <button onclick="doLogin()">Login</button>
-  <p id="loginMsg" style="color:salmon;min-height:18px;font-size:13px;margin:8px 0 0;"></p>
+  <h2 style="font-size:38px;margin:0 0 8px;letter-spacing:2px;">🚀 ROCKET DODGE</h2>
+  <p style="color:#888;font-size:16px;margin:0 0 22px;">Login or create an account</p>
+  <input id="usernameInput" placeholder="Username" style="font-size:18px;padding:12px;width:min(260px,85vw);"><br>
+  <input id="passwordInput" type="password" placeholder="Password" style="font-size:18px;padding:12px;width:min(260px,85vw);"><br>
+  <label style="font-size:15px;color:#aaa;"><input type="checkbox" id="rememberMe"> Always use this account</label><br><br>
+  <button onclick="doRegister()" style="font-size:17px;padding:12px 28px;">Register</button>
+  <button onclick="doLogin()" style="font-size:17px;padding:12px 28px;">Login</button>
+  <p id="loginMsg" style="color:salmon;min-height:18px;font-size:14px;margin:10px 0 0;"></p>
 </div>
 
 <!-- MAIN MENU -->
 <div id="menuScreen" class="screen" style="display:none">
-  <h2 style="font-size:28px;margin:0 0 4px;letter-spacing:2px;">🚀 ROCKET DODGE</h2>
-  <p id="menuUser" style="color:#666;font-size:13px;margin:0 0 18px;"></p>
-  <button onclick="showLevelSelect()" style="font-size:17px;padding:12px 32px;border-color:#00ccff;color:#00ccff;" data-i18n="play">▶ Spielen</button><br>
-  <button onclick="openShop()" data-i18n="shop">🛒 Shop</button>
-  <button onclick="openSkinCatalog()" data-i18n="skins">🎨 Skins</button><br>
-  <button onclick="openLeaderboard()" data-i18n="leaderboard">🏆 Bestenliste</button>
-  <button onclick="openSettingsMenu()" data-i18n="settings">⚙️ Einstellungen</button>
-  <button onclick="openFriends()" style="border-color:rgba(0,200,100,0.5);color:#00cc66;">👥 Freunde</button>
-  <button onclick="checkIncomingDuels()" style="font-size:12px;padding:6px 14px;border-color:rgba(255,100,100,0.4);color:#ff9999;margin-top:4px;">🔔 Duell-Einladungen prüfen</button>
-  <div id="onlineList" style="margin-top:14px;padding:8px 12px;background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.15);border-radius:10px;font-size:12px;color:#aaa;min-height:28px;text-align:left;">
+  <h2 style="font-size:38px;margin:0 0 4px;letter-spacing:2px;">🚀 ROCKET DODGE</h2>
+  <p id="menuUser" style="color:#666;font-size:15px;margin:0 0 20px;"></p>
+  <button onclick="showLevelSelect()" style="font-size:22px;padding:16px 44px;border-color:#00ccff;color:#00ccff;" data-i18n="play">▶ Spielen</button><br>
+  <button onclick="openShop()" style="font-size:18px;padding:12px 26px;" data-i18n="shop">🛒 Shop</button>
+  <button onclick="openSkinCatalog()" style="font-size:18px;padding:12px 26px;" data-i18n="skins">🎨 Skins</button><br>
+  <button onclick="openLeaderboard()" style="font-size:18px;padding:12px 26px;" data-i18n="leaderboard">🏆 Bestenliste</button>
+  <button onclick="openSettingsMenu()" style="font-size:18px;padding:12px 26px;" data-i18n="settings">⚙️ Einstellungen</button>
+  <button onclick="openFriends()" style="font-size:18px;padding:12px 26px;border-color:rgba(0,200,100,0.5);color:#00cc66;">👥 Freunde</button>
+  <button onclick="checkIncomingDuels()" style="font-size:13px;padding:8px 16px;border-color:rgba(255,100,100,0.4);color:#ff9999;margin-top:4px;">🔔 Duell-Einladungen prüfen</button>
+  <div id="onlineList" style="margin-top:14px;padding:8px 12px;background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.15);border-radius:10px;font-size:13px;color:#aaa;min-height:28px;text-align:left;">
     <span style="color:#00ff88;margin-right:6px;">●</span><span id="onlineListText">Lade...</span>
   </div>
 </div>
