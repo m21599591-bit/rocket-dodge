@@ -2820,14 +2820,18 @@ function drawGems(){
 
 // ===== ROCKET DRAWING =====
 function drawSkinOnCanvas(c,skin,x,y,w,h){
+  c.save();
+  // clip to cell bounds so glow doesn't bleed out
+  c.beginPath();c.rect(x,y,w,h);c.clip();
+  c.shadowBlur=0;
   if(skin.shape==="rocket"){
-    drawRocketShape(c,skin,x,y,w,h);return;
+    drawRocketShape(c,skin,x,y,w,h);c.restore();return;
   }
   if(skin.shape==="invader"){
-    drawInvader(c,skin.color||"#44ff44",skin.style||0,x,y,w,h);return;
+    drawInvader(c,skin.color||"#44ff44",skin.style||0,x,y,w,h);c.restore();return;
   }
   if(skin.shape==="elias"){
-    drawEliasShip(c,x,y,w,h);return;
+    drawEliasShip(c,x,y,w,h);c.restore();return;
   }
   c.fillStyle=skin.color||"cyan";
   if(skin.shape==="rect"||!skin.shape){
@@ -2842,6 +2846,7 @@ function drawSkinOnCanvas(c,skin,x,y,w,h){
     c.beginPath();c.moveTo(x+w,y+h/2);c.lineTo(x+w*0.4,y);c.lineTo(x+w*0.4,y+h*0.3);
     c.lineTo(x,y+h*0.3);c.lineTo(x,y+h*0.7);c.lineTo(x+w*0.4,y+h*0.7);c.lineTo(x+w*0.4,y+h);c.closePath();c.fill();
   }
+  c.restore();
 }
 
 // draws a pixel-art space invader, style 0-4
@@ -2910,36 +2915,28 @@ function drawInvader(c,color,style,x,y,w,h){
 
 // Elias skin: pixel-art spaceship (white body, blue dome, red engines)
 function drawEliasShip(c,x,y,w,h){
+  c.save();
+  c.shadowBlur=0;
   const p=(px,py,pw,ph,col)=>{
     c.fillStyle=col;
     c.fillRect(x+px*w/16, y+py*h/10, pw*w/16, ph*h/10);
   };
-  // black outline shadow
-  c.shadowColor="#000";c.shadowBlur=6;
-  // main white body (ellipse-ish)
   p(2,3,12,4,"#e8e8f0");
   p(1,4,14,2,"#f0f0f8");
   p(3,2,10,6,"#e8e8f0");
-  // grey underside
   p(3,6,10,2,"#b0b0c0");
   p(4,7,8,1,"#9090a0");
-  // red engine pods left side (2 stacked)
-  p(0,1,3,2,"#cc2200");p(0,1,3,2,"#cc2200");
+  p(0,1,3,2,"#cc2200");
   p(0,4,3,2,"#cc2200");
-  // engine connector bars
   p(2,2,2,1,"#661100");p(2,5,2,1,"#661100");
-  // red engine nozzles right
   p(13,3,3,1,"#cc2200");p(13,5,3,1,"#cc2200");
-  // blue dome on top
   p(5,1,6,3,"#6688cc");
   p(6,0,4,2,"#7799dd");
-  p(7,0,2,1,"#aabbee"); // highlight
-  // red dome base ring
+  p(7,0,2,1,"#aabbee");
   p(5,3,6,1,"#aa1100");
-  // blue detail buttons on body
   p(6,5,2,2,"#3355aa");p(9,5,2,2,"#3355aa");
   p(7,4,1,1,"#5577cc");p(10,4,1,1,"#5577cc");
-  c.shadowBlur=0;
+  c.restore();
 }
 
 function drawRocketShape(c,skin,x,y,w,h){
