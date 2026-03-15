@@ -529,6 +529,7 @@ const BACKGROUNDS=[
   {id:"snowmount",  name:"Snow Mountain",emoji:"🏔️",price:1000,desc:"Icy pixel mountain"},
   {id:"pixelforest",name:"Pixel Forest", emoji:"🌲",price:1000,desc:"Night pixel forest"},
   {id:"pastelsky",  name:"Pastel Sky",  emoji:"☁️",price:1000,desc:"Dreamy pastel clouds"},
+  {id:"hyperspace", name:"Hyperspace",  emoji:"🌀",price:100, desc:"Pixel warp speed"},
 ];
 
 // ===== MUSIC =====
@@ -1202,7 +1203,23 @@ document.getElementById("btnDown").addEventListener("touchend",e=>{e.preventDefa
 
 // ===== BACKGROUND RENDERERS =====
 let bgStars=[];
-for(let i=0;i<140;i++) bgStars.push({x:Math.random()*3000,y:Math.random()*2000,s:Math.random()*2+0.4});
+for(let i=0;i<140;i++) bgStars.push({x:Math.random()*3000,y:Math.random()*2000,s:Math.random()*2+0.4,speed:Math.random()*0.5+0.2});
+
+// hyperspace warp streaks
+let warpStreaks=[];
+(function initWarp(){
+  for(let i=0;i<80;i++){
+    const angle=Math.random()*Math.PI*2;
+    const dist=Math.random()*0.15+0.05;
+    warpStreaks.push({
+      angle,dist,len:Math.random()*0.12+0.04,
+      speed:Math.random()*0.004+0.002,
+      w:Math.floor(Math.random()*3)+1,
+      hue:Math.random()<0.5?(Math.random()*60+280):(Math.random()*40+190), // pink-purple or blue-cyan
+      alpha:Math.random()*0.6+0.4
+    });
+  }
+})();
 let matrixCols=[];
 function initMatrix(){
   matrixCols=[];
@@ -1719,6 +1736,45 @@ function drawBackground(){
     // ground
     ctx.fillStyle="rgba(220,150,255,0.5)";ctx.fillRect(0,H*0.75,W,H*0.25);
     ctx.fillStyle="rgba(200,120,240,0.4)";ctx.fillRect(0,H*0.82,W,H*0.18);
+  } else if(bg==="hyperspace"){
+    const W=canvas.width,H=canvas.height;
+    const cx=W*0.5,cy=H*0.5;
+    // dark bg
+    ctx.fillStyle="#06030f";ctx.fillRect(0,0,W,H);
+    // subtle center glow
+    const cg=ctx.createRadialGradient(cx,cy,0,cx,cy,W*0.4);
+    cg.addColorStop(0,"rgba(80,0,120,0.18)");cg.addColorStop(1,"transparent");
+    ctx.fillStyle=cg;ctx.fillRect(0,0,W,H);
+
+    // warp streaks — pixel style (draw as thick dashed lines)
+    warpStreaks.forEach(s=>{
+      s.dist+=s.speed;
+      if(s.dist>0.85){s.dist=Math.random()*0.05;s.len=Math.random()*0.12+0.04;s.alpha=Math.random()*0.6+0.4;}
+      const x1=cx+Math.cos(s.angle)*s.dist*W;
+      const y1=cy+Math.sin(s.angle)*s.dist*H*0.7;
+      const x2=cx+Math.cos(s.angle)*(s.dist+s.len)*W;
+      const y2=cy+Math.sin(s.angle)*(s.dist+s.len)*H*0.7;
+      // pixel-ize: draw as small rectangles along the line
+      const steps=Math.max(2,Math.floor(Math.sqrt((x2-x1)**2+(y2-y1)**2)/4));
+      const alpha=s.alpha*(s.dist/0.85); // fade in from center
+      ctx.fillStyle=`hsla(${s.hue},100%,65%,${alpha})`;
+      for(let i=0;i<steps;i++){
+        if(i%2===0) continue; // pixel gap effect
+        const t=i/steps;
+        const px=x1+(x2-x1)*t;
+        const py=y1+(y2-y1)*t;
+        ctx.fillRect(Math.round(px),Math.round(py),s.w+1,s.w);
+      }
+    });
+
+    // small white pixel stars
+    bgStars.forEach((s,i)=>{
+      const twinkle=0.3+0.7*Math.abs(Math.sin(Date.now()*0.001+i));
+      ctx.globalAlpha=twinkle*0.8;
+      ctx.fillStyle="white";
+      ctx.fillRect(Math.round(s.x%W),Math.round(s.y%H),s.s>1.5?2:1,s.s>1.5?2:1);
+    });
+    ctx.globalAlpha=1;
   }
 }
 
@@ -1841,7 +1897,7 @@ let duelPollInterval=null;
 let duelId=null;
 let duelRole=null; // 'challenger' or 'opponent'
 let duelOpponentName=null;
-let duelOppY=300,duelOppScore=0,duelOppAlive=true;
+let duelOppY=300,duelOppScore=0,duelOppAlive=true,duelOppTargetY=300;
 
 const DUEL_CONFIGS={
   easy: {rockSpeed:4,spawnRate:50,rockSize:[20,38],objTypes:["rock"]},
@@ -1978,7 +2034,7 @@ function startDuelGame(duel){
   score=0;gameOver=false;paused=false;gameRunning=true;
   sessionCoins=0;sessionGems=0;
   activePowerUp=null;powerUpTimer=0;lastPowerUpScore=0;
-  duelOppY=canvas.height/2;duelOppScore=0;duelOppAlive=true;
+  duelOppY=canvas.height/2;duelOppTargetY=canvas.height/2;duelOppScore=0;duelOppAlive=true;
   rocket={x:120,y:canvas.height/2,w:44,h:22,speed:sensitivity};
   if(activeBackground==="matrix") initMatrix();
   stopMenuBg();
@@ -2022,7 +2078,7 @@ async function duelSyncTick(){
     const oppY=duelRole==="challenger"?duel.opponentY:duel.challengerY;
     const oppScore=duelRole==="challenger"?duel.opponentScore:duel.challengerScore;
     const oppAlive=duelRole==="challenger"?duel.opponentAlive:duel.challengerAlive;
-    if(oppY!==undefined) duelOppY=oppY;
+    if(oppY!==undefined) duelOppTargetY=oppY; // smooth interpolation in gameLoop
     if(oppScore!==undefined) duelOppScore=oppScore;
     duelOppAlive=oppAlive!==false;
     globalBoard.duels=duels;
@@ -2139,7 +2195,10 @@ function gameLoop(){
   drawCoins();
   drawGems();
   drawRocket();
-  if(currentDiff==="duel") drawDuelOpponent();
+  if(currentDiff==="duel"){
+    duelOppY+=(duelOppTargetY-duelOppY)*0.15; // smooth interpolation
+    drawDuelOpponent();
+  }
   drawHUD();
   score++;
   if(currentDiff==="ending"&&score>=5000){winGame();return;}
