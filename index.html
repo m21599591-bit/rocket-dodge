@@ -901,8 +901,8 @@ function renderSkinGrid(){
 
 function selectSkinPreview(id){previewSkinId=id;renderSkinPreview(id);}
 function renderSkinPreview(id){
-  const skin=SKINS[id];const u=getUser();
-  const owned=u.ownedSkins.includes(id);const isActive=u.activeSkin===id;
+  const skin=SKINS.find(s=>s.id===id)||SKINS[0];const u=getUser();
+  const owned=u.ownedSkins.includes(skin.id);const isActive=u.activeSkin===skin.id;
   const pc=document.getElementById("skinPreviewCanvas");
   const px=pc.getContext("2d");px.clearRect(0,0,80,80);
   drawSkinOnCanvas(px,skin,10,26,60,28);
@@ -960,7 +960,8 @@ function skinAction(){
   let u=getUser();
   const owned=u.ownedSkins.includes(previewSkinId);
   if(!owned){
-    const price=skinPrice(SKINS[previewSkinId]);
+    const skin=SKINS.find(s=>s.id===previewSkinId);
+    const price=skinPrice(skin);
     if(u.coins<price){alert("Not enough coins");return;}
     u.coins-=price;u.ownedSkins.push(previewSkinId);saveUser(u);updateTopBar();
   }
@@ -1855,7 +1856,7 @@ function drawRocketShape(c,skin,x,y,w,h){
 }
 
 function drawRocket(){
-  const skin=SKINS[selectedSkinId]||SKINS[0];
+  const skin=SKINS.find(s=>s.id===selectedSkinId)||SKINS[0];
   // glow around player
   ctx.save();
   ctx.shadowColor=skin.color||skin.glow||"#00ccff";
