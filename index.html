@@ -404,7 +404,7 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
 
 <!-- 1v1 WAITING (challenger) -->
 <div id="duelWaitScreen" class="screen" style="display:none;width:min(380px,96vw);">
-  <h2 style="margin:0 0 8px;">? Warten...</h2>
+  <h2 style="margin:0 0 8px;">&#9203; Warten...</h2>
   <p id="duelWaitMsg" style="color:#aaa;font-size:14px;margin:0 0 20px;"></p>
   <div style="width:40px;height:40px;border:3px solid #ff6666;border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 20px;"></div>
   <button onclick="cancelDuel()" style="border-color:#ff4444;color:#ff4444;">? Abbrechen</button>
@@ -415,7 +415,7 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
   <h2 style="margin:0 0 8px;">⚔️ Duell-Einladung!</h2>
   <p id="duelInviteMsg" style="color:#ffcc00;font-size:16px;margin:0 0 6px;"></p>
   <p id="duelInviteDiff" style="color:#aaa;font-size:13px;margin:0 0 20px;"></p>
-  <button onclick="acceptDuel()" style="border-color:#00cc66;color:#00cc66;margin:4px;">? Annehmen</button>
+  <button onclick="acceptDuel()" style="border-color:#00cc66;color:#00cc66;margin:4px;">&#10003; Annehmen</button>
   <button onclick="declineDuel()" style="border-color:#ff4444;color:#ff4444;margin:4px;">? Ablehnen</button>
 </div>
 
@@ -991,7 +991,7 @@ async function pushScore(diff,newScore){
 }
 
 async function claimPendingRewards(){
-  try{
+  (async()=>{try{
     // localStorage is the primary guard against double-claiming
     let claimedIds=JSON.parse(localStorage.getItem("claimedRewardIds")||"[]");
 
@@ -1043,6 +1043,7 @@ async function claimPendingRewards(){
     if(doReset) setTimeout(()=>alert("Deine Coins & Diamanten wurden vom Admin zurueckgesetzt."),500);
     else if(totalCoins>0||totalGems>0) setTimeout(()=>alert("Du hast eine Belohnung erhalten! +"+totalCoins+" Coins +"+totalGems+" Diamanten"),500);
   }catch(e){console.warn("claimPendingRewards failed:",e);}
+  })();
 }
 function openAdminPin(){const pin=prompt("PIN eingeben:");if(pin!=="1208"){if(pin!==null)alert("Falscher PIN");return;}openAdmin();}
 async function openAdmin(){
@@ -1081,7 +1082,8 @@ async function adminGive(){
   document.getElementById("adminMsg").innerText="\u23F3 Wird gesendet...";
   await fetchBoard();
   if(!Array.isArray(globalBoard.pendingRewards)) globalBoard.pendingRewards=[];
-  globalBoard.pendingRewards.push({target,coins,gems,ts:Date.now()});
+  const ts=Date.now();
+  globalBoard.pendingRewards.push({id:"r_"+ts+"_"+target,target,coins,gems,ts});
   await pushBin();
   document.getElementById("adminMsg").innerText=`\u2713 Belohnung für "${target}" gespeichert: +${coins}🪙 +${gems}💎`;
 }
@@ -1091,7 +1093,8 @@ async function adminGiveAll(){
   document.getElementById("adminMsg").innerText="\u23F3 Wird gesendet...";
   await fetchBoard();
   if(!Array.isArray(globalBoard.pendingRewards)) globalBoard.pendingRewards=[];
-  globalBoard.pendingRewards.push({target:"all",coins,gems,claimedBy:[],ts:Date.now()});
+  const ts=Date.now();
+  globalBoard.pendingRewards.push({id:"r_"+ts+"_all",target:"all",coins,gems,claimedBy:[],ts});
   await pushBin();
   document.getElementById("adminMsg").innerText=`\u2713 Belohnung für ALLE gespeichert: +${coins}🪙 +${gems}💎`;
 }
