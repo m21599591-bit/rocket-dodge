@@ -36,6 +36,7 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
   #touchControls{bottom:16px;right:12px;gap:16px;}
   #touchControls button{width:80px;height:80px;font-size:36px;}
 }
+@keyframes spin{to{transform:rotate(360deg);}}
 </style>
 </head>
 <body>
@@ -1895,15 +1896,34 @@ function startCustomLevel(index){
 let duelDiff='easy';
 let duelPollInterval=null;
 let duelId=null;
-let duelRole=null; // 'challenger' or 'opponent'
+let duelRole=null;
 let duelOpponentName=null;
 let duelOppY=300,duelOppScore=0,duelOppAlive=true,duelOppTargetY=300;
+let lastSeenDuelId=null;
+let duelSyncing=false; // mutex to prevent concurrent writes
 
 const DUEL_CONFIGS={
-  easy: {rockSpeed:4,spawnRate:50,rockSize:[20,38],objTypes:["rock"]},
-  medium:{rockSpeed:7,spawnRate:30,rockSize:[22,42],objTypes:["rock","spike","ball"]},
+  easy:  {rockSpeed:4, spawnRate:50,rockSize:[20,38],objTypes:["rock"]},
+  medium:{rockSpeed:7, spawnRate:30,rockSize:[22,42],objTypes:["rock","spike","ball"]},
   hard:  {rockSpeed:12,spawnRate:18,rockSize:[24,46],objTypes:["rock","spike","ball","laser","zigzag"]},
 };
+
+// Single atomic helper: fetch latest bin, apply a mutation fn, push back
+async function duelAtomicUpdate(mutateFn){
+  try{
+    const r=await fetch(JSONBIN_URL+"/latest",{headers:{"X-Access-Key":JSONBIN_KEY}});
+    if(!r.ok) return null;
+    const data=(await r.json()).record||{};
+    if(!Array.isArray(data.duels)) data.duels=[];
+    // clean duels older than 10min
+    data.duels=data.duels.filter(d=>Date.now()-d.created<600000);
+    const result=mutateFn(data);
+    await fetch(JSONBIN_URL,{method:"PUT",headers:{"Content-Type":"application/json","X-Access-Key":JSONBIN_KEY},body:JSON.stringify(data)});
+    // keep globalBoard in sync
+    globalBoard={...globalBoard,...data};
+    return result;
+  }catch(e){return null;}
+}
 
 function open1v1Menu(){
   document.getElementById("duelOpponent").value="";
@@ -1923,82 +1943,77 @@ async function sendDuelInvite(){
   const opp=document.getElementById("duelOpponent").value.trim();
   if(!opp){alert("Bitte Gegner-Namen eingeben.");return;}
   if(opp===currentUser){alert("Du kannst dich nicht selbst herausfordern.");return;}
-  duelId="duel_"+Date.now()+"_"+Math.random().toString(36).slice(2,7);
-  duelRole="challenger";
-  duelOpponentName=opp;
-  const duel={
-    id:duelId,challenger:currentUser,opponent:opp,
+  const newId="duel_"+Date.now()+"_"+Math.random().toString(36).slice(2,7);
+  const newDuel={
+    id:newId,challenger:currentUser,opponent:opp,
     diff:duelDiff,status:"pending",
     challengerAlive:true,opponentAlive:true,
     challengerScore:0,opponentScore:0,
+    challengerY:canvas.height/2,opponentY:canvas.height/2,
     created:Date.now()
   };
-  await fetchBoard();
-  if(!Array.isArray(globalBoard.duels)) globalBoard.duels=[];
-  // clean old duels (>5min)
-  globalBoard.duels=globalBoard.duels.filter(d=>Date.now()-d.created<300000);
-  globalBoard.duels.push(duel);
-  await pushBin();
+  const ok=await duelAtomicUpdate(data=>{
+    data.duels.push(newDuel);
+    return true;
+  });
+  if(!ok){alert("Fehler beim Senden. Bitte nochmal versuchen.");return;}
+  duelId=newId;duelRole="challenger";duelOpponentName=opp;
   document.getElementById("duelWaitMsg").innerText=`Warte auf ${opp}...`;
   showScreen("duelWaitScreen");
-  duelPollInterval=setInterval(pollDuelStatus,2000);
+  duelPollInterval=setInterval(pollDuelStatus,2500);
 }
 
 async function cancelDuel(){
   clearInterval(duelPollInterval);duelPollInterval=null;
-  if(duelId){
-    await fetchBoard();
-    if(Array.isArray(globalBoard.duels)){
-      const d=globalBoard.duels.find(x=>x.id===duelId);
-      if(d) d.status="cancelled";
-      await pushBin();
-    }
-  }
+  const id=duelId;
   duelId=null;duelRole=null;
+  if(id) await duelAtomicUpdate(data=>{
+    const d=data.duels.find(x=>x.id===id);
+    if(d) d.status="cancelled";
+  });
   showScreen("levelScreen");
 }
 
 async function pollDuelStatus(){
+  if(!duelId) return;
   try{
-    await fetchBoard();
-    if(!Array.isArray(globalBoard.duels)) return;
-    const duel=globalBoard.duels.find(d=>d.id===duelId);
-    if(!duel){clearInterval(duelPollInterval);return;}
+    const r=await fetch(JSONBIN_URL+"/latest",{headers:{"X-Access-Key":JSONBIN_KEY}});
+    if(!r.ok) return;
+    const data=(await r.json()).record||{};
+    const duel=(data.duels||[]).find(d=>d.id===duelId);
+    if(!duel) return;
     if(duel.status==="cancelled"||duel.status==="declined"){
       clearInterval(duelPollInterval);duelPollInterval=null;
-      alert(duel.status==="declined"?`${duelOpponentName} hat abgelehnt.`:"Duell abgebrochen.");
-      duelId=null;showScreen("levelScreen");return;
+      const msg=duel.status==="declined"?`${duelOpponentName} hat abgelehnt.`:"Duell abgebrochen.";
+      duelId=null;duelRole=null;
+      alert(msg);showScreen("levelScreen");return;
     }
     if(duel.status==="accepted"){
       clearInterval(duelPollInterval);duelPollInterval=null;
+      globalBoard={...globalBoard,...data};
       startDuelGame(duel);
     }
   }catch(e){}
 }
 
-// Opponent side: check for incoming invites
-let lastSeenDuelId=null;
 async function checkIncomingDuels(){
-  if(!currentUser) return;
-  // don't interrupt if already handling a duel
-  if(duelRole==="opponent"&&duelId) return;
+  if(!currentUser||gameRunning) return;
+  if(duelId) return; // already in a duel
   try{
     const r=await fetch(JSONBIN_URL+"/latest",{headers:{"X-Access-Key":JSONBIN_KEY}});
     if(!r.ok) return;
-    const j=await r.json();
-    const data=j.record||j;
+    const data=(await r.json()).record||{};
     const duels=Array.isArray(data.duels)?data.duels:[];
     const invite=duels.find(d=>
-      d.opponent===currentUser &&
-      d.status==="pending" &&
-      Date.now()-d.created<120000 &&
+      d.opponent===currentUser&&
+      d.status==="pending"&&
+      Date.now()-d.created<120000&&
       d.id!==lastSeenDuelId
     );
     if(invite){
       lastSeenDuelId=invite.id;
       duelId=invite.id;duelRole="opponent";duelOpponentName=invite.challenger;
-      // merge into globalBoard so accept/decline works
-      globalBoard.duels=duels;
+      globalBoard={...globalBoard,...data};
       document.getElementById("duelInviteMsg").innerText=`${invite.challenger} fordert dich heraus!`;
       document.getElementById("duelInviteDiff").innerText="Schwierigkeit: "+invite.diff.charAt(0).toUpperCase()+invite.diff.slice(1);
       showScreen("duelInviteScreen");
@@ -2007,20 +2022,24 @@ async function checkIncomingDuels(){
 }
 
 async function acceptDuel(){
-  await fetchBoard();
-  const duel=globalBoard.duels.find(d=>d.id===duelId);
-  if(!duel||duel.status!=="pending"){alert("Einladung nicht mehr gültig.");showScreen("menuScreen");return;}
-  duel.status="accepted";
-  await pushBin();
-  startDuelGame(duel);
+  const id=duelId;
+  const accepted=await duelAtomicUpdate(data=>{
+    const d=data.duels.find(x=>x.id===id);
+    if(!d||d.status!=="pending") return null;
+    d.status="accepted";
+    return d;
+  });
+  if(!accepted){alert("Einladung nicht mehr gültig.");duelId=null;duelRole=null;showScreen("menuScreen");return;}
+  startDuelGame(accepted);
 }
 
 async function declineDuel(){
-  await fetchBoard();
-  const duel=globalBoard.duels.find(d=>d.id===duelId);
-  if(duel) duel.status="declined";
-  await pushBin();
+  const id=duelId;
   duelId=null;duelRole=null;
+  await duelAtomicUpdate(data=>{
+    const d=data.duels.find(x=>x.id===id);
+    if(d) d.status="declined";
+  });
   showScreen("menuScreen");
 }
 
@@ -2035,6 +2054,7 @@ function startDuelGame(duel){
   sessionCoins=0;sessionGems=0;
   activePowerUp=null;powerUpTimer=0;lastPowerUpScore=0;
   duelOppY=canvas.height/2;duelOppTargetY=canvas.height/2;duelOppScore=0;duelOppAlive=true;
+  duelSyncing=false;
   rocket={x:120,y:canvas.height/2,w:44,h:22,speed:sensitivity};
   if(activeBackground==="matrix") initMatrix();
   stopMenuBg();
@@ -2044,56 +2064,47 @@ function startDuelGame(duel){
   document.getElementById("touchControls").style.display=isMobile?"flex":"none";
   if(animId) cancelAnimationFrame(animId);
   playBeat(0);
-  // push own position every 500ms, poll opponent every 500ms
   duelPollInterval=setInterval(duelSyncTick,500);
   animId=requestAnimationFrame(gameLoop);
 }
 
-async function reportDuelDead(){
-  clearInterval(duelPollInterval);duelPollInterval=null;
-  try{
-    await fetchBoard();
-    const duel=globalBoard.duels.find(d=>d.id===duelId);
-    if(!duel) return;
-    if(duelRole==="challenger"){duel.challengerAlive=false;duel.challengerScore=score;duel.challengerY=rocket.y;}
-    else{duel.opponentAlive=false;duel.opponentScore=score;duel.opponentY=rocket.y;}
-    await pushBin();
-  }catch(e){}
-}
-
 async function duelSyncTick(){
-  if(!duelId||gameOver) return;
+  if(!duelId||gameOver||duelSyncing) return;
+  duelSyncing=true;
   try{
-    // push own state
+    const myY=rocket?rocket.y:canvas.height/2;
+    const myScore=score;
+    const id=duelId;
+    const role=duelRole;
     const r=await fetch(JSONBIN_URL+"/latest",{headers:{"X-Access-Key":JSONBIN_KEY}});
-    if(!r.ok) return;
-    const j=await r.json();const data=j.record||j;
+    if(!r.ok){duelSyncing=false;return;}
+    const data=(await r.json()).record||{};
     const duels=Array.isArray(data.duels)?data.duels:[];
-    const duel=duels.find(d=>d.id===duelId);
-    if(!duel) return;
-    // write my position
-    if(duelRole==="challenger"){duel.challengerY=rocket.y;duel.challengerScore=score;}
-    else{duel.opponentY=rocket.y;duel.opponentScore=score;}
-    // read opponent position
-    const oppY=duelRole==="challenger"?duel.opponentY:duel.challengerY;
-    const oppScore=duelRole==="challenger"?duel.opponentScore:duel.challengerScore;
-    const oppAlive=duelRole==="challenger"?duel.opponentAlive:duel.challengerAlive;
-    if(oppY!==undefined) duelOppTargetY=oppY; // smooth interpolation in gameLoop
-    if(oppScore!==undefined) duelOppScore=oppScore;
+    const duel=duels.find(d=>d.id===id);
+    if(!duel){duelSyncing=false;return;}
+    // write only my fields — don't touch opponent fields
+    if(role==="challenger"){duel.challengerY=myY;duel.challengerScore=myScore;}
+    else{duel.opponentY=myY;duel.opponentScore=myScore;}
+    // read opponent fields
+    const oppY=role==="challenger"?duel.opponentY:duel.challengerY;
+    const oppScore=role==="challenger"?duel.opponentScore:duel.challengerScore;
+    const oppAlive=role==="challenger"?duel.opponentAlive:duel.challengerAlive;
+    if(oppY!=null) duelOppTargetY=oppY;
+    if(oppScore!=null) duelOppScore=oppScore;
+    const wasAlive=duelOppAlive;
     duelOppAlive=oppAlive!==false;
-    globalBoard.duels=duels;
-    await fetch(JSONBIN_URL,{method:"PUT",headers:{"Content-Type":"application/json","X-Access-Key":JSONBIN_KEY},body:JSON.stringify({...data,duels})});
-    // if opponent died → we win (end game naturally when we die, or show win now)
-    if(!duelOppAlive&&!gameOver){
+    globalBoard={...globalBoard,...data,duels};
+    await fetch(JSONBIN_URL,{method:"PUT",headers:{"Content-Type":"application/json","X-Access-Key":JSONBIN_KEY},body:JSON.stringify(data)});
+    // opponent just died and we're still alive → instant win
+    if(wasAlive&&!duelOppAlive&&!gameOver){
       clearInterval(duelPollInterval);duelPollInterval=null;
-      // opponent is dead, we're still alive → instant win
       gameOver=true;gameRunning=false;
       if(animId){cancelAnimationFrame(animId);animId=null;}
       stopMusic();
       document.getElementById("touchControls").style.display="none";
       canvas.style.display="none";menuBg.style.display="block";
       if(!menuAnimId) animateMenuBg();
-      document.getElementById("winScore").innerText="Score: "+score+" vs "+duelOppScore;
+      document.getElementById("winScore").innerText="Score: "+myScore+" vs "+duelOppScore;
       document.getElementById("winCoins").innerText="⚔️ "+duelOpponentName+" ist gestorben. Du gewinnst!";
       document.getElementById("nextLevelBtn").style.display="none";
       showScreen("winScreen");
@@ -2102,40 +2113,44 @@ async function duelSyncTick(){
       duelId=null;duelRole=null;
     }
   }catch(e){}
+  duelSyncing=false;
 }
 
 async function endDuelGame(){
-  // called from endGame when currentDiff==="duel"
-  await reportDuelDead();
-  // wait briefly then check if opponent also dead
-  setTimeout(async()=>{
-    await fetchBoard();
-    const duel=globalBoard.duels.find(d=>d.id===duelId);
-    const oppAlive=duel?(duelRole==="challenger"?duel.opponentAlive:duel.challengerAlive):false;
-    const oppName=duelOpponentName||"Gegner";
-    document.getElementById("duelLoseScore").innerText="Dein Score: "+score;
-    if(oppAlive){
-      // opponent still alive → we lost
-      document.getElementById("duelLoseMsg").innerText=oppName+" lebt noch. Du hast verloren!";
-      showScreen("duelLoseScreen");
+  // stop sync, save my death
+  clearInterval(duelPollInterval);duelPollInterval=null;
+  const myScore=score;
+  const id=duelId;
+  const role=duelRole;
+  const oppName=duelOpponentName||"Gegner";
+  // mark me as dead atomically
+  let oppAlive=true,oppScore=0;
+  await duelAtomicUpdate(data=>{
+    const d=data.duels.find(x=>x.id===id);
+    if(!d) return;
+    if(role==="challenger"){d.challengerAlive=false;d.challengerScore=myScore;}
+    else{d.opponentAlive=false;d.opponentScore=myScore;}
+    oppAlive=role==="challenger"?d.opponentAlive:d.challengerAlive;
+    oppScore=role==="challenger"?d.opponentScore:d.challengerScore;
+  });
+  duelId=null;duelRole=null;
+  document.getElementById("duelLoseScore").innerText="Dein Score: "+myScore;
+  if(oppAlive!==false){
+    document.getElementById("duelLoseMsg").innerText=oppName+" lebt noch. Du hast verloren!";
+    showScreen("duelLoseScreen");
+  } else {
+    if(myScore>=oppScore){
+      document.getElementById("winScore").innerText="Score: "+myScore+" vs "+oppScore;
+      document.getElementById("winCoins").innerText="⚔️ Du hast das Duell gewonnen!";
+      document.getElementById("nextLevelBtn").style.display="none";
+      showScreen("winScreen");
     } else {
-      // both dead — whoever has higher score wins
-      const myScore=score;
-      const oppScore=duel?(duelRole==="challenger"?duel.opponentScore:duel.challengerScore):0;
-      if(myScore>=oppScore){
-        document.getElementById("winScore").innerText="Score: "+myScore+" vs "+oppScore;
-        document.getElementById("winCoins").innerText="⚔️ Du hast das Duell gewonnen!";
-        document.getElementById("nextLevelBtn").style.display="none";
-        showScreen("winScreen");
-      } else {
-        document.getElementById("duelLoseMsg").innerText=oppName+" hatte mehr Punkte ("+oppScore+" vs "+myScore+").";
-        showScreen("duelLoseScreen");
-      }
+      document.getElementById("duelLoseMsg").innerText=oppName+" hatte mehr Punkte ("+oppScore+" vs "+myScore+").";
+      showScreen("duelLoseScreen");
     }
-    document.getElementById("topBar").style.display="flex";
-    updateTopBar();
-    duelId=null;duelRole=null;
-  },1200);
+  }
+  document.getElementById("topBar").style.display="flex";
+  updateTopBar();
 }
 
 // ===== GAME START =====
