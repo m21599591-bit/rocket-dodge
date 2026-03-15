@@ -19,6 +19,10 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
 #topBar button{padding:4px 10px;font-size:12px;margin:0 2px;}
 #touchControls{position:absolute;bottom:20px;right:16px;z-index:25;display:none;flex-direction:column;gap:14px;}
 #touchControls button{width:76px;height:76px;font-size:34px;border-radius:50%;border:3px solid white;background:rgba(255,255,255,0.25);color:white;cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:none;}
+#touchZoneUp.active-zone{background:rgba(255,255,255,0.04);}
+#touchZoneDown.active-zone{background:rgba(255,255,255,0.04);}
+#touchZoneUp::after{content:"▲";position:absolute;bottom:8px;left:50%;transform:translateX(-50%);font-size:28px;color:rgba(255,255,255,0.15);pointer-events:none;}
+#touchZoneDown::after{content:"▼";position:absolute;top:8px;left:50%;transform:translateX(-50%);font-size:28px;color:rgba(255,255,255,0.15);pointer-events:none;}
 .lvl-btn{display:inline-block;margin:4px;padding:8px 14px;font-size:14px;cursor:pointer;border-radius:8px;border:2px solid rgba(255,255,255,0.35);background:rgba(0,0,0,0.5);color:white;transition:all 0.15s;touch-action:manipulation;}
 .lvl-btn:hover{background:rgba(255,255,255,0.1);}
 .lvl-btn.active{border-color:#00ccff;color:#00ccff;}
@@ -47,6 +51,11 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
   <button id="btnDown">▼</button>
   <button id="btnMenu" onclick="pauseToMenu()" style="font-size:22px;background:rgba(0,0,0,0.5);border-color:rgba(255,255,255,0.4);">🏠</button>
 </div>
+
+<!-- Full-screen touch zones for mobile gameplay -->
+<div id="touchZoneUp" style="display:none;position:absolute;top:0;left:0;width:100%;height:50%;z-index:24;touch-action:none;"></div>
+<div id="touchZoneDown" style="display:none;position:absolute;top:50%;left:0;width:100%;height:50%;z-index:24;touch-action:none;"></div>
+<div id="touchPauseBtn" style="display:none;position:absolute;top:10px;right:10px;z-index:26;width:52px;height:52px;border-radius:50%;background:rgba(0,0,0,0.6);border:2px solid rgba(255,255,255,0.3);font-size:22px;line-height:52px;text-align:center;cursor:pointer;" onclick="pauseToMenu()">🏠</div>
 
 <div id="topBar">
   <span id="topCoins">🪙 0</span>
@@ -1407,7 +1416,17 @@ document.addEventListener("contextmenu",e=>{if(gameRunning&&!gameOver)e.preventD
 
 function setDevice(mode){
   isMobile=mode==="mobile";localStorage.setItem("deviceMode",mode);updateDeviceButtons();
-  if(gameRunning) document.getElementById("touchControls").style.display=isMobile?"flex":"none";
+  const show=isMobile&&gameRunning;
+  showTouchControls(false); // hide old buttons
+  document.getElementById("touchZoneUp").style.display=show?"block":"none";
+  document.getElementById("touchZoneDown").style.display=show?"block":"none";
+  document.getElementById("touchPauseBtn").style.display=show?"block":"none";
+}
+function showTouchControls(visible){
+  showTouchControls(false);
+  document.getElementById("touchZoneUp").style.display=(visible&&isMobile)?"block":"none";
+  document.getElementById("touchZoneDown").style.display=(visible&&isMobile)?"block":"none";
+  document.getElementById("touchPauseBtn").style.display=(visible&&isMobile)?"block":"none";
 }
 function updateDeviceButtons(){
   ["devicePC","pDevicePC"].forEach(id=>{const el=document.getElementById(id);if(el)el.style.borderColor=!isMobile?"#00ccff":"rgba(255,255,255,0.5)";});
@@ -1437,7 +1456,7 @@ function pauseToMenu(){
   paused=false;gameRunning=false;gameOver=true;
   if(animId){cancelAnimationFrame(animId);animId=null;}
   stopMusic();
-  document.getElementById("touchControls").style.display="none";
+  showTouchControls(false);
   document.getElementById("pauseScreen").style.display="none";
   document.getElementById("pauseSettingsScreen").style.display="none";
   canvas.style.display="none";menuBg.style.display="block";
@@ -1447,10 +1466,39 @@ function pauseToMenu(){
 }
 
 // ===== TOUCH CONTROLS =====
+// Auto-detect touch device
+if('ontouchstart' in window || navigator.maxTouchPoints>0){
+  if(!localStorage.getItem("deviceMode")) setDevice('mobile');
+}
+
+// Touch zones (full half-screen tap areas)
+const tzUp=document.getElementById("touchZoneUp");
+const tzDown=document.getElementById("touchZoneDown");
+
+function setupTouchZone(el, upKey, downKey){
+  el.addEventListener("touchstart",e=>{e.preventDefault();keys[upKey]=true;el.classList.add("active-zone");},{passive:false});
+  el.addEventListener("touchend",e=>{e.preventDefault();keys[upKey]=false;el.classList.remove("active-zone");},{passive:false});
+  el.addEventListener("touchcancel",e=>{keys[upKey]=false;el.classList.remove("active-zone");},{passive:false});
+}
+setupTouchZone(tzUp,"__up");
+setupTouchZone(tzDown,"__down");
+
+// Legacy button fallback (still works)
 document.getElementById("btnUp").addEventListener("touchstart",e=>{e.preventDefault();keys["__up"]=true;},{passive:false});
 document.getElementById("btnUp").addEventListener("touchend",e=>{e.preventDefault();keys["__up"]=false;},{passive:false});
 document.getElementById("btnDown").addEventListener("touchstart",e=>{e.preventDefault();keys["__down"]=true;},{passive:false});
 document.getElementById("btnDown").addEventListener("touchend",e=>{e.preventDefault();keys["__down"]=false;},{passive:false});
+
+// Swipe support
+let swipeStartY=null;
+canvas.addEventListener("touchstart",e=>{if(e.touches.length===1) swipeStartY=e.touches[0].clientY;},{passive:true});
+canvas.addEventListener("touchmove",e=>{
+  if(swipeStartY===null||!isMobile||!gameRunning||gameOver) return;
+  const dy=e.touches[0].clientY-swipeStartY;
+  if(dy<-10){keys["__up"]=true;keys["__down"]=false;}
+  else if(dy>10){keys["__down"]=true;keys["__up"]=false;}
+},{passive:true});
+canvas.addEventListener("touchend",()=>{keys["__up"]=false;keys["__down"]=false;swipeStartY=null;},{passive:true});
 
 // ===== BACKGROUND RENDERERS =====
 let bgStars=[];
@@ -2136,7 +2184,7 @@ function startCustomLevel(index){
   menuBg.style.display="none";canvas.style.display="block";
   showScreen(null);
   document.getElementById("topBar").style.display="none";
-  document.getElementById("touchControls").style.display=isMobile?"flex":"none";
+  showTouchControls(true);
   if(animId) cancelAnimationFrame(animId);
   playBeat(0);
   animId=requestAnimationFrame(gameLoop);
@@ -2323,7 +2371,7 @@ function startDuelGame(duel){
   menuBg.style.display="none";canvas.style.display="block";
   showScreen(null);
   document.getElementById("topBar").style.display="none";
-  document.getElementById("touchControls").style.display=isMobile?"flex":"none";
+  showTouchControls(true);
   if(animId) cancelAnimationFrame(animId);
   playBeat(0);
   duelPollInterval=setInterval(duelSyncTick,500);
@@ -2363,7 +2411,7 @@ async function duelSyncTick(){
       gameOver=true;gameRunning=false;
       if(animId){cancelAnimationFrame(animId);animId=null;}
       stopMusic();
-      document.getElementById("touchControls").style.display="none";
+      showTouchControls(false);
       canvas.style.display="none";menuBg.style.display="block";
       if(!menuAnimId) animateMenuBg();
       const savedOppScore=duelOppScore;
@@ -2435,7 +2483,7 @@ function startGame(diff,subIdx){
   menuBg.style.display="none";canvas.style.display="block";
   showScreen(null);
   document.getElementById("topBar").style.display="none";
-  document.getElementById("touchControls").style.display=isMobile?"flex":"none";
+  showTouchControls(true);
   if(animId) cancelAnimationFrame(animId);
   playBeat(getBeatIndex(diff,subIdx));
   animId=requestAnimationFrame(gameLoop);
@@ -2958,7 +3006,7 @@ function endGame(){
   gameOver=true;gameRunning=false;
   if(animId){cancelAnimationFrame(animId);animId=null;}
   stopMusic();
-  document.getElementById("touchControls").style.display="none";
+  showTouchControls(false);
   canvas.style.display="none";menuBg.style.display="block";
   if(!menuAnimId) animateMenuBg();
 
@@ -2992,7 +3040,7 @@ function winGame(){
   gameOver=true;gameRunning=false;
   if(animId){cancelAnimationFrame(animId);animId=null;}
   stopMusic();
-  document.getElementById("touchControls").style.display="none";
+  showTouchControls(false);
   canvas.style.display="none";menuBg.style.display="block";
   if(!menuAnimId) animateMenuBg();
   let u=getUser();
@@ -3028,7 +3076,7 @@ function goMenu(){
   if(animId){cancelAnimationFrame(animId);animId=null;}
   if(duelPollInterval){clearInterval(duelPollInterval);duelPollInterval=null;}
   stopMusic();
-  document.getElementById("touchControls").style.display="none";
+  showTouchControls(false);
   canvas.style.display="none";menuBg.style.display="block";
   if(!menuAnimId) animateMenuBg();
   showScreen("menuScreen");
