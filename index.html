@@ -76,6 +76,7 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
   <button onclick="openSkinCatalog()" data-i18n="skins">🎨 Skins</button><br>
   <button onclick="openLeaderboard()" data-i18n="leaderboard">🏆 Bestenliste</button>
   <button onclick="openSettingsMenu()" data-i18n="settings">⚙️ Einstellungen</button>
+  <button onclick="checkIncomingDuels()" style="font-size:12px;padding:6px 14px;border-color:rgba(255,100,100,0.4);color:#ff9999;margin-top:4px;">🔔 Duell-Einladungen prüfen</button>
 </div>
 
 <!-- LEVEL SELECT -->
@@ -733,8 +734,9 @@ function afterLogin(){
   document.getElementById("menuUser").innerText=currentUser;
   showScreen("menuScreen");
   claimPendingRewards();
-  // check for incoming duel invites every 5s
-  setInterval(()=>{if(!gameRunning&&!duelId) checkIncomingDuels();},5000);
+  // poll for duel invites every 3s
+  setInterval(()=>{if(!gameRunning) checkIncomingDuels();},3000);
+  setTimeout(checkIncomingDuels,500); // immediate check on login
 }
 
 window.onload=function(){
@@ -853,7 +855,7 @@ function convertCoins(cost,gems){
 const JSONBIN_ID="69b59787aa77b81da9e48d95";
 const JSONBIN_KEY="$2a$10$tN0QTuYw6vRr5emhhyVnlO1fx1CHyMdk8nrkcBOMA0/FEroWv1MzO";
 const JSONBIN_URL=`https://api.jsonbin.io/v3/b/${JSONBIN_ID}`;
-let globalBoard={easy:[],medium:[],hard:[],ending:[],pendingRewards:[]};
+let globalBoard={easy:[],medium:[],hard:[],ending:[],pendingRewards:[],duels:[]};
 
 async function fetchBoard(){
   try{
@@ -866,7 +868,8 @@ async function fetchBoard(){
       medium:Array.isArray(data.medium)?data.medium:[],
       hard:Array.isArray(data.hard)?data.hard:[],
       ending:Array.isArray(data.ending)?data.ending:[],
-      pendingRewards:Array.isArray(data.pendingRewards)?data.pendingRewards:[]
+      pendingRewards:Array.isArray(data.pendingRewards)?data.pendingRewards:[],
+      duels:Array.isArray(data.duels)?data.duels:[],
     };
   }catch(e){console.warn("Leaderboard fetch failed:",e);}
 }
@@ -1917,14 +1920,28 @@ async function pollDuelStatus(){
 }
 
 // Opponent side: check for incoming invites
+let lastSeenDuelId=null;
 async function checkIncomingDuels(){
   if(!currentUser) return;
+  // don't interrupt if already handling a duel
+  if(duelRole==="opponent"&&duelId) return;
   try{
-    await fetchBoard();
-    if(!Array.isArray(globalBoard.duels)) return;
-    const invite=globalBoard.duels.find(d=>d.opponent===currentUser&&d.status==="pending"&&Date.now()-d.created<120000);
+    const r=await fetch(JSONBIN_URL+"/latest",{headers:{"X-Access-Key":JSONBIN_KEY}});
+    if(!r.ok) return;
+    const j=await r.json();
+    const data=j.record||j;
+    const duels=Array.isArray(data.duels)?data.duels:[];
+    const invite=duels.find(d=>
+      d.opponent===currentUser &&
+      d.status==="pending" &&
+      Date.now()-d.created<120000 &&
+      d.id!==lastSeenDuelId
+    );
     if(invite){
+      lastSeenDuelId=invite.id;
       duelId=invite.id;duelRole="opponent";duelOpponentName=invite.challenger;
+      // merge into globalBoard so accept/decline works
+      globalBoard.duels=duels;
       document.getElementById("duelInviteMsg").innerText=`${invite.challenger} fordert dich heraus!`;
       document.getElementById("duelInviteDiff").innerText="Schwierigkeit: "+invite.diff.charAt(0).toUpperCase()+invite.diff.slice(1);
       showScreen("duelInviteScreen");
