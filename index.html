@@ -2411,11 +2411,12 @@ async function duelAtomicUpdate(mutateFn){
     // clean duels older than 10min
     data.duels=data.duels.filter(d=>Date.now()-d.created<600000);
     const result=mutateFn(data);
-    await fetch(JSONBIN_URL,{method:"PUT",headers:{"Content-Type":"application/json","X-Access-Key":JSONBIN_KEY},body:JSON.stringify(data)});
+    const putR=await fetch(JSONBIN_URL,{method:"PUT",headers:{"Content-Type":"application/json","X-Access-Key":JSONBIN_KEY},body:JSON.stringify(data)});
+    if(!putR.ok) return null;
     // keep globalBoard in sync
     globalBoard={...globalBoard,...data};
     return result;
-  }catch(e){return null;}
+  }catch(e){console.error("duelAtomicUpdate error:",e);return null;}
 }
 
 function showDuelResult(myScore, oppScore, oppNameOverride, wonOverride){
@@ -2449,14 +2450,14 @@ async function sendDuelInvite(){
     diff:duelDiff,status:"pending",
     challengerAlive:true,opponentAlive:true,
     challengerScore:0,opponentScore:0,
-    challengerY:canvas.height/2,opponentY:canvas.height/2,
+    challengerY:300,opponentY:300,
     created:Date.now()
   };
   const ok=await duelAtomicUpdate(data=>{
     data.duels.push(newDuel);
     return true;
   });
-  if(!ok){alert("Fehler beim Senden. Bitte nochmal versuchen.");return;}
+  if(!ok){alert("Fehler beim Senden. Prüfe deine Internetverbindung und versuche es nochmal.");return;}
   duelId=newId;duelRole="challenger";duelOpponentName=opp;
   document.getElementById("duelWaitMsg").innerText=`Warte auf ${opp}...`;
   showScreen("duelWaitScreen");
