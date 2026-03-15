@@ -922,9 +922,15 @@ async function claimPendingRewards(){
     if(!Array.isArray(globalBoard.pendingRewards)||globalBoard.pendingRewards.length===0) return;
     const mine=globalBoard.pendingRewards.filter(r=>r.target===currentUser||r.target==="all");
     if(mine.length===0) return;
-    let totalCoins=0,totalGems=0;
-    mine.forEach(r=>{totalCoins+=r.coins||0;totalGems+=r.gems||0;});
-    let u=getUser();u.coins=(u.coins||0)+totalCoins;u.diamonds=(u.diamonds||0)+totalGems;saveUser(u);updateTopBar();
+    let totalCoins=0,totalGems=0,doReset=false;
+    mine.forEach(r=>{
+      if(r.reset){doReset=true;}
+      else{totalCoins+=r.coins||0;totalGems+=r.gems||0;}
+    });
+    let u=getUser();
+    if(doReset){u.coins=0;u.diamonds=0;}
+    u.coins=(u.coins||0)+totalCoins;u.diamonds=(u.diamonds||0)+totalGems;
+    saveUser(u);updateTopBar();
     globalBoard.pendingRewards=globalBoard.pendingRewards.filter(r=>{
       if(r.target===currentUser) return false;
       if(r.target==="all"){
@@ -935,7 +941,8 @@ async function claimPendingRewards(){
       return true;
     });
     await pushBin();
-    if(totalCoins>0||totalGems>0) setTimeout(()=>alert(`🎁 Du hast eine Belohnung erhalten!\n+${totalCoins}🪙 Coins\n+${totalGems}💎 Diamanten`),500);
+    if(doReset) setTimeout(()=>alert("�️ Deine Coins & Diamanten wurden vom Admin zurückgesetzt."),500);
+    else if(totalCoins>0||totalGems>0) setTimeout(()=>alert(`🎁 Du hast eine Belohnung erhalten!\n+${totalCoins}🪙 Coins\n+${totalGems}💎 Diamanten`),500);
   }catch(e){console.warn("claimPendingRewards failed:",e);}
 }
 function openAdminPin(){const pin=prompt("PIN eingeben:");if(pin!=="1208"){if(pin!==null)alert("Falscher PIN");return;}openAdmin();}
@@ -977,11 +984,22 @@ function adminResetOne(){
 
 function adminResetAll(){
   if(!confirm("Wirklich alle Coins & Diamanten von ALLEN Spielern löschen?")) return;
+  // Reset alle lokalen Spieler
   const users=getUsers();
   Object.keys(users).forEach(name=>{users[name].coins=0;users[name].diamonds=0;});
   saveUsers(users);
-  document.getElementById("adminMsg").innerText="✓ Alle Coins & Diamanten gelöscht.";
   updateTopBar();
+  // Push globalen Reset-Befehl über JSONBin damit andere Geräte auch resettet werden
+  document.getElementById("adminMsg").innerText="⏳ Wird gesendet...";
+  fetchBoard().then(()=>{
+    if(!Array.isArray(globalBoard.pendingRewards)) globalBoard.pendingRewards=[];
+    globalBoard.pendingRewards.push({target:"all",coins:0,gems:0,reset:true,claimedBy:[],ts:Date.now()});
+    return pushBin();
+  }).then(()=>{
+    document.getElementById("adminMsg").innerText="✓ Alle Coins & Diamanten gelöscht (lokal + global).";
+  }).catch(()=>{
+    document.getElementById("adminMsg").innerText="✓ Lokal gelöscht. JSONBin-Sync fehlgeschlagen.";
+  });
 }
 
 // ===== LEADERBOARD =====
