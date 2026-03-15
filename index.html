@@ -79,6 +79,9 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
   <button onclick="openSettingsMenu()" data-i18n="settings">⚙️ Einstellungen</button>
   <button onclick="openFriends()" style="border-color:rgba(0,200,100,0.5);color:#00cc66;">👥 Freunde</button>
   <button onclick="checkIncomingDuels()" style="font-size:12px;padding:6px 14px;border-color:rgba(255,100,100,0.4);color:#ff9999;margin-top:4px;">🔔 Duell-Einladungen prüfen</button>
+  <div id="onlineList" style="margin-top:14px;padding:8px 12px;background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.15);border-radius:10px;font-size:12px;color:#aaa;min-height:28px;text-align:left;">
+    <span style="color:#00ff88;margin-right:6px;">●</span><span id="onlineListText">Lade...</span>
+  </div>
 </div>
 
 <!-- LEVEL SELECT -->
@@ -1161,10 +1164,20 @@ function startPresenceHeartbeat(){
         if(!data.presence) data.presence={};
         data.presence[currentUser]=Date.now();
       });
+      updateOnlineList();
     }catch(e){}
   }
   beat();
   setInterval(beat,10000);
+}
+
+function updateOnlineList(){
+  const el=document.getElementById("onlineListText");
+  if(!el) return;
+  const presence=globalBoard.presence||{};
+  const online=Object.keys(presence).filter(name=>Date.now()-presence[name]<20000&&name!==currentUser);
+  if(online.length===0){el.innerText="Niemand sonst online";return;}
+  el.innerHTML=online.map(n=>`<span style="color:white;">${n}</span>`).join('<span style="color:#444;"> · </span>');
 }
 
 // check for accepted friend requests and add them locally
