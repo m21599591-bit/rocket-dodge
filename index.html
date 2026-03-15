@@ -199,23 +199,25 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
 </div>
 
 <!-- SKIN CATALOG -->
-<div id="skinScreen" class="screen" style="display:none;width:min(600px,96vw);">
+<div id="skinScreen" class="screen" style="display:none;width:min(600px,96vw);padding:16px;">
   <h2 style="margin:0 0 4px;">🎨 Skin Catalog</h2>
   <p id="skinCoins" style="color:gold;margin:0 0 8px;"></p>
   <div style="margin-bottom:10px;">
     <button class="lvl-btn active" id="tabSkins" onclick="switchSkinTab('skins')">🚀 Skins</button>
     <button class="lvl-btn" id="tabFlames" onclick="switchSkinTab('flames')">🔥 Antrieb</button>
   </div>
-  <!-- Grid -->
-  <div id="skinGrid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;overflow-y:auto;max-height:260px;padding:2px;margin-bottom:12px;"></div>
-  <!-- Preview bar at bottom -->
-  <div id="skinPreviewPanel" style="background:#0d0d0d;border-radius:12px;padding:10px 16px;display:flex;align-items:center;gap:14px;border:1px solid #333;">
-    <canvas id="skinPreviewCanvas" width="120" height="60"></canvas>
-    <div style="flex:1;text-align:left;">
-      <p id="skinPreviewName" style="font-size:15px;margin:0 0 2px;font-weight:bold;"></p>
-      <p id="skinPreviewPrice" style="font-size:13px;color:#aaa;margin:0 0 8px;"></p>
-      <button id="skinActionBtn" onclick="skinAction()" style="display:none;font-size:13px;padding:7px 16px;"></button>
+  <div style="display:flex;gap:12px;align-items:flex-start;">
+    <!-- Preview panel left — fixed width, no overflow -->
+    <div id="skinPreviewPanel" style="flex:0 0 130px;min-width:130px;background:#0d0d0d;border-radius:12px;padding:10px 8px;display:flex;flex-direction:column;align-items:center;border:1px solid #333;">
+      <div style="width:114px;height:64px;border-radius:6px;background:#111;overflow:hidden;position:relative;">
+        <canvas id="skinPreviewCanvas" width="114" height="64" style="position:absolute;top:0;left:0;width:114px;height:64px;"></canvas>
+      </div>
+      <p id="skinPreviewName" style="font-size:13px;margin:6px 0 2px;font-weight:bold;text-align:center;word-break:break-word;"></p>
+      <p id="skinPreviewPrice" style="font-size:11px;color:#aaa;margin:0 0 6px;text-align:center;"></p>
+      <button id="skinActionBtn" onclick="skinAction()" style="display:none;font-size:12px;padding:6px 10px;width:100%;"></button>
     </div>
+    <!-- Grid right -->
+    <div id="skinGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;overflow-y:auto;max-height:320px;flex:1;min-width:0;"></div>
   </div>
   <br>
   <button onclick="closeSkinCatalog()">Back</button>
@@ -1350,9 +1352,12 @@ function renderSkinPreview(id){
   const pc=document.getElementById("skinPreviewCanvas");
   const px=pc.getContext("2d");
   px.clearRect(0,0,pc.width,pc.height);
-  // reset all context state before drawing
+  px.save();
   px.shadowBlur=0;px.globalAlpha=1;px.setTransform(1,0,0,1,0,0);
-  drawSkinOnCanvas(px,skin,8,8,pc.width-16,pc.height-16);
+  // draw with padding
+  const pad=6;
+  drawSkinOnCanvas(px,skin,pad,pad,pc.width-pad*2,pc.height-pad*2);
+  px.restore();
   document.getElementById("skinPreviewName").innerText=skin.name;
   document.getElementById("skinPreviewPrice").innerText=skin.free?"Free":skinPrice(skin)+" 🪙";
   const btn=document.getElementById("skinActionBtn");
@@ -1397,11 +1402,19 @@ function selectFlamePreview(id){
   const pc=document.getElementById("skinPreviewCanvas");
   const px=pc.getContext("2d");
   px.clearRect(0,0,pc.width,pc.height);
+  px.save();
   px.shadowBlur=0;
-  const g=px.createLinearGradient(pc.width-8,pc.height/2,8,pc.height/2);
+  const pad=8;
+  const g=px.createLinearGradient(pc.width-pad,pc.height/2,pad,pc.height/2);
   g.addColorStop(0,f.c1);g.addColorStop(0.5,f.c2);g.addColorStop(1,"rgba(0,0,0,0)");
   px.fillStyle=g;
-  px.beginPath();px.moveTo(pc.width-8,pc.height/2);px.lineTo(pc.width/2,8);px.lineTo(8,pc.height/2);px.lineTo(pc.width/2,pc.height-8);px.closePath();px.fill();
+  px.beginPath();
+  px.moveTo(pc.width-pad,pc.height/2);
+  px.lineTo(pc.width/2,pad);
+  px.lineTo(pad,pc.height/2);
+  px.lineTo(pc.width/2,pc.height-pad);
+  px.closePath();px.fill();
+  px.restore();
   document.getElementById("skinPreviewName").innerText=f.name;
   document.getElementById("skinPreviewPrice").innerText=flamePrice(f)+"💎";
   const btn=document.getElementById("skinActionBtn");btn.style.display="inline-block";
@@ -2844,9 +2857,10 @@ function drawGems(){
 // ===== ROCKET DRAWING =====
 function drawSkinOnCanvas(c,skin,x,y,w,h){
   c.save();
-  // clip to cell bounds so glow doesn't bleed out
-  c.beginPath();c.rect(x,y,w,h);c.clip();
   c.shadowBlur=0;
+  c.shadowColor="transparent";
+  // clip strictly to bounds
+  c.beginPath();c.rect(x,y,w,h);c.clip();
   if(skin.shape==="rocket"){
     drawRocketShape(c,skin,x,y,w,h);c.restore();return;
   }
@@ -2876,6 +2890,7 @@ function drawSkinOnCanvas(c,skin,x,y,w,h){
 function drawInvader(c,color,style,x,y,w,h){
   c.save();
   c.shadowBlur=0;
+  c.shadowColor="transparent";
   c.fillStyle=color;
   const px=w/8,py=h/8;
   // each style is an 8x8 pixel grid (1=filled)
@@ -2942,6 +2957,7 @@ function drawInvader(c,color,style,x,y,w,h){
 function drawEliasShip(c,x,y,w,h){
   c.save();
   c.shadowBlur=0;
+  c.shadowColor="transparent";
   const p=(px,py,pw,ph,col)=>{
     c.fillStyle=col;
     c.fillRect(x+px*w/16, y+py*h/10, pw*w/16, ph*h/10);
