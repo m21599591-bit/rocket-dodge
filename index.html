@@ -2266,7 +2266,7 @@ function startCustomLevel(index){
   obstacles=[];coins=[];gems=[];spawnTimer=0;coinSpawnTimer=0;gemSpawnTimer=0;
   score=0;gameOver=false;paused=false;gameRunning=true;
   sessionCoins=0;sessionGems=0;
-  activePowerUp=null;powerUpTimer=0;lastPowerUpScore=0;
+  activePowerUp=null;powerUpTimer=0;lastPowerUpScore=0;wallTouchTimer=0;
   rocket={x:120,y:canvas.height/2,w:44,h:22,speed:sensitivity};
   if(activeBackground==="matrix") initMatrix();
   stopMenuBg();
@@ -2451,7 +2451,7 @@ function startDuelGame(duel){
   obstacles=[];coins=[];gems=[];spawnTimer=0;coinSpawnTimer=0;gemSpawnTimer=0;
   score=0;gameOver=false;paused=false;gameRunning=true;
   sessionCoins=0;sessionGems=0;
-  activePowerUp=null;powerUpTimer=0;lastPowerUpScore=0;
+  activePowerUp=null;powerUpTimer=0;lastPowerUpScore=0;wallTouchTimer=0;
   duelOppY=canvas.height/2;duelOppTargetY=canvas.height/2;duelOppScore=0;duelOppAlive=true;
   duelSyncing=false;
   rocket={x:120,y:canvas.height/2,w:44,h:22,speed:sensitivity};
@@ -2565,7 +2565,7 @@ function startGame(diff,subIdx){
   obstacles=[];coins=[];gems=[];spawnTimer=0;coinSpawnTimer=0;gemSpawnTimer=0;
   score=0;gameOver=false;paused=false;gameRunning=true;
   sessionCoins=0;sessionGems=0;
-  activePowerUp=null;powerUpTimer=0;lastPowerUpScore=0;
+  activePowerUp=null;powerUpTimer=0;lastPowerUpScore=0;wallTouchTimer=0;
   rocket={x:120,y:canvas.height/2,w:44,h:22,speed:sensitivity};
   if(activeBackground==="matrix") initMatrix();
   stopMenuBg();
@@ -2629,12 +2629,20 @@ function gameLoop(){
 }
 
 // ===== ROCKET MOVEMENT =====
+let wallTouchTimer=0;
 function moveRocket(){
   const upKey=keys[keyBindings.up]||keys["w"]||keys["W"]||keys["__up"]||keys["__mouseUp"];
   const downKey=keys[keyBindings.down]||keys["s"]||keys["S"]||keys["__down"]||keys["__mouseDown"];
   if(upKey) rocket.y-=rocket.speed;
   if(downKey) rocket.y+=rocket.speed;
+  const atWall=rocket.y<=0||rocket.y>=canvas.height-rocket.h;
   rocket.y=Math.max(0,Math.min(canvas.height-rocket.h,rocket.y));
+  if(atWall){
+    wallTouchTimer+=1/60;
+    if(wallTouchTimer>=7){endGame();return;}
+  } else {
+    wallTouchTimer=0;
+  }
 }
 
 // ===== OBSTACLES =====
@@ -3058,6 +3066,18 @@ function drawHUD(){
   ctx.fillStyle="white"; ctx.font="bold 16px Arial"; ctx.textAlign="left";
   ctx.fillText("Score: "+score,12,22);
   ctx.restore();
+
+  // wall touch warning bar
+  if(wallTouchTimer>0){
+    const pct=wallTouchTimer/7;
+    const bw=120,bh=6,bx=12,by=30;
+    ctx.save();
+    ctx.fillStyle="rgba(255,0,0,0.25)";ctx.fillRect(bx,by,bw,bh);
+    ctx.fillStyle=`rgba(255,${Math.floor(80*(1-pct))},0,0.9)`;ctx.fillRect(bx,by,bw*pct,bh);
+    ctx.fillStyle="rgba(255,100,100,0.9)";ctx.font="bold 10px Arial";ctx.textAlign="left";
+    ctx.fillText("⚠ Wand: "+(7-Math.floor(wallTouchTimer))+"s",bx,by+bh+10);
+    ctx.restore();
+  }
 
   if(currentDiff==="ending"||currentDiff==="custom"){
     const goal=currentDiff==="ending"?5000:customGoalScore;
