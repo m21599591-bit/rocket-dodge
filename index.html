@@ -904,7 +904,7 @@ function convertCoins(cost,gems){
 const JSONBIN_ID="69b59787aa77b81da9e48d95";
 const JSONBIN_KEY="$2a$10$tN0QTuYw6vRr5emhhyVnlO1fx1CHyMdk8nrkcBOMA0/FEroWv1MzO";
 const JSONBIN_URL=`https://api.jsonbin.io/v3/b/${JSONBIN_ID}`;
-let globalBoard={easy:[],medium:[],hard:[],ending:[],pendingRewards:[],duels:[]};
+let globalBoard={easy:[],medium:[],hard:[],ending:[],pendingRewards:[],duels:[],friendRequests:[],presence:{}};
 
 async function fetchBoard(){
   try{
@@ -919,6 +919,8 @@ async function fetchBoard(){
       ending:Array.isArray(data.ending)?data.ending:[],
       pendingRewards:Array.isArray(data.pendingRewards)?data.pendingRewards:[],
       duels:Array.isArray(data.duels)?data.duels:[],
+      friendRequests:Array.isArray(data.friendRequests)?data.friendRequests:[],
+      presence:data.presence||{},
     };
   }catch(e){console.warn("Leaderboard fetch failed:",e);}
 }
