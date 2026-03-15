@@ -985,37 +985,56 @@ async function pushScore(diff,newScore){
 
 async function claimPendingRewards(){
   try{
-    // Use atomic update: fetch, mark claimed, push — all in one operation
-    let totalCoins=0,totalGems=0,doReset=false,hasRewards=false;
-    await duelAtomicUpdate(data=>{
-      if(!Array.isArray(data.pendingRewards)||data.pendingRewards.length===0) return;
-      const mine=data.pendingRewards.filter(r=>{
-        if(r.target===currentUser) return true;
-        if(r.target==="all"){if(!r.claimedBy)r.claimedBy=[];return !r.claimedBy.includes(currentUser);}
-        return false;
-      });
-      if(mine.length===0) return;
-      hasRewards=true;
-      mine.forEach(r=>{if(r.reset)doReset=true;else{totalCoins+=r.coins||0;totalGems+=r.gems||0;}});
-      // mark/remove in the same atomic write
-      data.pendingRewards=data.pendingRewards.filter(r=>{
-        if(r.target===currentUser) return false; // remove personal
-        if(r.target==="all"){
-          if(!r.claimedBy)r.claimedBy=[];
-          if(!r.claimedBy.includes(currentUser))r.claimedBy.push(currentUser);
-          return true;
-        }
-        return true;
-      });
+    // localStorage is the primary guard against double-claiming
+    let claimedIds=JSON.parse(localStorage.getItem("claimedRewardIds")||"[]");
+
+    await fetchBoard();
+    if(!Array.isArray(globalBoard.pendingRewards)||globalBoard.pendingRewards.length===0) return;
+
+    // assign IDs to any rewards that don't have one
+    let needsIdPush=false;
+    globalBoard.pendingRewards.forEach(r=>{
+      if(!r.id){r.id="r_"+r.ts+"_"+(r.target||"");needsIdPush=true;}
     });
-    if(!hasRewards) return;
-    // Only apply locally AFTER successful push
+
+    const mine=globalBoard.pendingRewards.filter(r=>{
+      if(claimedIds.includes(r.id)) return false; // already claimed on this device
+      if(r.target===currentUser) return true;
+      if(r.target==="all"){if(!r.claimedBy)r.claimedBy=[];return !r.claimedBy.includes(currentUser);}
+      return false;
+    });
+    if(mine.length===0) return;
+
+    let totalCoins=0,totalGems=0,doReset=false;
+    mine.forEach(r=>{
+      if(r.reset) doReset=true;
+      else{totalCoins+=r.coins||0;totalGems+=r.gems||0;}
+    });
+
+    // Save to localStorage FIRST — prevents double claim even if JSONBin fails
+    mine.forEach(r=>claimedIds.push(r.id));
+    localStorage.setItem("claimedRewardIds",JSON.stringify(claimedIds.slice(-200)));
+
+    // Apply coins locally
     let u=getUser();
     if(doReset){u.coins=0;u.diamonds=0;}
     else{u.coins=(u.coins||0)+totalCoins;u.diamonds=(u.diamonds||0)+totalGems;}
     saveUser(u);updateTopBar();
+
+    // Clean up bin in background (best-effort)
+    globalBoard.pendingRewards=globalBoard.pendingRewards.filter(r=>{
+      if(r.target===currentUser) return false;
+      if(r.target==="all"){
+        if(!r.claimedBy)r.claimedBy=[];
+        if(!r.claimedBy.includes(currentUser))r.claimedBy.push(currentUser);
+        return true;
+      }
+      return true;
+    });
+    pushBin().catch(()=>{});
+
     if(doReset) setTimeout(()=>alert("Deine Coins & Diamanten wurden vom Admin zurueckgesetzt."),500);
-    else if(totalCoins>0||totalGems>0) setTimeout(()=>alert("Du hast eine Belohnung erhalten! +" + totalCoins + " Coins +" + totalGems + " Diamanten"),500);
+    else if(totalCoins>0||totalGems>0) setTimeout(()=>alert("Du hast eine Belohnung erhalten! +"+totalCoins+" Coins +"+totalGems+" Diamanten"),500);
   }catch(e){console.warn("claimPendingRewards failed:",e);}
 }
 function openAdminPin(){const pin=prompt("PIN eingeben:");if(pin!=="1208"){if(pin!==null)alert("Falscher PIN");return;}openAdmin();}
