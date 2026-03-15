@@ -199,21 +199,23 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
 </div>
 
 <!-- SKIN CATALOG -->
-<div id="skinScreen" class="screen" style="display:none;width:min(740px,96vw);">
+<div id="skinScreen" class="screen" style="display:none;width:min(600px,96vw);">
   <h2 style="margin:0 0 4px;">🎨 Skin Catalog</h2>
-  <p id="skinCoins" style="color:gold;margin:0 0 6px;"></p>
+  <p id="skinCoins" style="color:gold;margin:0 0 8px;"></p>
   <div style="margin-bottom:10px;">
     <button class="lvl-btn active" id="tabSkins" onclick="switchSkinTab('skins')">🚀 Skins</button>
     <button class="lvl-btn" id="tabFlames" onclick="switchSkinTab('flames')">🔥 Antrieb</button>
   </div>
-  <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;">
-    <div id="skinPreviewPanel" style="min-width:110px;flex:0 0 110px;background:#0d0d0d;border-radius:12px;padding:12px;display:flex;flex-direction:column;align-items:center;border:1px solid #333;">
-      <canvas id="skinPreviewCanvas" width="80" height="80"></canvas>
-      <p id="skinPreviewName" style="font-size:13px;margin:6px 0 2px;"></p>
-      <p id="skinPreviewPrice" style="font-size:12px;color:#aaa;margin:0 0 8px;"></p>
-      <button id="skinActionBtn" onclick="skinAction()" style="display:none;font-size:13px;padding:7px 12px;"></button>
+  <!-- Grid -->
+  <div id="skinGrid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;overflow-y:auto;max-height:260px;padding:2px;margin-bottom:12px;"></div>
+  <!-- Preview bar at bottom -->
+  <div id="skinPreviewPanel" style="background:#0d0d0d;border-radius:12px;padding:10px 16px;display:flex;align-items:center;gap:14px;border:1px solid #333;">
+    <canvas id="skinPreviewCanvas" width="80" height="44"></canvas>
+    <div style="flex:1;text-align:left;">
+      <p id="skinPreviewName" style="font-size:15px;margin:0 0 2px;font-weight:bold;"></p>
+      <p id="skinPreviewPrice" style="font-size:13px;color:#aaa;margin:0 0 8px;"></p>
+      <button id="skinActionBtn" onclick="skinAction()" style="display:none;font-size:13px;padding:7px 16px;"></button>
     </div>
-    <div id="skinGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;overflow-y:auto;max-height:300px;flex:1;min-width:0;padding-right:2px;"></div>
   </div>
   <br>
   <button onclick="closeSkinCatalog()">Back</button>
@@ -1316,11 +1318,11 @@ function renderSkinGrid(){
     const owned=u.ownedSkins.includes(skin.id);
     const isActive=u.activeSkin===skin.id;
     const cell=document.createElement("div");
-    cell.style.cssText="background:#0d0d0d;border-radius:8px;padding:5px;cursor:pointer;display:flex;flex-direction:column;align-items:center;position:relative;border:2px solid "+(isActive?"#ff3333":"#2a2a2a")+";";
-    const cv=document.createElement("canvas");cv.width=44;cv.height=28;
-    drawSkinOnCanvas(cv.getContext("2d"),skin,2,2,40,24);
-    const lbl=document.createElement("div");lbl.style.cssText="font-size:10px;margin-top:3px;color:#bbb;";lbl.innerText=skin.name;
-    if(!owned){const pr=document.createElement("div");pr.style.cssText="font-size:9px;color:gold;";pr.innerText=skinPrice(skin)+"🪙";cell.appendChild(pr);}
+    cell.style.cssText="background:#0d0d0d;border-radius:8px;padding:6px 4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;border:2px solid "+(isActive?"#ff3333":"#2a2a2a")+";";
+    const cv=document.createElement("canvas");cv.width=72;cv.height=40;
+    drawSkinOnCanvas(cv.getContext("2d"),skin,4,8,64,24);
+    const lbl=document.createElement("div");lbl.style.cssText="font-size:9px;margin-top:4px;color:#bbb;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;";lbl.innerText=skin.name;
+    if(!owned){const pr=document.createElement("div");pr.style.cssText="font-size:8px;color:gold;margin-bottom:2px;";pr.innerText=skinPrice(skin)+"🪙";cell.appendChild(pr);}
     cell.appendChild(cv);cell.appendChild(lbl);
     cell.onclick=()=>selectSkinPreview(skin.id);
     grid.appendChild(cell);
@@ -1334,8 +1336,8 @@ function renderSkinPreview(id){
   const skin=SKINS.find(s=>s.id===id)||SKINS[0];const u=getUser();
   const owned=u.ownedSkins.includes(skin.id);const isActive=u.activeSkin===skin.id;
   const pc=document.getElementById("skinPreviewCanvas");
-  const px=pc.getContext("2d");px.clearRect(0,0,80,80);
-  drawSkinOnCanvas(px,skin,10,26,60,28);
+  const px=pc.getContext("2d");px.clearRect(0,0,80,44);
+  drawSkinOnCanvas(px,skin,8,10,64,24);
   document.getElementById("skinPreviewName").innerText=skin.name;
   document.getElementById("skinPreviewPrice").innerText=skin.free?"Free":skinPrice(skin)+" 🪙";
   const btn=document.getElementById("skinActionBtn");btn.style.display="inline-block";
