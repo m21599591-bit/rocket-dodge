@@ -230,11 +230,11 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
 <div id="leaderScreen" class="screen" style="display:none;">
   <h2 style="margin:0 0 10px;">🏆 <span data-i18n="leaderboard">Bestenliste</span></h2>
   <div style="margin-bottom:12px;">
-    <button class="lvl-btn" onclick="showLeaderTab('easy')">Easy</button>
-    <button class="lvl-btn" onclick="showLeaderTab('medium')">Medium</button>
-    <button class="lvl-btn" onclick="showLeaderTab('hard')">Hard</button>
-    <button class="lvl-btn" onclick="showLeaderTab('ending')" style="color:#ff8888;">Ending</button>
+    <button class="lvl-btn active" id="leaderTabEasy" onclick="showLeaderTab('easy')">Easy</button>
+    <button class="lvl-btn" id="leaderTabMedium" onclick="showLeaderTab('medium')">Medium</button>
+    <button class="lvl-btn" id="leaderTabHard" onclick="showLeaderTab('hard')">Hard</button>
   </div>
+  <p style="font-size:11px;color:#666;margin:0 0 8px;">Nur Level 5 zählt</p>
   <div id="leaderList" style="min-width:240px;text-align:left;min-height:80px;"></div>
   <br>
   <button onclick="closeLeaderboard()" data-i18n="back">Zurück</button>
@@ -1137,6 +1137,10 @@ function openLeaderboard(){
 }
 function closeLeaderboard(){showScreen("menuScreen");}
 function showLeaderTab(diff){
+  ['easy','medium','hard'].forEach(d=>{
+    const btn=document.getElementById("leaderTab"+d.charAt(0).toUpperCase()+d.slice(1));
+    if(btn) btn.className='lvl-btn'+(d===diff?' active':'');
+  });
   const list=globalBoard[diff]||[];
   const el=document.getElementById("leaderList");
   if(!list.length){el.innerHTML=`<p style='color:#888;font-size:13px;'>${t("noEntries")}</p>`;return;}
@@ -3268,7 +3272,8 @@ function endGame(){
   if(currentDiff!=="custom"){
     prev=u.highscores[currentDiff]?.[currentSubLevel]||0;
     if(score>prev){u.highscores[currentDiff][currentSubLevel]=score;saveUser(u);}
-    if(score>prev) pushScore(currentDiff,score);
+    // only submit to leaderboard on level 5 (index 4), not ending
+    if(score>prev && currentSubLevel===4 && currentDiff!=="ending") pushScore(currentDiff,score);
   } else {
     // save custom level best score
     if(!u.customLevels) u.customLevels=[];
@@ -3297,10 +3302,10 @@ function winGame(){
   if(!menuAnimId) animateMenuBg();
   let u=getUser();
   if(currentDiff==="ending"){
-    if(!u.highscores.ending) u.highscores.ending=Array(20).fill(0);
+    if(!u.highscores.ending) u.highscores.ending=Array(10).fill(0);
     u.highscores.ending[currentSubLevel]=5000;
     saveUser(u);
-    pushScore("ending",5000);
+    // ending not in leaderboard
   } else if(currentDiff==="custom"){
     if(!u.customLevels) u.customLevels=[];
     if(u.customLevels[currentSubLevel]){
