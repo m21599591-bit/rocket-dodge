@@ -6,8 +6,9 @@
 <title>Rocket Dodge</title>
 <style>
 *{box-sizing:border-box;}
-body{margin:0;background:black;overflow:hidden;font-family:Arial;color:white;text-align:center;}
-canvas{display:block;position:absolute;top:0;left:0;}
+html{height:100%;height:100dvh;}
+body{margin:0;background:black;overflow:hidden;font-family:Arial;color:white;text-align:center;height:100%;height:100dvh;}
+canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%;}
 .screen{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.92);padding:28px 32px;border-radius:20px;z-index:10;min-width:300px;max-width:96vw;width:max-content;border:1px solid rgba(255,255,255,0.08);overflow-y:auto;max-height:92vh;}
 button{padding:10px 22px;margin:6px;font-size:15px;cursor:pointer;border-radius:10px;border:2px solid rgba(255,255,255,0.5);background:rgba(0,0,0,0.6);color:white;transition:all 0.18s;touch-action:manipulation;}
 button:hover{background:rgba(255,255,255,0.12);border-color:white;}
@@ -515,15 +516,19 @@ function updateLangButtons(){
 // ===== CANVASES =====
 const menuBg=document.getElementById("menuBg");
 const mctx=menuBg.getContext("2d");
-menuBg.width=window.innerWidth;menuBg.height=window.innerHeight;
+function getVH(){return window.visualViewport?window.visualViewport.height:window.innerHeight;}
+function getVW(){return window.visualViewport?window.visualViewport.width:window.innerWidth;}
+menuBg.width=getVW();menuBg.height=getVH();
 const canvas=document.getElementById("game");
 const ctx=canvas.getContext("2d");
-canvas.width=window.innerWidth;canvas.height=window.innerHeight;
-window.addEventListener("resize",()=>{
-  menuBg.width=canvas.width=window.innerWidth;
-  menuBg.height=canvas.height=window.innerHeight;
+canvas.width=getVW();canvas.height=getVH();
+function onResize(){
+  menuBg.width=canvas.width=getVW();
+  menuBg.height=canvas.height=getVH();
   initMenuBg();
-});
+}
+window.addEventListener("resize",onResize);
+if(window.visualViewport) window.visualViewport.addEventListener("resize",onResize);
 
 // ===== SKINS =====
 const SKINS=[
@@ -665,26 +670,16 @@ const LEVEL_CONFIG={
     {label:"Hard 5",rockSpeed:18,spawnRate:11,rockSize:[30,54],objTypes:["spike","ball","laser","zigzag"]},
   ],
   ending:[
-    {label:"End 1", rockSpeed:8, spawnRate:35,rockSize:[24,44],objTypes:["rock","spike","ball"]},
-    {label:"End 2", rockSpeed:9, spawnRate:32,rockSize:[25,45],objTypes:["rock","spike","ball","laser"]},
-    {label:"End 3", rockSpeed:10,spawnRate:29,rockSize:[26,46],objTypes:["rock","spike","ball","laser","zigzag"]},
-    {label:"End 4", rockSpeed:11,spawnRate:27,rockSize:[26,47],objTypes:["rock","spike","ball","laser","zigzag"]},
-    {label:"End 5", rockSpeed:12,spawnRate:25,rockSize:[27,48],objTypes:["spike","ball","laser","zigzag"]},
-    {label:"End 6", rockSpeed:13,spawnRate:22,rockSize:[27,49],objTypes:["spike","ball","laser","zigzag"]},
-    {label:"End 7", rockSpeed:14,spawnRate:20,rockSize:[28,50],objTypes:["spike","ball","laser","zigzag"]},
-    {label:"End 8", rockSpeed:15,spawnRate:18,rockSize:[28,51],objTypes:["spike","ball","laser","zigzag"]},
-    {label:"End 9", rockSpeed:16,spawnRate:16,rockSize:[29,52],objTypes:["spike","ball","laser","zigzag"]},
-    {label:"End 10",rockSpeed:17,spawnRate:14,rockSize:[29,52],objTypes:["spike","ball","laser","zigzag"]},
-    {label:"End 11",rockSpeed:18,spawnRate:13,rockSize:[30,53],objTypes:["spike","ball","laser","zigzag"]},
-    {label:"End 12",rockSpeed:19,spawnRate:12,rockSize:[30,53],objTypes:["spike","ball","laser","zigzag"]},
-    {label:"End 13",rockSpeed:20,spawnRate:11,rockSize:[30,54],objTypes:["spike","ball","laser","zigzag"]},
-    {label:"End 14",rockSpeed:21,spawnRate:10,rockSize:[31,54],objTypes:["spike","ball","laser","zigzag"]},
-    {label:"End 15",rockSpeed:22,spawnRate:9, rockSize:[31,55],objTypes:["spike","ball","laser","zigzag"]},
-    {label:"End 16",rockSpeed:24,spawnRate:8, rockSize:[32,55],objTypes:["spike","ball","laser","zigzag"]},
-    {label:"End 17",rockSpeed:26,spawnRate:7, rockSize:[32,56],objTypes:["spike","ball","laser","zigzag"]},
-    {label:"End 18",rockSpeed:28,spawnRate:6, rockSize:[33,57],objTypes:["spike","ball","laser","zigzag"]},
-    {label:"End 19",rockSpeed:30,spawnRate:5, rockSize:[34,58],objTypes:["spike","ball","laser","zigzag"]},
-    {label:"End 20",rockSpeed:32,spawnRate:4, rockSize:[35,60],objTypes:["spike","ball","laser","zigzag"]},
+    {label:"End 1", rockSpeed:4, spawnRate:70,rockSize:[20,36],objTypes:["rock"]},
+    {label:"End 2", rockSpeed:5, spawnRate:62,rockSize:[22,38],objTypes:["rock","spike"]},
+    {label:"End 3", rockSpeed:6, spawnRate:55,rockSize:[22,40],objTypes:["rock","spike","ball"]},
+    {label:"End 4", rockSpeed:7, spawnRate:48,rockSize:[24,42],objTypes:["rock","spike","ball"]},
+    {label:"End 5", rockSpeed:8, spawnRate:42,rockSize:[24,44],objTypes:["rock","spike","ball","laser"]},
+    {label:"End 6", rockSpeed:9, spawnRate:38,rockSize:[25,45],objTypes:["rock","spike","ball","laser"]},
+    {label:"End 7", rockSpeed:10,spawnRate:34,rockSize:[26,46],objTypes:["rock","spike","ball","laser","zigzag"]},
+    {label:"End 8", rockSpeed:11,spawnRate:30,rockSize:[26,47],objTypes:["spike","ball","laser","zigzag"]},
+    {label:"End 9", rockSpeed:12,spawnRate:26,rockSize:[27,48],objTypes:["spike","ball","laser","zigzag"]},
+    {label:"End 10",rockSpeed:13,spawnRate:22,rockSize:[28,50],objTypes:["spike","ball","laser","zigzag"]},
   ]
 };
 
@@ -780,7 +775,7 @@ function doRegister(){
     shop:{stars:false,ownedBgs:["none"],activeBg:"none"},
     ownedSkins:[0,1,2,3,4,5,6,7,8,9],activeSkin:0,
     ownedFlames:[],activeFlame:0,
-    highscores:{easy:[0,0,0,0,0],medium:[0,0,0,0,0],hard:[0,0,0,0,0],ending:Array(20).fill(0)}
+    highscores:{easy:[0,0,0,0,0],medium:[0,0,0,0,0],hard:[0,0,0,0,0],ending:Array(10).fill(0)}
   };
   saveUsers(users);
   document.getElementById("loginMsg").innerText="Account created! Now login.";
@@ -793,7 +788,7 @@ function migrateUser(u){
   if(u.diamonds===undefined) u.diamonds=0;
   if(!u.ownedFlames) u.ownedFlames=[];
   if(u.activeFlame===undefined) u.activeFlame=0;
-  if(!Array.isArray(u.highscores?.easy)) u.highscores={easy:[0,0,0,0,0],medium:[0,0,0,0,0],hard:[0,0,0,0,0],ending:Array(20).fill(0)};
+  if(!Array.isArray(u.highscores?.easy)) u.highscores={easy:[0,0,0,0,0],medium:[0,0,0,0,0],hard:[0,0,0,0,0],ending:Array(10).fill(0)};
   if(!Array.isArray(u.highscores.ending)) u.highscores.ending=Array(20).fill(0);
   return u;
 }
