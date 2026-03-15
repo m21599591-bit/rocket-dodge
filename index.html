@@ -2717,8 +2717,8 @@ function moveCoins(){
     const dx=rocket.x+rocket.w/2-c.x,dy=rocket.y+rocket.h/2-c.y;
     if(Math.sqrt(dx*dx+dy*dy)<c.r+16){
       coins.splice(i,1);
-      let u=getUser();u.coins+=5;saveUser(u);
-      sessionCoins+=5;
+      let u=getUser();u.coins+=20;saveUser(u);
+      sessionCoins+=20;
     }
   }
 }
@@ -3094,7 +3094,10 @@ function endGame(){
   }
   document.getElementById("endScore").innerText="Score: "+score;
   document.getElementById("endHigh").innerText=t("bestOnLevel")+" "+(score>prev?score:prev);
-  document.getElementById("endCoinsEarned").innerText="+"+sessionCoins+"🪙  +"+sessionGems+"💎";
+  const scoreCoins=Math.floor(score/10);
+  const totalCoins=sessionCoins+scoreCoins;
+  let uu=getUser();uu.coins=(uu.coins||0)+scoreCoins;saveUser(uu);updateTopBar();
+  document.getElementById("endCoinsEarned").innerText="+"+totalCoins+"🪙  +"+sessionGems+"💎  (inkl. "+scoreCoins+"🪙 für Score)";
   showScreen("endScreen");
   document.getElementById("topBar").style.display="flex";
   updateTopBar();
@@ -3121,7 +3124,10 @@ function winGame(){
   }
   const nextExists=currentDiff==="ending"&&currentSubLevel<LEVEL_CONFIG.ending.length-1;
   document.getElementById("winScore").innerText="Score: "+score;
-  document.getElementById("winCoins").innerText="+"+sessionCoins+"🪙  +"+sessionGems+"💎";
+  const scoreCoinsW=Math.floor(score/10);
+  const totalCoinsW=sessionCoins+scoreCoinsW;
+  let uw=getUser();uw.coins=(uw.coins||0)+scoreCoinsW;saveUser(uw);
+  document.getElementById("winCoins").innerText="+"+totalCoinsW+"🪙  +"+sessionGems+"💎  (inkl. "+scoreCoinsW+"🪙 für Score)";
   document.getElementById("nextLevelBtn").style.display=nextExists?"inline-block":"none";
   showScreen("winScreen");
   document.getElementById("topBar").style.display="flex";
