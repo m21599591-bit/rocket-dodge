@@ -1956,10 +1956,6 @@ function showDuelResult(myScore, oppScore, oppNameOverride, wonOverride){
   document.getElementById("topBar").style.display="flex";
   updateTopBar();
 }
-  document.getElementById("duelOpponent").value="";
-  selectDuelDiff('easy');
-  showScreen("duel1v1Screen");
-}
 function selectDuelDiff(d){
   duelDiff=d;
   ["easy","medium","hard"].forEach(x=>{
