@@ -2851,8 +2851,9 @@ function drawSkinOnCanvas(c,skin,x,y,w,h){
 
 // draws a pixel-art space invader, style 0-4
 function drawInvader(c,color,style,x,y,w,h){
+  c.save();
+  c.shadowBlur=0;
   c.fillStyle=color;
-  c.shadowColor=color;c.shadowBlur=8;
   const px=w/8,py=h/8;
   // each style is an 8x8 pixel grid (1=filled)
   const grids=[
@@ -2911,6 +2912,7 @@ function drawInvader(c,color,style,x,y,w,h){
     }
   }
   c.shadowBlur=0;
+  c.restore();
 }
 
 // Elias skin: pixel-art spaceship (white body, blue dome, red engines)
