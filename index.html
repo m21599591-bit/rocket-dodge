@@ -55,6 +55,42 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
 <!-- Full-screen touch zones for mobile gameplay -->
 <div id="touchPauseBtn" style="display:none;position:absolute;top:10px;right:10px;z-index:26;width:52px;height:52px;border-radius:50%;background:rgba(0,0,0,0.6);border:2px solid rgba(255,255,255,0.3);font-size:22px;line-height:52px;text-align:center;cursor:pointer;" onclick="pauseToMenu()">🏠</div>
 
+<!-- MOBILE TUTORIAL OVERLAY -->
+<div id="tutorialOverlay" style="display:none;position:absolute;top:0;left:0;width:100%;height:100%;z-index:30;background:rgba(0,0,0,0.82);flex-direction:column;align-items:center;justify-content:center;touch-action:none;">
+  <div id="tutStep0" class="tut-step" style="text-align:center;padding:24px 28px;">
+    <div style="font-size:56px;margin-bottom:12px;">🚀</div>
+    <h2 style="font-size:24px;margin:0 0 8px;color:white;">Willkommen!</h2>
+    <p style="color:#aaa;font-size:15px;margin:0 0 24px;">Lass uns kurz die Steuerung zeigen.</p>
+    <button onclick="tutNext(1)" style="font-size:17px;padding:12px 32px;border-color:#00ccff;color:#00ccff;">Weiter ▶</button>
+  </div>
+  <div id="tutStep1" class="tut-step" style="display:none;text-align:center;padding:24px 28px;">
+    <div style="font-size:20px;color:#aaa;margin-bottom:16px;">Obere Hälfte tippen</div>
+    <div style="width:min(280px,80vw);height:120px;border:2px dashed rgba(0,200,255,0.5);border-radius:12px;position:relative;margin:0 auto 8px;">
+      <div style="position:absolute;top:0;left:0;width:100%;height:50%;background:rgba(0,200,255,0.1);border-radius:10px 10px 0 0;display:flex;align-items:center;justify-content:center;">
+        <span style="font-size:28px;">▲</span>
+      </div>
+      <div style="position:absolute;top:50%;left:0;width:100%;height:50%;background:rgba(255,100,100,0.08);border-radius:0 0 10px 10px;display:flex;align-items:center;justify-content:center;">
+        <span style="font-size:28px;">▼</span>
+      </div>
+    </div>
+    <p style="color:#aaa;font-size:14px;margin:8px 0 24px;">Untere Hälfte tippen = runter</p>
+    <button onclick="tutNext(2)" style="font-size:17px;padding:12px 32px;border-color:#00ccff;color:#00ccff;">Weiter ▶</button>
+  </div>
+  <div id="tutStep2" class="tut-step" style="display:none;text-align:center;padding:24px 28px;">
+    <div style="font-size:48px;margin-bottom:12px;">🪨</div>
+    <h3 style="font-size:20px;margin:0 0 8px;color:white;">Hindernissen ausweichen</h3>
+    <p style="color:#aaa;font-size:14px;margin:0 0 6px;">Berühre kein Objekt — sonst Game Over.</p>
+    <p style="color:gold;font-size:14px;margin:0 0 24px;">🪙 Münzen einsammeln für Coins!</p>
+    <button onclick="tutNext(3)" style="font-size:17px;padding:12px 32px;border-color:#00ccff;color:#00ccff;">Weiter ▶</button>
+  </div>
+  <div id="tutStep3" class="tut-step" style="display:none;text-align:center;padding:24px 28px;">
+    <div style="font-size:48px;margin-bottom:12px;">🏠</div>
+    <h3 style="font-size:20px;margin:0 0 8px;color:white;">Pause / Menü</h3>
+    <p style="color:#aaa;font-size:14px;margin:0 0 24px;">Der 🏠 Button oben rechts bringt dich zurück ins Menü.</p>
+    <button onclick="tutFinish()" style="font-size:18px;padding:14px 36px;border-color:#00ff88;color:#00ff88;">Los geht's! 🚀</button>
+  </div>
+</div>
+
 <div id="topBar">
   <span id="topCoins">🪙 0</span>
   <span id="topDiamonds" style="font-size:15px;font-weight:bold;color:#88eeff;margin-right:auto;">💎 0</span>
@@ -1462,7 +1498,30 @@ function pauseToMenu(){
   document.getElementById("topBar").style.display="flex";
 }
 
-// ===== TOUCH CONTROLS =====
+// ===== MOBILE TUTORIAL =====
+let tutorialActive=false;
+function shouldShowTutorial(){
+  return isMobile && !localStorage.getItem("tutorialDone");
+}
+function showTutorial(){
+  tutorialActive=true;
+  paused=true;
+  const ov=document.getElementById("tutorialOverlay");
+  ov.style.display="flex";
+  tutNext(0);
+}
+function tutNext(step){
+  document.querySelectorAll(".tut-step").forEach(el=>el.style.display="none");
+  const s=document.getElementById("tutStep"+step);
+  if(s) s.style.display="block";
+}
+function tutFinish(){
+  localStorage.setItem("tutorialDone","1");
+  document.getElementById("tutorialOverlay").style.display="none";
+  tutorialActive=false;
+  paused=false;
+  animId=requestAnimationFrame(gameLoop);
+}
 // Auto-detect touch device
 if('ontouchstart' in window || navigator.maxTouchPoints>0){
   if(!localStorage.getItem("deviceMode")) setDevice('mobile');
@@ -2491,7 +2550,12 @@ function startGame(diff,subIdx){
   showTouchControls(true);
   if(animId) cancelAnimationFrame(animId);
   playBeat(getBeatIndex(diff,subIdx));
-  animId=requestAnimationFrame(gameLoop);
+  if(shouldShowTutorial()){
+    drawBackground();
+    showTutorial();
+  } else {
+    animId=requestAnimationFrame(gameLoop);
+  }
 }
 
 // ===== GAME LOOP =====
