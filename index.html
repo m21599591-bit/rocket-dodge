@@ -88,6 +88,7 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
     <button class="lvl-btn" id="diffHard" onclick="selectDiff('hard')">Hard</button>
     <button class="lvl-btn" id="diffEnding" onclick="selectDiff('ending')" style="border-color:rgba(255,50,50,0.5);color:#ff8888;">Ending</button>
     <button class="lvl-btn" id="diffCustom" onclick="openCustomLevels()" style="border-color:rgba(255,200,0,0.5);color:#ffcc00;">✏️ Erstellen</button>
+    <button class="lvl-btn" id="diff1v1" onclick="open1v1Menu()" style="border-color:rgba(255,80,80,0.6);color:#ff6666;">⚔️ 1v1</button>
   </div>
   <div id="subLevelRow"></div>
   <br>
@@ -315,6 +316,54 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
   <button onclick="saveCustomLevel()" style="border-color:#00cc66;color:#00cc66;">💾 Speichern</button>
   <button onclick="openCustomLevels()" style="margin-left:8px;">Abbrechen</button>
   <input type="hidden" id="edEditIndex" value="-1">
+</div>
+
+<!-- 1v1 MENU -->
+<div id="duel1v1Screen" class="screen" style="display:none;width:min(420px,96vw);">
+  <h2 style="margin:0 0 6px;">⚔️ 1v1 Duell</h2>
+  <p style="color:#aaa;font-size:13px;margin:0 0 16px;">Fordere einen Spieler heraus</p>
+  <div style="display:flex;flex-direction:column;gap:10px;max-width:320px;margin:0 auto;">
+    <div>
+      <label style="font-size:13px;color:#aaa;">Gegner-Name</label><br>
+      <input id="duelOpponent" placeholder="Username..." style="width:100%;padding:8px;background:#111;color:white;border:1px solid #444;border-radius:8px;font-size:14px;box-sizing:border-box;">
+    </div>
+    <div>
+      <label style="font-size:13px;color:#aaa;">Schwierigkeit</label><br>
+      <div style="display:flex;gap:8px;margin-top:6px;">
+        <button class="lvl-btn active" id="duelEasy" onclick="selectDuelDiff('easy')">Easy</button>
+        <button class="lvl-btn" id="duelMedium" onclick="selectDuelDiff('medium')">Medium</button>
+        <button class="lvl-btn" id="duelHard" onclick="selectDuelHard('hard')">Hard</button>
+      </div>
+    </div>
+  </div>
+  <br>
+  <button onclick="sendDuelInvite()" style="border-color:#ff6666;color:#ff6666;">⚔️ Einladung senden</button>
+  <button onclick="showScreen('levelScreen')" style="margin-left:8px;">Zurück</button>
+</div>
+
+<!-- 1v1 WAITING (challenger) -->
+<div id="duelWaitScreen" class="screen" style="display:none;width:min(380px,96vw);">
+  <h2 style="margin:0 0 8px;">⏳ Warten...</h2>
+  <p id="duelWaitMsg" style="color:#aaa;font-size:14px;margin:0 0 20px;"></p>
+  <div style="width:40px;height:40px;border:3px solid #ff6666;border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 20px;"></div>
+  <button onclick="cancelDuel()" style="border-color:#ff4444;color:#ff4444;">✕ Abbrechen</button>
+</div>
+
+<!-- 1v1 INVITE (opponent receives) -->
+<div id="duelInviteScreen" class="screen" style="display:none;width:min(380px,96vw);">
+  <h2 style="margin:0 0 8px;">⚔️ Duell-Einladung!</h2>
+  <p id="duelInviteMsg" style="color:#ffcc00;font-size:16px;margin:0 0 6px;"></p>
+  <p id="duelInviteDiff" style="color:#aaa;font-size:13px;margin:0 0 20px;"></p>
+  <button onclick="acceptDuel()" style="border-color:#00cc66;color:#00cc66;margin:4px;">✓ Annehmen</button>
+  <button onclick="declineDuel()" style="border-color:#ff4444;color:#ff4444;margin:4px;">✕ Ablehnen</button>
+</div>
+
+<!-- 1v1 LOSE SCREEN -->
+<div id="duelLoseScreen" class="screen" style="display:none;">
+  <h2 style="margin:0 0 8px;font-size:28px;">💀 Du hast verloren!</h2>
+  <p id="duelLoseMsg" style="color:#ff6666;font-size:15px;margin:0 0 6px;"></p>
+  <p id="duelLoseScore" style="color:#aaa;font-size:14px;margin:0 0 20px;"></p>
+  <button onclick="goMenu()">🏠 Hauptmenü</button>
 </div>
 
 <script>
@@ -569,7 +618,7 @@ function getUser(){const us=getUsers();return us[currentUser]||null;}
 function saveUser(u){const us=getUsers();us[currentUser]=u;saveUsers(us);}
 
 const ALL_SCREENS=["loginScreen","menuScreen","levelScreen","shopScreen","skinScreen",
-  "leaderScreen","settingsScreen","pauseScreen","pauseSettingsScreen","endScreen","winScreen","adminScreen","customScreen","customEditorScreen"];
+  "leaderScreen","settingsScreen","pauseScreen","pauseSettingsScreen","endScreen","winScreen","adminScreen","customScreen","customEditorScreen","duel1v1Screen","duelWaitScreen","duelInviteScreen","duelLoseScreen"];
 function showScreen(id){
   ALL_SCREENS.forEach(s=>{
     const el=document.getElementById(s);
@@ -684,6 +733,8 @@ function afterLogin(){
   document.getElementById("menuUser").innerText=currentUser;
   showScreen("menuScreen");
   claimPendingRewards();
+  // check for incoming duel invites every 5s
+  setInterval(()=>{if(!gameRunning&&!duelId) checkIncomingDuels();},5000);
 }
 
 window.onload=function(){
@@ -1781,6 +1832,211 @@ function startCustomLevel(index){
   animId=requestAnimationFrame(gameLoop);
 }
 
+// ===== 1v1 DUEL =====
+let duelDiff='easy';
+let duelPollInterval=null;
+let duelId=null;
+let duelRole=null; // 'challenger' or 'opponent'
+let duelOpponentName=null;
+
+const DUEL_CONFIGS={
+  easy: {rockSpeed:4,spawnRate:50,rockSize:[20,38],objTypes:["rock"]},
+  medium:{rockSpeed:7,spawnRate:30,rockSize:[22,42],objTypes:["rock","spike","ball"]},
+  hard:  {rockSpeed:12,spawnRate:18,rockSize:[24,46],objTypes:["rock","spike","ball","laser","zigzag"]},
+};
+
+function open1v1Menu(){
+  document.getElementById("duelOpponent").value="";
+  selectDuelDiff('easy');
+  showScreen("duel1v1Screen");
+}
+function selectDuelDiff(d){
+  duelDiff=d;
+  ["easy","medium","hard"].forEach(x=>{
+    const btn=document.getElementById("duel"+x.charAt(0).toUpperCase()+x.slice(1));
+    if(btn) btn.className="lvl-btn"+(x===d?" active":"");
+  });
+}
+function selectDuelHard(d){selectDuelDiff(d);}
+
+async function sendDuelInvite(){
+  const opp=document.getElementById("duelOpponent").value.trim();
+  if(!opp){alert("Bitte Gegner-Namen eingeben.");return;}
+  if(opp===currentUser){alert("Du kannst dich nicht selbst herausfordern.");return;}
+  duelId="duel_"+Date.now()+"_"+Math.random().toString(36).slice(2,7);
+  duelRole="challenger";
+  duelOpponentName=opp;
+  const duel={
+    id:duelId,challenger:currentUser,opponent:opp,
+    diff:duelDiff,status:"pending",
+    challengerAlive:true,opponentAlive:true,
+    challengerScore:0,opponentScore:0,
+    created:Date.now()
+  };
+  await fetchBoard();
+  if(!Array.isArray(globalBoard.duels)) globalBoard.duels=[];
+  // clean old duels (>5min)
+  globalBoard.duels=globalBoard.duels.filter(d=>Date.now()-d.created<300000);
+  globalBoard.duels.push(duel);
+  await pushBin();
+  document.getElementById("duelWaitMsg").innerText=`Warte auf ${opp}...`;
+  showScreen("duelWaitScreen");
+  duelPollInterval=setInterval(pollDuelStatus,2000);
+}
+
+async function cancelDuel(){
+  clearInterval(duelPollInterval);duelPollInterval=null;
+  if(duelId){
+    await fetchBoard();
+    if(Array.isArray(globalBoard.duels)){
+      const d=globalBoard.duels.find(x=>x.id===duelId);
+      if(d) d.status="cancelled";
+      await pushBin();
+    }
+  }
+  duelId=null;duelRole=null;
+  showScreen("levelScreen");
+}
+
+async function pollDuelStatus(){
+  try{
+    await fetchBoard();
+    if(!Array.isArray(globalBoard.duels)) return;
+    const duel=globalBoard.duels.find(d=>d.id===duelId);
+    if(!duel){clearInterval(duelPollInterval);return;}
+    if(duel.status==="cancelled"||duel.status==="declined"){
+      clearInterval(duelPollInterval);duelPollInterval=null;
+      alert(duel.status==="declined"?`${duelOpponentName} hat abgelehnt.`:"Duell abgebrochen.");
+      duelId=null;showScreen("levelScreen");return;
+    }
+    if(duel.status==="accepted"){
+      clearInterval(duelPollInterval);duelPollInterval=null;
+      startDuelGame(duel);
+    }
+  }catch(e){}
+}
+
+// Opponent side: check for incoming invites
+async function checkIncomingDuels(){
+  if(!currentUser) return;
+  try{
+    await fetchBoard();
+    if(!Array.isArray(globalBoard.duels)) return;
+    const invite=globalBoard.duels.find(d=>d.opponent===currentUser&&d.status==="pending"&&Date.now()-d.created<120000);
+    if(invite){
+      duelId=invite.id;duelRole="opponent";duelOpponentName=invite.challenger;
+      document.getElementById("duelInviteMsg").innerText=`${invite.challenger} fordert dich heraus!`;
+      document.getElementById("duelInviteDiff").innerText="Schwierigkeit: "+invite.diff.charAt(0).toUpperCase()+invite.diff.slice(1);
+      showScreen("duelInviteScreen");
+    }
+  }catch(e){}
+}
+
+async function acceptDuel(){
+  await fetchBoard();
+  const duel=globalBoard.duels.find(d=>d.id===duelId);
+  if(!duel||duel.status!=="pending"){alert("Einladung nicht mehr gültig.");showScreen("menuScreen");return;}
+  duel.status="accepted";
+  await pushBin();
+  startDuelGame(duel);
+}
+
+async function declineDuel(){
+  await fetchBoard();
+  const duel=globalBoard.duels.find(d=>d.id===duelId);
+  if(duel) duel.status="declined";
+  await pushBin();
+  duelId=null;duelRole=null;
+  showScreen("menuScreen");
+}
+
+function startDuelGame(duel){
+  const cfg=DUEL_CONFIGS[duel.diff]||DUEL_CONFIGS.easy;
+  currentDiff="duel";currentSubLevel=0;
+  rockSpeed=cfg.rockSpeed;spawnRate=cfg.spawnRate;
+  rockSizeMin=cfg.rockSize[0];rockSizeMax=cfg.rockSize[1];
+  currentObjTypes=cfg.objTypes;
+  obstacles=[];coins=[];gems=[];spawnTimer=0;coinSpawnTimer=0;gemSpawnTimer=0;
+  score=0;gameOver=false;paused=false;gameRunning=true;
+  sessionCoins=0;sessionGems=0;
+  activePowerUp=null;powerUpTimer=0;lastPowerUpScore=0;
+  rocket={x:120,y:canvas.height/2,w:44,h:22,speed:sensitivity};
+  if(activeBackground==="matrix") initMatrix();
+  stopMenuBg();
+  menuBg.style.display="none";canvas.style.display="block";
+  showScreen(null);
+  document.getElementById("topBar").style.display="none";
+  document.getElementById("touchControls").style.display=isMobile?"flex":"none";
+  if(animId) cancelAnimationFrame(animId);
+  playBeat(0);
+  // start polling opponent status
+  duelPollInterval=setInterval(pollOpponentDead,1500);
+  animId=requestAnimationFrame(gameLoop);
+}
+
+async function reportDuelDead(){
+  // called when this player dies in duel mode
+  clearInterval(duelPollInterval);duelPollInterval=null;
+  try{
+    await fetchBoard();
+    const duel=globalBoard.duels.find(d=>d.id===duelId);
+    if(!duel) return;
+    if(duelRole==="challenger") duel.challengerAlive=false;
+    else duel.opponentAlive=false;
+    duel.challengerScore=duelRole==="challenger"?score:duel.challengerScore;
+    duel.opponentScore=duelRole==="opponent"?score:duel.opponentScore;
+    await pushBin();
+  }catch(e){}
+}
+
+async function pollOpponentDead(){
+  try{
+    await fetchBoard();
+    const duel=globalBoard.duels.find(d=>d.id===duelId);
+    if(!duel) return;
+    const oppAlive=duelRole==="challenger"?duel.opponentAlive:duel.challengerAlive;
+    if(!oppAlive){
+      // opponent died while we're still alive → we win
+      clearInterval(duelPollInterval);duelPollInterval=null;
+      // don't end game yet, just note it — endGame will show win
+    }
+  }catch(e){}
+}
+
+async function endDuelGame(){
+  // called from endGame when currentDiff==="duel"
+  await reportDuelDead();
+  // wait briefly then check if opponent also dead
+  setTimeout(async()=>{
+    await fetchBoard();
+    const duel=globalBoard.duels.find(d=>d.id===duelId);
+    const oppAlive=duel?(duelRole==="challenger"?duel.opponentAlive:duel.challengerAlive):false;
+    const oppName=duelOpponentName||"Gegner";
+    document.getElementById("duelLoseScore").innerText="Dein Score: "+score;
+    if(oppAlive){
+      // opponent still alive → we lost
+      document.getElementById("duelLoseMsg").innerText=oppName+" lebt noch. Du hast verloren!";
+      showScreen("duelLoseScreen");
+    } else {
+      // both dead — whoever has higher score wins
+      const myScore=score;
+      const oppScore=duel?(duelRole==="challenger"?duel.opponentScore:duel.challengerScore):0;
+      if(myScore>=oppScore){
+        document.getElementById("winScore").innerText="Score: "+myScore+" vs "+oppScore;
+        document.getElementById("winCoins").innerText="⚔️ Du hast das Duell gewonnen!";
+        document.getElementById("nextLevelBtn").style.display="none";
+        showScreen("winScreen");
+      } else {
+        document.getElementById("duelLoseMsg").innerText=oppName+" hatte mehr Punkte ("+oppScore+" vs "+myScore+").";
+        showScreen("duelLoseScreen");
+      }
+    }
+    document.getElementById("topBar").style.display="flex";
+    updateTopBar();
+    duelId=null;duelRole=null;
+  },1200);
+}
+
 // ===== GAME START =====
 function startGame(diff,subIdx){
   currentDiff=diff;currentSubLevel=subIdx;
@@ -2287,6 +2543,11 @@ function endGame(){
   document.getElementById("touchControls").style.display="none";
   canvas.style.display="none";menuBg.style.display="block";
   if(!menuAnimId) animateMenuBg();
+
+  if(currentDiff==="duel"){
+    endDuelGame();
+    return;
+  }
   let u=getUser();
   let prev=0;
   if(currentDiff!=="custom"){
@@ -2347,6 +2608,7 @@ function restartGame(){
 function goMenu(){
   gameRunning=false;gameOver=true;
   if(animId){cancelAnimationFrame(animId);animId=null;}
+  if(duelPollInterval){clearInterval(duelPollInterval);duelPollInterval=null;}
   stopMusic();
   document.getElementById("touchControls").style.display="none";
   canvas.style.display="none";menuBg.style.display="block";
