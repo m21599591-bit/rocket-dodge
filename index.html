@@ -1136,6 +1136,19 @@ function openLeaderboard(){
   fetchBoard().then(()=>showLeaderTab('easy'));
 }
 function closeLeaderboard(){showScreen("menuScreen");}
+function showLeaderTab(diff){
+  const list=globalBoard[diff]||[];
+  const el=document.getElementById("leaderList");
+  if(!list.length){el.innerHTML=`<p style='color:#888;font-size:13px;'>${t("noEntries")}</p>`;return;}
+  el.innerHTML=list.slice(0,20).map((e,i)=>{
+    const medal=i===0?"🥇":i===1?"🥈":i===2?"🥉":`${i+1}.`;
+    const isMe=e.name===currentUser;
+    return `<div style="display:flex;justify-content:space-between;padding:5px 8px;border-radius:6px;margin:2px 0;background:${isMe?"rgba(0,200,255,0.1)":"rgba(255,255,255,0.03)"};">
+      <span>${medal} <span style="color:${isMe?"#00ccff":"white"}">${e.name}</span></span>
+      <span style="color:gold;font-weight:bold;">${e.score}</span>
+    </div>`;
+  }).join('');
+}
 
 // ===== FRIENDS =====
 async function openFriends(){
