@@ -22,8 +22,8 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
 #touchControls button{width:76px;height:76px;font-size:34px;border-radius:50%;border:3px solid white;background:rgba(255,255,255,0.25);color:white;cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:none;}
 #touchZoneUp.active-zone{background:rgba(255,255,255,0.04);}
 #touchZoneDown.active-zone{background:rgba(255,255,255,0.04);}
-#touchZoneUp::after{content:"?";position:absolute;bottom:8px;left:50%;transform:translateX(-50%);font-size:28px;color:rgba(255,255,255,0.15);pointer-events:none;}
-#touchZoneDown::after{content:"?";position:absolute;top:8px;left:50%;transform:translateX(-50%);font-size:28px;color:rgba(255,255,255,0.15);pointer-events:none;}
+#touchZoneUp::after{content:"▲";position:absolute;bottom:8px;left:50%;transform:translateX(-50%);font-size:28px;color:rgba(255,255,255,0.15);pointer-events:none;}
+#touchZoneDown::after{content:"▼";position:absolute;top:8px;left:50%;transform:translateX(-50%);font-size:28px;color:rgba(255,255,255,0.15);pointer-events:none;}
 .lvl-btn{display:inline-block;margin:4px;padding:8px 14px;font-size:14px;cursor:pointer;border-radius:8px;border:2px solid rgba(255,255,255,0.35);background:rgba(0,0,0,0.5);color:white;transition:all 0.15s;touch-action:manipulation;}
 .lvl-btn:hover{background:rgba(255,255,255,0.1);}
 .lvl-btn.active{border-color:#00ccff;color:#00ccff;}
@@ -48,8 +48,8 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
 <canvas id="menuBg"></canvas>
 <canvas id="game" style="display:none;"></canvas>
 <div id="touchControls">
-  <button id="btnUp">?</button>
-  <button id="btnDown">?</button>
+  <button id="btnUp">▲</button>
+  <button id="btnDown">▼</button>
   <button id="btnMenu" onclick="pauseToMenu()" style="font-size:22px;background:rgba(0,0,0,0.5);border-color:rgba(255,255,255,0.4);">🏠</button>
 </div>
 
@@ -62,27 +62,27 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
     <div style="font-size:56px;margin-bottom:12px;">🚀</div>
     <h2 style="font-size:24px;margin:0 0 8px;color:white;">Willkommen!</h2>
     <p style="color:#aaa;font-size:15px;margin:0 0 24px;">Lass uns kurz die Steuerung zeigen.</p>
-    <button onclick="tutNext(1)" style="font-size:17px;padding:12px 32px;border-color:#00ccff;color:#00ccff;">Weiter ?</button>
+    <button onclick="tutNext(1)" style="font-size:17px;padding:12px 32px;border-color:#00ccff;color:#00ccff;">Weiter ▶</button>
   </div>
   <div id="tutStep1" class="tut-step" style="display:none;text-align:center;padding:24px 28px;">
     <div style="font-size:20px;color:#aaa;margin-bottom:16px;">Obere H�lfte tippen</div>
     <div style="width:min(280px,80vw);height:120px;border:2px dashed rgba(0,200,255,0.5);border-radius:12px;position:relative;margin:0 auto 8px;">
       <div style="position:absolute;top:0;left:0;width:100%;height:50%;background:rgba(0,200,255,0.1);border-radius:10px 10px 0 0;display:flex;align-items:center;justify-content:center;">
-        <span style="font-size:28px;">?</span>
+        <span style="font-size:28px;">▲</span>
       </div>
       <div style="position:absolute;top:50%;left:0;width:100%;height:50%;background:rgba(255,100,100,0.08);border-radius:0 0 10px 10px;display:flex;align-items:center;justify-content:center;">
-        <span style="font-size:28px;">?</span>
+        <span style="font-size:28px;">▼</span>
       </div>
     </div>
     <p style="color:#aaa;font-size:14px;margin:8px 0 24px;">Untere H�lfte tippen = runter</p>
-    <button onclick="tutNext(2)" style="font-size:17px;padding:12px 32px;border-color:#00ccff;color:#00ccff;">Weiter ?</button>
+    <button onclick="tutNext(2)" style="font-size:17px;padding:12px 32px;border-color:#00ccff;color:#00ccff;">Weiter ▶</button>
   </div>
   <div id="tutStep2" class="tut-step" style="display:none;text-align:center;padding:24px 28px;">
     <div style="font-size:48px;margin-bottom:12px;">🎮</div>
     <h3 style="font-size:20px;margin:0 0 8px;color:white;">Hindernissen ausweichen</h3>
     <p style="color:#aaa;font-size:14px;margin:0 0 6px;">Ber�hre kein Objekt � sonst Game Over.</p>
     <p style="color:gold;font-size:14px;margin:0 0 24px;">🪙 M�nzen einsammeln f�r Coins!</p>
-    <button onclick="tutNext(3)" style="font-size:17px;padding:12px 32px;border-color:#00ccff;color:#00ccff;">Weiter ?</button>
+    <button onclick="tutNext(3)" style="font-size:17px;padding:12px 32px;border-color:#00ccff;color:#00ccff;">Weiter ▶</button>
   </div>
   <div id="tutStep3" class="tut-step" style="display:none;text-align:center;padding:24px 28px;">
     <div style="font-size:48px;margin-bottom:12px;">🎮</div>
@@ -116,7 +116,7 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
 <div id="menuScreen" class="screen" style="display:none">
   <h2 style="font-size:38px;margin:0 0 4px;letter-spacing:2px;">🚀 ROCKET DODGE</h2>
   <p id="menuUser" style="color:#666;font-size:15px;margin:0 0 20px;"></p>
-  <button onclick="showLevelSelect()" style="font-size:22px;padding:16px 44px;border-color:#00ccff;color:#00ccff;" data-i18n="play">? Spielen</button><br>
+  <button onclick="showLevelSelect()" style="font-size:22px;padding:16px 44px;border-color:#00ccff;color:#00ccff;" data-i18n="play">🚀 Spielen</button><br>
   <button onclick="openShop()" style="font-size:18px;padding:12px 26px;" data-i18n="shop">🛒 Shop</button>
   <button onclick="openSkinCatalog()" style="font-size:18px;padding:12px 26px;" data-i18n="skins">🎨 Skins</button><br>
   <button onclick="openLeaderboard()" style="font-size:18px;padding:12px 26px;" data-i18n="leaderboard">🏆 Bestenliste</button>
@@ -124,7 +124,7 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
   <button onclick="openFriends()" style="font-size:18px;padding:12px 26px;border-color:rgba(0,200,100,0.5);color:#00cc66;">👥 Freunde</button>
   <button onclick="checkIncomingDuels()" style="font-size:13px;padding:8px 16px;border-color:rgba(255,100,100,0.4);color:#ff9999;margin-top:4px;">⚔️ Duell-Einladungen pr�fen</button>
   <div id="onlineList" style="margin-top:14px;padding:8px 12px;background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.15);border-radius:10px;font-size:13px;color:#aaa;min-height:28px;text-align:left;">
-    <span style="color:#00ff88;margin-right:6px;">?</span><span id="onlineListText">Lade...</span>
+    <span style="color:#00ff88;margin-right:6px;">🟢</span><span id="onlineListText">Lade...</span>
   </div>
 </div>
 
@@ -166,7 +166,7 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
   <br>
   <button onclick="closeShop()">Back</button>
   <br><br>
-  <button onclick="openAdminPin()" style="font-size:11px;padding:4px 8px;opacity:0.3;border-color:rgba(255,255,255,0.2);">?</button>
+  <button onclick="openAdminPin()" style="font-size:11px;padding:4px 8px;opacity:0.3;border-color:rgba(255,255,255,0.2);">⚙</button>
 </div>
 
 <!-- ADMIN PANEL -->
@@ -187,7 +187,7 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
       <input id="adminGemsInput" type="number" min="0" value="0" style="width:90px;padding:6px;border-radius:6px;background:#111;color:#88eeff;border:1px solid #555;font-size:14px;">
     </div>
   </div>
-  <button onclick="adminGive()" style="border-color:#00cc66;color:#00cc66;margin:4px;">? Senden</button>
+  <button onclick="adminGive()" style="border-color:#00cc66;color:#00cc66;margin:4px;">✓ Senden</button>
   <button onclick="adminGiveAll()" style="border-color:#ffaa00;color:#ffaa00;margin:4px;">🌍 Allen senden</button>
   <hr style="border-color:rgba(255,255,255,0.1);margin:12px 0;">
   <p style="font-size:12px;color:#ff6666;margin:0 0 6px;">⚠️ Gef�hrliche Aktionen</p>
@@ -258,11 +258,11 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
   <p style="margin:16px 0 6px;" data-i18n="keys">Tasten</p>
   <div style="display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap;">
     <div>
-      <div style="font-size:12px;color:#aaa;margin-bottom:4px;" data-i18n="up">? Hoch</div>
+      <div style="font-size:12px;color:#aaa;margin-bottom:4px;" data-i18n="up">⬆ Hoch</div>
       <button id="bindUpBtn" onclick="startBind('up')" style="width:90px;font-size:13px;padding:8px;"><span id="bindUpLabel"></span></button>
     </div>
     <div>
-      <div style="font-size:12px;color:#aaa;margin-bottom:4px;" data-i18n="down">? Runter</div>
+      <div style="font-size:12px;color:#aaa;margin-bottom:4px;" data-i18n="down">⬇ Runter</div>
       <button id="bindDownBtn" onclick="startBind('down')" style="width:90px;font-size:13px;padding:8px;"><span id="bindDownLabel"></span></button>
     </div>
   </div>
@@ -273,8 +273,8 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
 
 <!-- PAUSE MENU -->
 <div id="pauseScreen" class="screen" style="display:none">
-  <h2 style="margin:0 0 16px;" data-i18n="paused">? Pausiert</h2>
-  <button onclick="resumeGame()" data-i18n="continue">? Weiter</button><br>
+  <h2 style="margin:0 0 16px;" data-i18n="paused">⏸ Pausiert</h2>
+  <button onclick="resumeGame()" data-i18n="continue">▶ Weiter</button><br>
   <button onclick="openPauseSettings()" data-i18n="settings">⚙️ Einstellungen</button><br>
   <button onclick="pauseToMenu()" data-i18n="mainMenu">🏠 Hauptmen�</button>
 </div>
@@ -297,11 +297,11 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
   <p style="margin:16px 0 6px;" data-i18n="keys">Tasten</p>
   <div style="display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap;">
     <div>
-      <div style="font-size:12px;color:#aaa;margin-bottom:4px;" data-i18n="up">? Hoch</div>
+      <div style="font-size:12px;color:#aaa;margin-bottom:4px;" data-i18n="up">⬆ Hoch</div>
       <button id="pBindUpBtn" onclick="startBind('up')" style="width:90px;font-size:13px;padding:8px;"><span id="pBindUpLabel"></span></button>
     </div>
     <div>
-      <div style="font-size:12px;color:#aaa;margin-bottom:4px;" data-i18n="down">? Runter</div>
+      <div style="font-size:12px;color:#aaa;margin-bottom:4px;" data-i18n="down">⬇ Runter</div>
       <button id="pBindDownBtn" onclick="startBind('down')" style="width:90px;font-size:13px;padding:8px;"><span id="pBindDownLabel"></span></button>
     </div>
   </div>
@@ -327,7 +327,7 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
   <p id="winScore" style="font-size:20px;margin:6px 0;"></p>
   <p id="winCoins" style="color:gold;font-size:15px;margin:4px 0 16px;"></p>
   <button onclick="restartGame()" data-i18n="playAgain">🔄 Nochmal</button>
-  <button id="nextLevelBtn" onclick="nextEndingLevel()" style="border-color:#00ccff;color:#00ccff;" data-i18n="nextLevel">? N�chstes Level</button>
+  <button id="nextLevelBtn" onclick="nextEndingLevel()" style="border-color:#00ccff;color:#00ccff;" data-i18n="nextLevel">▶ N�chstes Level</button>
   <button onclick="goMenu()" data-i18n="mainMenu">🏠 Hauptmen�</button>
 </div>
 
@@ -336,7 +336,7 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
   <h2 style="margin:0 0 4px;">🎮 Eigene Level</h2>
   <p style="color:#aaa;font-size:13px;margin:0 0 14px;">Nur f�r dich sichtbar</p>
   <div id="customLevelList" style="display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto;margin-bottom:14px;"></div>
-  <button onclick="openLevelEditor(null)" style="border-color:#ffcc00;color:#ffcc00;">? Neues Level erstellen</button><br><br>
+  <button onclick="openLevelEditor(null)" style="border-color:#ffcc00;color:#ffcc00;">✏️ Neues Level erstellen</button><br><br>
   <button onclick="showScreen('levelScreen')">Zur�ck</button>
 </div>
 
@@ -367,8 +367,8 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
       <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;">
         <label style="font-size:13px;"><input type="checkbox" id="edObjRock" checked> 🪨 Rock</label>
         <label style="font-size:13px;"><input type="checkbox" id="edObjSpike"> 🔺 Spike</label>
-        <label style="font-size:13px;"><input type="checkbox" id="edObjBall"> ? Ball</label>
-        <label style="font-size:13px;"><input type="checkbox" id="edObjLaser"> ? Laser</label>
+        <label style="font-size:13px;"><input type="checkbox" id="edObjBall"> 🔵 Ball</label>
+        <label style="font-size:13px;"><input type="checkbox" id="edObjLaser"> ⚡ Laser</label>
         <label style="font-size:13px;"><input type="checkbox" id="edObjZigzag"> ⚡ Zigzag</label>
       </div>
     </div>
@@ -404,10 +404,10 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
 
 <!-- 1v1 WAITING (challenger) -->
 <div id="duelWaitScreen" class="screen" style="display:none;width:min(380px,96vw);">
-  <h2 style="margin:0 0 8px;">? Warten...</h2>
+  <h2 style="margin:0 0 8px;">⏳ Warten...</h2>
   <p id="duelWaitMsg" style="color:#aaa;font-size:14px;margin:0 0 20px;"></p>
   <div style="width:40px;height:40px;border:3px solid #ff6666;border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 20px;"></div>
-  <button onclick="cancelDuel()" style="border-color:#ff4444;color:#ff4444;">? Abbrechen</button>
+  <button onclick="cancelDuel()" style="border-color:#ff4444;color:#ff4444;">✕ Abbrechen</button>
 </div>
 
 <!-- 1v1 INVITE (opponent receives) -->
@@ -415,8 +415,8 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
   <h2 style="margin:0 0 8px;">⚔️ Duell-Einladung!</h2>
   <p id="duelInviteMsg" style="color:#ffcc00;font-size:16px;margin:0 0 6px;"></p>
   <p id="duelInviteDiff" style="color:#aaa;font-size:13px;margin:0 0 20px;"></p>
-  <button onclick="acceptDuel()" style="border-color:#00cc66;color:#00cc66;margin:4px;">? Annehmen</button>
-  <button onclick="declineDuel()" style="border-color:#ff4444;color:#ff4444;margin:4px;">? Ablehnen</button>
+  <button onclick="acceptDuel()" style="border-color:#00cc66;color:#00cc66;margin:4px;">✓ Annehmen</button>
+  <button onclick="declineDuel()" style="border-color:#ff4444;color:#ff4444;margin:4px;">✕ Ablehnen</button>
 </div>
 
 <!-- 1v1 LOSE SCREEN -->
@@ -452,7 +452,7 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
   <p id="friendsMsg" style="color:#00cc66;font-size:13px;min-height:16px;margin:0 0 10px;"></p>
   <div style="display:flex;gap:6px;margin-bottom:14px;">
     <input id="friendAddInput" placeholder="Username..." style="flex:1;padding:8px;background:#111;color:white;border:1px solid #444;border-radius:8px;font-size:14px;">
-    <button onclick="sendFriendRequest()" style="border-color:#00cc66;color:#00cc66;padding:8px 14px;">?</button>
+    <button onclick="sendFriendRequest()" style="border-color:#00cc66;color:#00cc66;padding:8px 14px;">✓</button>
   </div>
   <!-- Incoming requests -->
   <div id="friendRequestsSection" style="display:none;margin-bottom:12px;">
@@ -476,16 +476,16 @@ const LANG={
     back:"Zur�ck",sensitivity:"Empfindlichkeit",volume:"Lautst�rke",
     device:"Ger�t",pc:"💻 PC",mobile:"📱 Handy",keys:"Tasten",
     up:"⬆ Hoch",down:"⬇ Runter",language:"Sprache",
-    paused:"? Pausiert",continue:"▶ Weiter",mainMenu:"🏠 Hauptmen�",
+    paused:"⏸ Pausiert",continue:"▶ Weiter",mainMenu:"🏠 Hauptmen�",
     gameOver:"💀 Game Over",restart:"🔄 Neustart",
     bestOnLevel:"Bestes auf diesem Level:",coinsEarned:"Coins verdient:",
-    loading:"? Laden...",noEntries:"Noch keine Eintr�ge.",
+    loading:"⏳ Laden...",noEntries:"Noch keine Eintr�ge.",
     player:"Spieler",score:"Score",
     won:"🏆 Du hast es geschafft!",endingDone:"Ending abgeschlossen",
-    nextLevel:"? N�chstes Level",playAgain:"🔄 Nochmal",
+    nextLevel:"▶ N�chstes Level",playAgain:"🔄 Nochmal",
     beatenCount:"Geschafft:",of:"/","levels":" Level",
-    beaten:"? Geschafft",yourCoins:"Deine Coins:",
-    bindHint1:"Dr�cke eine Taste f�r '",bindHint2:"'...",saved:"? Gespeichert",
+    beaten:"✓ Geschafft",yourCoins:"Deine Coins:",
+    bindHint1:"Dr�cke eine Taste f�r '",bindHint2:"'...",saved:"✓ Gespeichert",
     hoch:"Hoch",runter:"Runter",nextBoost:"n�chster Boost:",
   },
   en:{
@@ -495,16 +495,16 @@ const LANG={
     back:"Back",sensitivity:"Sensitivity",volume:"Volume",
     device:"Device",pc:"💻 PC",mobile:"📱 Mobile",keys:"Keys",
     up:"⬆ Up",down:"⬇ Down",language:"Language",
-    paused:"? Paused",continue:"▶ Continue",mainMenu:"🏠 Main Menu",
+    paused:"⏸ Paused",continue:"▶ Continue",mainMenu:"🏠 Main Menu",
     gameOver:"💀 Game Over",restart:"🔄 Restart",
     bestOnLevel:"Best on this level:",coinsEarned:"Coins earned:",
-    loading:"? Loading...",noEntries:"No entries yet.",
+    loading:"⏳ Loading...",noEntries:"No entries yet.",
     player:"Player",score:"Score",
     won:"🏆 You did it!",endingDone:"Ending completed",
     nextLevel:"▶ Next Level",playAgain:"🔄 Play Again",
     beatenCount:"Beaten:",of:"/","levels":" Levels",
-    beaten:"? Done",yourCoins:"Your coins:",
-    bindHint1:"Press a key for '",bindHint2:"'...",saved:"? Saved",
+    beaten:"✓ Done",yourCoins:"Your coins:",
+    bindHint1:"Press a key for '",bindHint2:"'...",saved:"✓ Saved",
     hoch:"Up",runter:"Down",nextBoost:"next boost:",
   }
 };
@@ -609,7 +609,7 @@ function flamePrice(f){return (f.id+1)*100;}
 
 // ===== BACKGROUNDS =====
 const BACKGROUNDS=[
-  {id:"none",    name:"Default",    emoji:"?",price:0,   desc:"Plain black"},
+  {id:"none",    name:"Default",    emoji:"⬛",price:0,   desc:"Plain black"},
   {id:"stars",   name:"Stars",      emoji:"🌌",price:300, desc:"Moving starfield"},
   {id:"nebula",  name:"Nebula",     emoji:"🌌",price:350, desc:"Purple nebula clouds"},
   {id:"matrix",  name:"Matrix",     emoji:"🌌",price:400, desc:"Green code rain"},
@@ -1078,7 +1078,7 @@ async function adminGive(){
   const coins=parseInt(document.getElementById("adminCoinsInput").value)||0;
   const gems=parseInt(document.getElementById("adminGemsInput").value)||0;
   if(!target){adminGiveAll();return;}
-  document.getElementById("adminMsg").innerText="? Wird gesendet...";
+  document.getElementById("adminMsg").innerText="⏳ Wird gesendet...";
   await fetchBoard();
   if(!Array.isArray(globalBoard.pendingRewards)) globalBoard.pendingRewards=[];
   globalBoard.pendingRewards.push({target,coins,gems,ts:Date.now()});
@@ -1088,7 +1088,7 @@ async function adminGive(){
 async function adminGiveAll(){
   const coins=parseInt(document.getElementById("adminCoinsInput").value)||0;
   const gems=parseInt(document.getElementById("adminGemsInput").value)||0;
-  document.getElementById("adminMsg").innerText="? Wird gesendet...";
+  document.getElementById("adminMsg").innerText="⏳ Wird gesendet...";
   await fetchBoard();
   if(!Array.isArray(globalBoard.pendingRewards)) globalBoard.pendingRewards=[];
   globalBoard.pendingRewards.push({target:"all",coins,gems,claimedBy:[],ts:Date.now()});
@@ -1116,15 +1116,15 @@ function adminResetAll(){
   saveUsers(users);
   updateTopBar();
   // Push globalen Reset-Befehl �ber JSONBin damit andere Ger�te auch resettet werden
-  document.getElementById("adminMsg").innerText="? Wird gesendet...";
+  document.getElementById("adminMsg").innerText="⏳ Wird gesendet...";
   fetchBoard().then(()=>{
     if(!Array.isArray(globalBoard.pendingRewards)) globalBoard.pendingRewards=[];
     globalBoard.pendingRewards.push({target:"all",coins:0,gems:0,reset:true,claimedBy:[],ts:Date.now()});
     return pushBin();
   }).then(()=>{
-    document.getElementById("adminMsg").innerText="? Alle Coins & Diamanten gel�scht (lokal + global).";
+    document.getElementById("adminMsg").innerText="✓ Alle Coins & Diamanten gel�scht (lokal + global).";
   }).catch(()=>{
-    document.getElementById("adminMsg").innerText="? Lokal gel�scht. JSONBin-Sync fehlgeschlagen.";
+    document.getElementById("adminMsg").innerText="✓ Lokal gel�scht. JSONBin-Sync fehlgeschlagen.";
   });
 }
 
@@ -1161,8 +1161,8 @@ async function renderFriends(){
       div.style.cssText="display:flex;align-items:center;justify-content:space-between;background:rgba(255,200,0,0.08);border:1px solid rgba(255,200,0,0.2);border-radius:8px;padding:8px 10px;margin-bottom:4px;";
       div.innerHTML=`<span style="font-size:14px;">👤 ${r.from}</span>
         <span>
-          <button onclick="acceptFriend('${r.from}')" style="font-size:12px;padding:4px 10px;border-color:#00cc66;color:#00cc66;margin:0 2px;">?</button>
-          <button onclick="declineFriend('${r.from}')" style="font-size:12px;padding:4px 10px;border-color:#ff4444;color:#ff4444;margin:0 2px;">?</button>
+          <button onclick="acceptFriend('${r.from}')" style="font-size:12px;padding:4px 10px;border-color:#00cc66;color:#00cc66;margin:0 2px;">✓</button>
+          <button onclick="declineFriend('${r.from}')" style="font-size:12px;padding:4px 10px;border-color:#ff4444;color:#ff4444;margin:0 2px;">✕</button>
         </span>`;
       reqList.appendChild(div);
     });
@@ -1192,7 +1192,7 @@ async function renderFriends(){
       </span>
       <span>
         <button onclick="startDuelFromFriend('${name}')" style="font-size:11px;padding:3px 8px;border-color:#ff6666;color:#ff6666;margin:0 2px;">✕</button>
-        <button onclick="removeFriend('${name}')" style="font-size:11px;padding:3px 8px;border-color:#444;color:#888;margin:0 2px;">?</button>
+        <button onclick="removeFriend('${name}')" style="font-size:11px;padding:3px 8px;border-color:#444;color:#888;margin:0 2px;">✕</button>
       </span>`;
     list.appendChild(div);
   });
@@ -1392,7 +1392,7 @@ function renderSkinPreview(id){
   document.getElementById("skinPreviewPrice").innerText=skin.free?"Free":skinPrice(skin)+" 🪙";
   const btn=document.getElementById("skinActionBtn");
   btn.style.display="inline-block";
-  if(isActive){btn.innerText="? In Use";btn.disabled=true;}
+  if(isActive){btn.innerText="✓ In Use";btn.disabled=true;}
   else if(owned){btn.innerText="Nutzen";btn.disabled=false;}
   else{btn.innerText="Kaufen ("+skinPrice(skin)+"🪙");btn.disabled=false;}
 }
@@ -1448,7 +1448,7 @@ function selectFlamePreview(id){
   document.getElementById("skinPreviewName").innerText=f.name;
   document.getElementById("skinPreviewPrice").innerText=flamePrice(f)+"💎";
   const btn=document.getElementById("skinActionBtn");btn.style.display="inline-block";
-  if(isActive){btn.innerText="? Aktiv";btn.disabled=true;}
+  if(isActive){btn.innerText="✓ Aktiv";btn.disabled=true;}
   else if(owned){btn.innerText="Nutzen";btn.disabled=false;}
   else{btn.innerText="Kaufen ("+flamePrice(f)+"💎");btn.disabled=false;}
 }
