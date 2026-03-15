@@ -985,22 +985,31 @@ async function pushScore(diff,newScore){
 
 async function claimPendingRewards(){
   try{
-    await fetchBoard();
-    if(!Array.isArray(globalBoard.pendingRewards)||globalBoard.pendingRewards.length===0) return;
-    const mine=globalBoard.pendingRewards.filter(r=>{
-      if(r.target===currentUser) return true;
-      if(r.target==="all"){if(!r.claimedBy)r.claimedBy=[];return !r.claimedBy.includes(currentUser);}
-      return false;
+    // Use atomic update: fetch, mark claimed, push — all in one operation
+    let totalCoins=0,totalGems=0,doReset=false,hasRewards=false;
+    await duelAtomicUpdate(data=>{
+      if(!Array.isArray(data.pendingRewards)||data.pendingRewards.length===0) return;
+      const mine=data.pendingRewards.filter(r=>{
+        if(r.target===currentUser) return true;
+        if(r.target==="all"){if(!r.claimedBy)r.claimedBy=[];return !r.claimedBy.includes(currentUser);}
+        return false;
+      });
+      if(mine.length===0) return;
+      hasRewards=true;
+      mine.forEach(r=>{if(r.reset)doReset=true;else{totalCoins+=r.coins||0;totalGems+=r.gems||0;}});
+      // mark/remove in the same atomic write
+      data.pendingRewards=data.pendingRewards.filter(r=>{
+        if(r.target===currentUser) return false; // remove personal
+        if(r.target==="all"){
+          if(!r.claimedBy)r.claimedBy=[];
+          if(!r.claimedBy.includes(currentUser))r.claimedBy.push(currentUser);
+          return true;
+        }
+        return true;
+      });
     });
-    if(mine.length===0) return;
-    let totalCoins=0,totalGems=0,doReset=false;
-    mine.forEach(r=>{if(r.reset)doReset=true;else{totalCoins+=r.coins||0;totalGems+=r.gems||0;}});
-    globalBoard.pendingRewards=globalBoard.pendingRewards.filter(r=>{
-      if(r.target===currentUser) return false;
-      if(r.target==="all"){if(!r.claimedBy)r.claimedBy=[];if(!r.claimedBy.includes(currentUser))r.claimedBy.push(currentUser);return true;}
-      return true;
-    });
-    await pushBin();
+    if(!hasRewards) return;
+    // Only apply locally AFTER successful push
     let u=getUser();
     if(doReset){u.coins=0;u.diamonds=0;}
     else{u.coins=(u.coins||0)+totalCoins;u.diamonds=(u.diamonds||0)+totalGems;}
