@@ -428,6 +428,7 @@ const BACKGROUNDS=[
   {id:"blood",   name:"Blood Moon", emoji:"🔴",price:1000,desc:"Red blood moon sky"},
   {id:"desert",  name:"Desert",     emoji:"🏜️",price:1000,desc:"Sandy dunes"},
   {id:"storm",   name:"Thunderstorm",emoji:"⛈️",price:1000,desc:"Lightning storm"},
+  {id:"planet",  name:"Elias",emoji:"🪐",price:25000,desc:"Epic ringed planet"},
 ];
 
 // ===== MUSIC =====
@@ -1336,6 +1337,93 @@ function drawBackground(){
       let ly=0;while(ly<canvas.height*0.7){ly+=20+Math.random()*30;ctx.lineTo(lx+(Math.random()-0.5)*40,ly);}
       ctx.stroke();ctx.shadowBlur=0;
     }
+  } else if(bg==="planet"){
+    const t=Date.now()*0.0003;
+    const W=canvas.width,H=canvas.height;
+    // deep space bg
+    const sg=ctx.createRadialGradient(W*0.3,H*0.3,0,W*0.5,H*0.5,W*0.8);
+    sg.addColorStop(0,'#1a0040');sg.addColorStop(0.3,'#0a0030');sg.addColorStop(0.6,'#050020');sg.addColorStop(1,'#000008');
+    ctx.fillStyle=sg;ctx.fillRect(0,0,W,H);
+    // nebula clouds
+    [[W*0.15,H*0.2,220,'rgba(80,0,180,0.18)'],[W*0.8,H*0.7,280,'rgba(0,30,160,0.15)'],
+     [W*0.6,H*0.1,180,'rgba(180,0,80,0.12)'],[W*0.1,H*0.8,200,'rgba(0,60,200,0.1)']
+    ].forEach(([x,y,r,c])=>{
+      const g=ctx.createRadialGradient(x,y,0,x,y,r);
+      g.addColorStop(0,c);g.addColorStop(1,'transparent');
+      ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    });
+    // stars with twinkle
+    bgStars.forEach((s,i)=>{
+      const twinkle=0.4+0.6*Math.abs(Math.sin(t*3+i*0.7));
+      ctx.globalAlpha=twinkle*0.9;
+      const hue=i%3===0?200:i%3===1?280:60;
+      ctx.fillStyle=`hsl(${hue},60%,90%)`;
+      ctx.fillRect(s.x,s.y,s.s,s.s);
+      // 4-point star sparkle for bigger stars
+      if(s.s>1.5){
+        ctx.strokeStyle=`hsla(${hue},80%,95%,${twinkle*0.6})`;ctx.lineWidth=0.5;
+        ctx.beginPath();ctx.moveTo(s.x-4,s.y);ctx.lineTo(s.x+4,s.y);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(s.x,s.y-4);ctx.lineTo(s.x,s.y+4);ctx.stroke();
+      }
+      s.x-=s.speed*0.2;if(s.x<-4)s.x=W+4;
+    });
+    ctx.globalAlpha=1;
+    // small red planet top-right
+    const rpx=W*0.78,rpy=H*0.12,rpr=22;
+    const rpg=ctx.createRadialGradient(rpx-rpr*0.3,rpy-rpr*0.3,rpr*0.05,rpx,rpy,rpr);
+    rpg.addColorStop(0,'#ff8888');rpg.addColorStop(0.5,'#cc2200');rpg.addColorStop(1,'#440000');
+    ctx.fillStyle=rpg;ctx.beginPath();ctx.arc(rpx,rpy,rpr,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='rgba(255,100,50,0.3)';ctx.lineWidth=1;ctx.stroke();
+    // main planet
+    const px=W*0.5,py=H*0.52,pr=Math.min(W,H)*0.22;
+    // planet glow
+    const glowG=ctx.createRadialGradient(px,py,pr*0.5,px,py,pr*2.2);
+    glowG.addColorStop(0,'rgba(0,150,255,0.18)');glowG.addColorStop(0.5,'rgba(0,80,200,0.08)');glowG.addColorStop(1,'transparent');
+    ctx.fillStyle=glowG;ctx.fillRect(0,0,W,H);
+    // rings (behind planet — bottom half)
+    ctx.save();
+    ctx.translate(px,py);
+    const ringColors=[
+      'rgba(255,255,255,0.12)','rgba(100,180,255,0.25)','rgba(180,220,255,0.18)',
+      'rgba(255,255,255,0.08)','rgba(80,160,255,0.2)','rgba(200,230,255,0.15)',
+      'rgba(255,255,255,0.06)','rgba(60,140,255,0.18)',
+    ];
+    ringColors.forEach((col,i)=>{
+      const rx=(pr*1.35+i*pr*0.18);const ry=rx*0.28;
+      ctx.strokeStyle=col;ctx.lineWidth=i%3===1?2.5:1.2;
+      ctx.beginPath();
+      // only bottom arc (behind planet)
+      ctx.ellipse(0,0,rx,ry,0,0,Math.PI);
+      ctx.stroke();
+    });
+    ctx.restore();
+    // planet body
+    const pg=ctx.createRadialGradient(px-pr*0.3,py-pr*0.35,pr*0.05,px,py,pr);
+    pg.addColorStop(0,'#1a3a5a');pg.addColorStop(0.3,'#0a2040');pg.addColorStop(0.6,'#051530');pg.addColorStop(1,'#000510');
+    ctx.fillStyle=pg;ctx.beginPath();ctx.arc(px,py,pr,0,Math.PI*2);ctx.fill();
+    // planet surface shimmer (teal glow at bottom)
+    const shimG=ctx.createRadialGradient(px,py+pr*0.6,0,px,py+pr*0.5,pr*0.8);
+    shimG.addColorStop(0,'rgba(0,220,200,0.22)');shimG.addColorStop(1,'transparent');
+    ctx.fillStyle=shimG;ctx.beginPath();ctx.arc(px,py,pr,0,Math.PI*2);ctx.fill();
+    // planet atmosphere rim
+    const rimG=ctx.createRadialGradient(px,py,pr*0.88,px,py,pr*1.05);
+    rimG.addColorStop(0,'transparent');rimG.addColorStop(0.5,'rgba(0,180,255,0.15)');rimG.addColorStop(1,'transparent');
+    ctx.fillStyle=rimG;ctx.beginPath();ctx.arc(px,py,pr*1.05,0,Math.PI*2);ctx.fill();
+    // rings (front — top half)
+    ctx.save();
+    ctx.translate(px,py);
+    ringColors.forEach((col,i)=>{
+      const rx=(pr*1.35+i*pr*0.18);const ry=rx*0.28;
+      ctx.strokeStyle=col;ctx.lineWidth=i%3===1?2.5:1.2;
+      ctx.beginPath();
+      ctx.ellipse(0,0,rx,ry,0,Math.PI,Math.PI*2);
+      ctx.stroke();
+    });
+    ctx.restore();
+    // bottom light flare
+    const flareG=ctx.createRadialGradient(W*0.35,H*0.95,0,W*0.35,H*0.95,120);
+    flareG.addColorStop(0,'rgba(255,255,255,0.18)');flareG.addColorStop(1,'transparent');
+    ctx.fillStyle=flareG;ctx.fillRect(0,0,W,H);
   }
 }
 
