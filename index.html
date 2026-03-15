@@ -974,7 +974,16 @@ async function fetchBoard(){
 }
 async function pushBin(){
   try{
-    await fetch(JSONBIN_URL,{method:"PUT",headers:{"Content-Type":"application/json","X-Access-Key":JSONBIN_KEY},body:JSON.stringify(globalBoard)});
+    // trim bin before pushing to stay under size limits
+    const data={...globalBoard};
+    if(Array.isArray(data.pendingRewards)) data.pendingRewards=data.pendingRewards.slice(-30);
+    if(data.presence){
+      const entries=Object.entries(data.presence).sort((a,b)=>b[1]-a[1]).slice(0,50);
+      data.presence=Object.fromEntries(entries);
+    }
+    if(Array.isArray(data.duels)) data.duels=data.duels.filter(d=>Date.now()-d.created<600000).slice(-20);
+    const r=await fetch(JSONBIN_URL,{method:"PUT",headers:{"Content-Type":"application/json","X-Access-Key":JSONBIN_KEY},body:JSON.stringify(data)});
+    if(!r.ok) console.warn("pushBin failed: HTTP "+r.status);
   }catch(e){console.warn("Bin push failed:",e);}
 }
 async function pushScore(diff,newScore){
@@ -2410,10 +2419,16 @@ async function duelAtomicUpdate(mutateFn){
     if(!Array.isArray(data.duels)) data.duels=[];
     // clean duels older than 10min
     data.duels=data.duels.filter(d=>Date.now()-d.created<600000);
+    // limit presence entries to last 50 to keep bin small
+    if(data.presence){
+      const entries=Object.entries(data.presence).sort((a,b)=>b[1]-a[1]).slice(0,50);
+      data.presence=Object.fromEntries(entries);
+    }
+    // limit pendingRewards to last 30
+    if(Array.isArray(data.pendingRewards)) data.pendingRewards=data.pendingRewards.slice(-30);
     const result=mutateFn(data);
     const putR=await fetch(JSONBIN_URL,{method:"PUT",headers:{"Content-Type":"application/json","X-Access-Key":JSONBIN_KEY},body:JSON.stringify(data)});
-    if(!putR.ok) return null;
-    // keep globalBoard in sync
+    if(!putR.ok){console.error("duelAtomicUpdate PUT failed:",putR.status);return null;}
     globalBoard={...globalBoard,...data};
     return result;
   }catch(e){console.error("duelAtomicUpdate error:",e);return null;}
