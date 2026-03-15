@@ -194,6 +194,9 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
   <button onclick="adminResetOne()" style="border-color:#ff4444;color:#ff4444;margin:4px;">🗑️ Spieler zurücksetzen</button>
   <button onclick="adminResetAll()" style="border-color:#ff0000;color:#ff0000;margin:4px;">💣 ALLE zurücksetzen</button>
   <p id="adminMsg" style="color:#00cc66;font-size:13px;min-height:18px;margin:8px 0 0;"></p>
+  <hr style="border-color:rgba(255,255,255,0.1);margin:12px 0;">
+  <p style="font-size:12px;color:#aaa;margin:0 0 6px;">👥 Spieler Online-Status</p>
+  <div id="adminOnlineList" style="max-height:160px;overflow-y:auto;text-align:left;font-size:12px;background:#0d0d0d;border-radius:8px;padding:8px;border:1px solid #222;"></div>
   <br>
   <button onclick="closeAdmin()">Zurück</button>
 </div>
@@ -1042,7 +1045,34 @@ async function claimPendingRewards(){
   }catch(e){console.warn("claimPendingRewards failed:",e);}
 }
 function openAdminPin(){const pin=prompt("PIN eingeben:");if(pin!=="1208"){if(pin!==null)alert("Falscher PIN");return;}openAdmin();}
-function openAdmin(){document.getElementById("adminMsg").innerText="";showScreen("adminScreen");}
+async function openAdmin(){
+  document.getElementById("adminMsg").innerText="";
+  showScreen("adminScreen");
+  await fetchBoard();
+  renderAdminOnlineList();
+}
+function renderAdminOnlineList(){
+  const presence=globalBoard.presence||{};
+  const now=Date.now();
+  const entries=Object.entries(presence).sort((a,b)=>b[1]-a[1]);
+  const el=document.getElementById("adminOnlineList");
+  if(!entries.length){el.innerHTML='<span style="color:#555;">Keine Daten</span>';return;}
+  el.innerHTML=entries.map(([name,ts])=>{
+    const diff=now-ts;
+    const online=diff<20000;
+    const dot=online?'🟢':'🔴';
+    let when;
+    if(online) when='gerade online';
+    else if(diff<60000) when=`vor ${Math.floor(diff/1000)}s`;
+    else if(diff<3600000) when=`vor ${Math.floor(diff/60000)}min`;
+    else if(diff<86400000) when=`vor ${Math.floor(diff/3600000)}h`;
+    else when=`vor ${Math.floor(diff/86400000)}d`;
+    return `<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #1a1a1a;">
+      <span>${dot} <b>${name}</b></span>
+      <span style="color:#666;">${when}</span>
+    </div>`;
+  }).join('');
+}
 async function adminGive(){
   const target=document.getElementById("adminPlayerSelect").value.trim();
   const coins=parseInt(document.getElementById("adminCoinsInput").value)||0;
