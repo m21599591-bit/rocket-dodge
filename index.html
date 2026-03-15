@@ -210,7 +210,7 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
   <div id="skinGrid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;overflow-y:auto;max-height:260px;padding:2px;margin-bottom:12px;"></div>
   <!-- Preview bar at bottom -->
   <div id="skinPreviewPanel" style="background:#0d0d0d;border-radius:12px;padding:10px 16px;display:flex;align-items:center;gap:14px;border:1px solid #333;">
-    <canvas id="skinPreviewCanvas" width="80" height="44"></canvas>
+    <canvas id="skinPreviewCanvas" width="120" height="60"></canvas>
     <div style="flex:1;text-align:left;">
       <p id="skinPreviewName" style="font-size:15px;margin:0 0 2px;font-weight:bold;"></p>
       <p id="skinPreviewPrice" style="font-size:13px;color:#aaa;margin:0 0 8px;"></p>
@@ -1318,12 +1318,21 @@ function renderSkinGrid(){
     const owned=u.ownedSkins.includes(skin.id);
     const isActive=u.activeSkin===skin.id;
     const cell=document.createElement("div");
-    cell.style.cssText="background:#0d0d0d;border-radius:8px;padding:6px 4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;border:2px solid "+(isActive?"#ff3333":"#2a2a2a")+";";
-    const cv=document.createElement("canvas");cv.width=72;cv.height=40;
-    drawSkinOnCanvas(cv.getContext("2d"),skin,4,8,64,24);
-    const lbl=document.createElement("div");lbl.style.cssText="font-size:9px;margin-top:4px;color:#bbb;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;";lbl.innerText=skin.name;
-    if(!owned){const pr=document.createElement("div");pr.style.cssText="font-size:8px;color:gold;margin-bottom:2px;";pr.innerText=skinPrice(skin)+"🪙";cell.appendChild(pr);}
-    cell.appendChild(cv);cell.appendChild(lbl);
+    cell.style.cssText="background:#0d0d0d;border-radius:8px;padding:5px 3px;cursor:pointer;display:flex;flex-direction:column;align-items:center;border:2px solid "+(isActive?"#ff3333":"#2a2a2a")+";gap:2px;";
+    // color swatch instead of canvas
+    const swatch=document.createElement("div");
+    const col=skin.color||skin.body||skin.glow||"#888";
+    swatch.style.cssText="width:48px;height:20px;border-radius:4px;background:"+col+";";
+    const lbl=document.createElement("div");
+    lbl.style.cssText="font-size:9px;color:#bbb;text-align:center;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 2px;";
+    lbl.innerText=skin.name;
+    if(!owned){
+      const pr=document.createElement("div");
+      pr.style.cssText="font-size:8px;color:gold;";
+      pr.innerText=skinPrice(skin)+"🪙";
+      cell.appendChild(pr);
+    }
+    cell.appendChild(swatch);cell.appendChild(lbl);
     cell.onclick=()=>selectSkinPreview(skin.id);
     grid.appendChild(cell);
   });
@@ -1332,18 +1341,25 @@ function renderSkinGrid(){
 }
 
 function selectSkinPreview(id){previewSkinId=id;renderSkinPreview(id);}
+
 function renderSkinPreview(id){
-  const skin=SKINS.find(s=>s.id===id)||SKINS[0];const u=getUser();
-  const owned=u.ownedSkins.includes(skin.id);const isActive=u.activeSkin===skin.id;
+  const skin=SKINS.find(s=>s.id===id)||SKINS[0];
+  const u=getUser();
+  const owned=u.ownedSkins.includes(skin.id);
+  const isActive=u.activeSkin===skin.id;
   const pc=document.getElementById("skinPreviewCanvas");
-  const px=pc.getContext("2d");px.clearRect(0,0,80,44);
-  drawSkinOnCanvas(px,skin,8,10,64,24);
+  const px=pc.getContext("2d");
+  px.clearRect(0,0,pc.width,pc.height);
+  // reset all context state before drawing
+  px.shadowBlur=0;px.globalAlpha=1;px.setTransform(1,0,0,1,0,0);
+  drawSkinOnCanvas(px,skin,8,8,pc.width-16,pc.height-16);
   document.getElementById("skinPreviewName").innerText=skin.name;
   document.getElementById("skinPreviewPrice").innerText=skin.free?"Free":skinPrice(skin)+" 🪙";
-  const btn=document.getElementById("skinActionBtn");btn.style.display="inline-block";
+  const btn=document.getElementById("skinActionBtn");
+  btn.style.display="inline-block";
   if(isActive){btn.innerText="✓ In Use";btn.disabled=true;}
-  else if(owned){btn.innerText="Use";btn.disabled=false;}
-  else{btn.innerText="Buy ("+skinPrice(skin)+"🪙)";btn.disabled=false;}
+  else if(owned){btn.innerText="Nutzen";btn.disabled=false;}
+  else{btn.innerText="Kaufen ("+skinPrice(skin)+"🪙)";btn.disabled=false;}
 }
 
 function renderFlameGrid(){
@@ -1354,15 +1370,19 @@ function renderFlameGrid(){
     const owned=(u.ownedFlames||[]).includes(f.id);
     const isActive=(u.activeFlame||0)===f.id;
     const cell=document.createElement("div");
-    cell.style.cssText="background:#0d0d0d;border-radius:8px;padding:5px;cursor:pointer;display:flex;flex-direction:column;align-items:center;border:2px solid "+(isActive?"#ff3333":"#2a2a2a")+";";
-    const cv=document.createElement("canvas");cv.width=44;cv.height=28;
-    const cx=cv.getContext("2d");
-    const g=cx.createLinearGradient(40,14,0,14);
-    g.addColorStop(0,f.c1);g.addColorStop(0.4,f.c2);g.addColorStop(1,"rgba(0,0,0,0)");
-    cx.fillStyle=g;cx.beginPath();cx.moveTo(40,14);cx.lineTo(20,4);cx.lineTo(0,14);cx.lineTo(20,24);cx.closePath();cx.fill();
-    const lbl=document.createElement("div");lbl.style.cssText="font-size:10px;margin-top:3px;color:#bbb;";lbl.innerText=f.name;
-    if(!owned){const pr=document.createElement("div");pr.style.cssText="font-size:9px;color:gold;";pr.innerText=flamePrice(f)+"🪙";cell.appendChild(pr);}
-    cell.appendChild(cv);cell.appendChild(lbl);
+    cell.style.cssText="background:#0d0d0d;border-radius:8px;padding:5px 3px;cursor:pointer;display:flex;flex-direction:column;align-items:center;border:2px solid "+(isActive?"#ff3333":"#2a2a2a")+";gap:2px;";
+    const swatch=document.createElement("div");
+    swatch.style.cssText="width:48px;height:20px;border-radius:4px;background:linear-gradient(to right,"+f.c1+","+f.c2+");";
+    const lbl=document.createElement("div");
+    lbl.style.cssText="font-size:9px;color:#bbb;text-align:center;";
+    lbl.innerText=f.name;
+    if(!owned){
+      const pr=document.createElement("div");
+      pr.style.cssText="font-size:8px;color:#88eeff;";
+      pr.innerText=flamePrice(f)+"💎";
+      cell.appendChild(pr);
+    }
+    cell.appendChild(swatch);cell.appendChild(lbl);
     cell.onclick=()=>selectFlamePreview(f.id);
     grid.appendChild(cell);
   });
@@ -1375,10 +1395,13 @@ function selectFlamePreview(id){
   const owned=(u.ownedFlames||[]).includes(id);
   const isActive=(u.activeFlame||0)===id;
   const pc=document.getElementById("skinPreviewCanvas");
-  const px=pc.getContext("2d");px.clearRect(0,0,80,80);
-  const g=px.createLinearGradient(70,40,10,40);
-  g.addColorStop(0,f.c1);g.addColorStop(0.4,f.c2);g.addColorStop(0.7,f.c3);g.addColorStop(1,"rgba(0,0,0,0)");
-  px.fillStyle=g;px.beginPath();px.moveTo(70,40);px.lineTo(40,20);px.lineTo(10,40);px.lineTo(40,60);px.closePath();px.fill();
+  const px=pc.getContext("2d");
+  px.clearRect(0,0,pc.width,pc.height);
+  px.shadowBlur=0;
+  const g=px.createLinearGradient(pc.width-8,pc.height/2,8,pc.height/2);
+  g.addColorStop(0,f.c1);g.addColorStop(0.5,f.c2);g.addColorStop(1,"rgba(0,0,0,0)");
+  px.fillStyle=g;
+  px.beginPath();px.moveTo(pc.width-8,pc.height/2);px.lineTo(pc.width/2,8);px.lineTo(8,pc.height/2);px.lineTo(pc.width/2,pc.height-8);px.closePath();px.fill();
   document.getElementById("skinPreviewName").innerText=f.name;
   document.getElementById("skinPreviewPrice").innerText=flamePrice(f)+"💎";
   const btn=document.getElementById("skinActionBtn");btn.style.display="inline-block";
@@ -1394,7 +1417,7 @@ function skinAction(){
   if(!owned){
     const skin=SKINS.find(s=>s.id===previewSkinId);
     const price=skinPrice(skin);
-    if(u.coins<price){alert("Not enough coins");return;}
+    if(u.coins<price){alert("Nicht genug Coins 🪙");return;}
     u.coins-=price;u.ownedSkins.push(previewSkinId);saveUser(u);updateTopBar();
   }
   u=getUser();u.activeSkin=previewSkinId;saveUser(u);selectedSkinId=previewSkinId;
