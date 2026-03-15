@@ -939,6 +939,7 @@ function convertCoins(cost,gems){
 // ===== ADMIN =====
 const JSONBIN_ID="69b727b6c3097a1dd52a531b";
 const JSONBIN_KEY="$2a$10$PBxQcrIrreCnxpKzo7raa.kN4q0.q.x5B8a3YEdfmPrlDgzBpSLDO";
+const JSONBIN_MASTER="$2a$10$HJUosPrpxeJ/NhTrTyuW8egho4xkkNBWVqXqbvjZJxS8FvTCDB39O";
 const JSONBIN_URL=`https://api.jsonbin.io/v3/b/${JSONBIN_ID}`;
 let globalBoard={easy:[],medium:[],hard:[],ending:[],pendingRewards:[],duels:[],friendRequests:[],presence:{}};
 
@@ -970,7 +971,7 @@ async function pushBin(){
       data.presence=Object.fromEntries(entries);
     }
     if(Array.isArray(data.duels)) data.duels=data.duels.filter(d=>Date.now()-d.created<600000).slice(-20);
-    const r=await fetch(JSONBIN_URL,{method:"PUT",headers:{"Content-Type":"application/json","X-Access-Key":JSONBIN_KEY},body:JSON.stringify(data)});
+    const r=await fetch(JSONBIN_URL,{method:"PUT",headers:{"Content-Type":"application/json","X-Master-Key":JSONBIN_MASTER},body:JSON.stringify(data)});
     if(!r.ok) console.warn("pushBin failed: HTTP "+r.status);
   }catch(e){console.warn("Bin push failed:",e);}
 }
@@ -2418,7 +2419,7 @@ async function binPut(data){
   if(Array.isArray(data.duels)) data.duels=data.duels.filter(d=>Date.now()-d.created<600000).slice(-15);
   if(Array.isArray(data.pendingRewards)) data.pendingRewards=data.pendingRewards.slice(-30);
   if(data.presence){const e=Object.entries(data.presence).sort((a,b)=>b[1]-a[1]).slice(0,40);data.presence=Object.fromEntries(e);}
-  const r=await fetch(JSONBIN_URL,{method:"PUT",headers:{"Content-Type":"application/json","X-Access-Key":JSONBIN_KEY},body:JSON.stringify(data)});
+  const r=await fetch(JSONBIN_URL,{method:"PUT",headers:{"Content-Type":"application/json","X-Master-Key":JSONBIN_MASTER},body:JSON.stringify(data)});
   if(!r.ok) throw new Error("PUT "+r.status);
   return r;
 }
