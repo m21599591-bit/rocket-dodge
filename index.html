@@ -1241,8 +1241,10 @@ function updateOnlineList(){
   const el=document.getElementById("onlineListText");
   if(!el) return;
   const presence=globalBoard.presence||{};
-  const online=Object.keys(presence).filter(name=>Date.now()-presence[name]<20000&&name!==currentUser);
-  if(online.length===0){el.innerText="Niemand sonst online";return;}
+  const u=getUser();
+  const friends=u?u.friends||[]:[];
+  const online=friends.filter(name=>presence[name]&&Date.now()-presence[name]<20000);
+  if(online.length===0){el.innerText="Keine Freunde online";return;}
   el.innerHTML=online.map(n=>`<span style="color:white;">${n}</span>`).join('<span style="color:#444;"> · </span>');
 }
 
