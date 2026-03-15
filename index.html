@@ -2122,31 +2122,46 @@ async function endDuelGame(){
   const id=duelId;
   const role=duelRole;
   const oppName=duelOpponentName||"Gegner";
-  // snapshot opponent state BEFORE writing (duelSyncTick kept this up to date)
-  const oppWasAlive=duelOppAlive;
-  const oppLastScore=duelOppScore;
-  // mark me as dead atomically
+
+  // Step 1: write my death to bin
   await duelAtomicUpdate(data=>{
     const d=data.duels.find(x=>x.id===id);
     if(!d) return;
     if(role==="challenger"){d.challengerAlive=false;d.challengerScore=myScore;}
     else{d.opponentAlive=false;d.opponentScore=myScore;}
   });
+
+  // Step 2: wait 800ms so opponent has time to write their state too
+  await new Promise(r=>setTimeout(r,800));
+
+  // Step 3: read fresh state from bin
+  let oppStillAlive=true;
+  let oppFinalScore=duelOppScore;
+  try{
+    const r=await fetch(JSONBIN_URL+"/latest",{headers:{"X-Access-Key":JSONBIN_KEY}});
+    if(r.ok){
+      const data=(await r.json()).record||{};
+      const d=(data.duels||[]).find(x=>x.id===id);
+      if(d){
+        oppStillAlive=role==="challenger"?(d.opponentAlive!==false):(d.challengerAlive!==false);
+        oppFinalScore=role==="challenger"?(d.opponentScore||0):(d.challengerScore||0);
+      }
+    }
+  }catch(e){}
+
   duelId=null;duelRole=null;
   document.getElementById("duelLoseScore").innerText="Dein Score: "+myScore;
-  if(oppWasAlive){
-    // opponent still alive when we died → we lost
+  if(oppStillAlive){
     document.getElementById("duelLoseMsg").innerText=oppName+" lebt noch. Du hast verloren!";
     showScreen("duelLoseScreen");
   } else {
-    // opponent already dead (duelSyncTick should have caught this, but fallback)
-    if(myScore>=oppLastScore){
-      document.getElementById("winScore").innerText="Score: "+myScore+" vs "+oppLastScore;
+    if(myScore>=oppFinalScore){
+      document.getElementById("winScore").innerText="Score: "+myScore+" vs "+oppFinalScore;
       document.getElementById("winCoins").innerText="⚔️ Du hast das Duell gewonnen!";
       document.getElementById("nextLevelBtn").style.display="none";
       showScreen("winScreen");
     } else {
-      document.getElementById("duelLoseMsg").innerText=oppName+" hatte mehr Punkte ("+oppLastScore+" vs "+myScore+").";
+      document.getElementById("duelLoseMsg").innerText=oppName+" hatte mehr Punkte ("+oppFinalScore+" vs "+myScore+").";
       showScreen("duelLoseScreen");
     }
   }
