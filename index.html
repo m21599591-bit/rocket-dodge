@@ -945,7 +945,7 @@ let globalBoard={easy:[],medium:[],hard:[],ending:[],pendingRewards:[],duels:[],
 
 async function fetchBoard(){
   try{
-    const r=await fetch(JSONBIN_URL+"/latest",{headers:{"X-Access-Key":JSONBIN_KEY}});
+    const r=await fetch(JSONBIN_URL+"/latest",{headers:{"X-Master-Key":JSONBIN_MASTER}});
     if(!r.ok) throw new Error("HTTP "+r.status);
     const j=await r.json();
     const data=j.record||j;
@@ -2409,7 +2409,7 @@ function selectDuelDiff(d){
 
 // ---- helpers ----
 async function binGet(){
-  const r=await fetch(JSONBIN_URL+"/latest",{headers:{"X-Access-Key":JSONBIN_KEY}});
+  const r=await fetch(JSONBIN_URL+"/latest",{headers:{"X-Master-Key":JSONBIN_MASTER}});
   if(!r.ok) throw new Error("GET "+r.status);
   const j=await r.json();
   return j.record||j;
