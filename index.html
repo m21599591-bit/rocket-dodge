@@ -77,6 +77,7 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
   <button onclick="openSkinCatalog()" data-i18n="skins">🎨 Skins</button><br>
   <button onclick="openLeaderboard()" data-i18n="leaderboard">🏆 Bestenliste</button>
   <button onclick="openSettingsMenu()" data-i18n="settings">⚙️ Einstellungen</button>
+  <button onclick="openFriends()" style="border-color:rgba(0,200,100,0.5);color:#00cc66;">👥 Freunde</button>
   <button onclick="checkIncomingDuels()" style="font-size:12px;padding:6px 14px;border-color:rgba(255,100,100,0.4);color:#ff9999;margin-top:4px;">🔔 Duell-Einladungen prüfen</button>
 </div>
 
@@ -391,6 +392,26 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
   <button onclick="goMenu()">🏠 Hauptmenü</button>
 </div>
 
+<!-- FRIENDS SCREEN -->
+<div id="friendsScreen" class="screen" style="display:none;width:min(420px,96vw);">
+  <h2 style="margin:0 0 4px;">👥 Freunde</h2>
+  <p id="friendsMsg" style="color:#00cc66;font-size:13px;min-height:16px;margin:0 0 10px;"></p>
+  <div style="display:flex;gap:6px;margin-bottom:14px;">
+    <input id="friendAddInput" placeholder="Username..." style="flex:1;padding:8px;background:#111;color:white;border:1px solid #444;border-radius:8px;font-size:14px;">
+    <button onclick="sendFriendRequest()" style="border-color:#00cc66;color:#00cc66;padding:8px 14px;">➕</button>
+  </div>
+  <!-- Incoming requests -->
+  <div id="friendRequestsSection" style="display:none;margin-bottom:12px;">
+    <p style="font-size:12px;color:#ffcc00;margin:0 0 6px;">📩 Anfragen</p>
+    <div id="friendRequestsList"></div>
+  </div>
+  <!-- Friends list -->
+  <p style="font-size:12px;color:#aaa;margin:0 0 6px;">Freunde</p>
+  <div id="friendsList" style="display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto;"></div>
+  <br>
+  <button onclick="showScreen('menuScreen')">Zurück</button>
+</div>
+
 <script>
 // ===== LANGUAGE =====
 const LANG={
@@ -644,7 +665,7 @@ function getUser(){const us=getUsers();return us[currentUser]||null;}
 function saveUser(u){const us=getUsers();us[currentUser]=u;saveUsers(us);}
 
 const ALL_SCREENS=["loginScreen","menuScreen","levelScreen","shopScreen","skinScreen",
-  "leaderScreen","settingsScreen","pauseScreen","pauseSettingsScreen","endScreen","winScreen","adminScreen","customScreen","customEditorScreen","duel1v1Screen","duelWaitScreen","duelInviteScreen","duelLoseScreen","duelResultScreen"];
+  "leaderScreen","settingsScreen","pauseScreen","pauseSettingsScreen","endScreen","winScreen","adminScreen","customScreen","customEditorScreen","duel1v1Screen","duelWaitScreen","duelInviteScreen","duelLoseScreen","duelResultScreen","friendsScreen"];
 function showScreen(id){
   ALL_SCREENS.forEach(s=>{
     const el=document.getElementById(s);
@@ -761,7 +782,10 @@ function afterLogin(){
   claimPendingRewards();
   // poll for duel invites every 3s
   setInterval(()=>{if(!gameRunning) checkIncomingDuels();},3000);
-  setTimeout(checkIncomingDuels,500); // immediate check on login
+  setTimeout(checkIncomingDuels,500);
+  startPresenceHeartbeat();
+  setInterval(syncAcceptedFriends,15000);
+  setTimeout(syncAcceptedFriends,1000);
 }
 
 window.onload=function(){
@@ -1006,6 +1030,159 @@ function openLeaderboard(){
   fetchBoard().then(()=>showLeaderTab('easy'));
 }
 function closeLeaderboard(){showScreen("menuScreen");}
+
+// ===== FRIENDS =====
+async function openFriends(){
+  showScreen("friendsScreen");
+  document.getElementById("friendsMsg").innerText="";
+  document.getElementById("friendAddInput").value="";
+  await renderFriends();
+}
+
+async function renderFriends(){
+  await fetchBoard();
+  const u=getUser();
+  const friends=u.friends||[];
+  const incoming=(globalBoard.friendRequests||[]).filter(r=>r.to===currentUser&&r.status==="pending");
+
+  // incoming requests section
+  const reqSection=document.getElementById("friendRequestsSection");
+  const reqList=document.getElementById("friendRequestsList");
+  if(incoming.length>0){
+    reqSection.style.display="block";
+    reqList.innerHTML="";
+    incoming.forEach(r=>{
+      const div=document.createElement("div");
+      div.style.cssText="display:flex;align-items:center;justify-content:space-between;background:rgba(255,200,0,0.08);border:1px solid rgba(255,200,0,0.2);border-radius:8px;padding:8px 10px;margin-bottom:4px;";
+      div.innerHTML=`<span style="font-size:14px;">👤 ${r.from}</span>
+        <span>
+          <button onclick="acceptFriend('${r.from}')" style="font-size:12px;padding:4px 10px;border-color:#00cc66;color:#00cc66;margin:0 2px;">✓</button>
+          <button onclick="declineFriend('${r.from}')" style="font-size:12px;padding:4px 10px;border-color:#ff4444;color:#ff4444;margin:0 2px;">✕</button>
+        </span>`;
+      reqList.appendChild(div);
+    });
+  } else {
+    reqSection.style.display="none";
+  }
+
+  // friends list
+  const list=document.getElementById("friendsList");
+  list.innerHTML="";
+  if(friends.length===0){
+    list.innerHTML="<p style='color:#555;font-size:13px;'>Noch keine Freunde. Füge jemanden hinzu!</p>";
+    return;
+  }
+  // check online status via JSONBin presence
+  const presence=globalBoard.presence||{};
+  friends.forEach(name=>{
+    const lastSeen=presence[name]||0;
+    const online=Date.now()-lastSeen<20000;
+    const div=document.createElement("div");
+    div.style.cssText="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.04);border:1px solid #2a2a2a;border-radius:8px;padding:8px 12px;";
+    div.innerHTML=`
+      <span style="display:flex;align-items:center;gap:8px;">
+        <span style="width:8px;height:8px;border-radius:50%;background:${online?"#00ff88":"#555"};display:inline-block;"></span>
+        <span style="font-size:14px;">${name}</span>
+        <span style="font-size:11px;color:#555;">${online?"online":"offline"}</span>
+      </span>
+      <span>
+        <button onclick="startDuelFromFriend('${name}')" style="font-size:11px;padding:3px 8px;border-color:#ff6666;color:#ff6666;margin:0 2px;">⚔️</button>
+        <button onclick="removeFriend('${name}')" style="font-size:11px;padding:3px 8px;border-color:#444;color:#888;margin:0 2px;">✕</button>
+      </span>`;
+    list.appendChild(div);
+  });
+}
+
+async function sendFriendRequest(){
+  const target=document.getElementById("friendAddInput").value.trim();
+  const msg=document.getElementById("friendsMsg");
+  if(!target){msg.innerText="Bitte einen Namen eingeben.";msg.style.color="#ff6666";return;}
+  if(target===currentUser){msg.innerText="Du kannst dich nicht selbst hinzufügen.";msg.style.color="#ff6666";return;}
+  const u=getUser();
+  if((u.friends||[]).includes(target)){msg.innerText="Bereits befreundet.";msg.style.color="#ffcc00";return;}
+  await fetchBoard();
+  const already=(globalBoard.friendRequests||[]).find(r=>r.from===currentUser&&r.to===target&&r.status==="pending");
+  if(already){msg.innerText="Anfrage bereits gesendet.";msg.style.color="#ffcc00";return;}
+  await duelAtomicUpdate(data=>{
+    if(!Array.isArray(data.friendRequests)) data.friendRequests=[];
+    data.friendRequests.push({from:currentUser,to:target,status:"pending",ts:Date.now()});
+  });
+  msg.innerText="Anfrage an "+target+" gesendet!";msg.style.color="#00cc66";
+  document.getElementById("friendAddInput").value="";
+}
+
+async function acceptFriend(from){
+  await duelAtomicUpdate(data=>{
+    if(!Array.isArray(data.friendRequests)) return;
+    const r=data.friendRequests.find(x=>x.from===from&&x.to===currentUser&&x.status==="pending");
+    if(r) r.status="accepted";
+  });
+  // add both sides locally
+  let u=getUser();
+  if(!u.friends) u.friends=[];
+  if(!u.friends.includes(from)) u.friends.push(from);
+  saveUser(u);
+  document.getElementById("friendsMsg").innerText=from+" ist jetzt dein Freund!";
+  document.getElementById("friendsMsg").style.color="#00cc66";
+  await renderFriends();
+}
+
+async function declineFriend(from){
+  await duelAtomicUpdate(data=>{
+    if(!Array.isArray(data.friendRequests)) return;
+    const r=data.friendRequests.find(x=>x.from===from&&x.to===currentUser&&x.status==="pending");
+    if(r) r.status="declined";
+  });
+  await renderFriends();
+}
+
+async function removeFriend(name){
+  if(!confirm(name+" aus Freundesliste entfernen?")) return;
+  let u=getUser();
+  u.friends=(u.friends||[]).filter(f=>f!==name);
+  saveUser(u);
+  await renderFriends();
+}
+
+function startDuelFromFriend(name){
+  showScreen("duel1v1Screen");
+  document.getElementById("duelOpponent").value=name;
+  selectDuelDiff('easy');
+}
+
+// update own presence every 10s while logged in
+function startPresenceHeartbeat(){
+  async function beat(){
+    if(!currentUser) return;
+    try{
+      await duelAtomicUpdate(data=>{
+        if(!data.presence) data.presence={};
+        data.presence[currentUser]=Date.now();
+      });
+    }catch(e){}
+  }
+  beat();
+  setInterval(beat,10000);
+}
+
+// check for accepted friend requests and add them locally
+async function syncAcceptedFriends(){
+  if(!currentUser) return;
+  try{
+    await fetchBoard();
+    const accepted=(globalBoard.friendRequests||[]).filter(r=>r.from===currentUser&&r.status==="accepted");
+    if(accepted.length===0) return;
+    let u=getUser();if(!u.friends)u.friends=[];
+    let changed=false;
+    accepted.forEach(r=>{if(!u.friends.includes(r.to)){u.friends.push(r.to);changed=true;}});
+    if(changed){saveUser(u);updateTopBar();}
+    // clean up accepted requests
+    await duelAtomicUpdate(data=>{
+      if(!Array.isArray(data.friendRequests)) return;
+      data.friendRequests=data.friendRequests.filter(r=>!(r.from===currentUser&&r.status==="accepted"));
+    });
+  }catch(e){}
+}
 function showLeaderTab(tab){
   leaderTab=tab;
   const list=(globalBoard[tab]||[]).slice(0,3);
