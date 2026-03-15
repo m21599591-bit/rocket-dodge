@@ -347,35 +347,7 @@ const SKINS=[
   {id:7,name:"Violet",color:"violet",shape:"rect",free:true},
   {id:8,name:"Mint",color:"#00ffcc",shape:"rect",free:true},
   {id:9,name:"White",color:"white",shape:"rect",free:true},
-  {id:10,name:"Arrow",color:"cyan",shape:"arrow",free:false},
-  {id:11,name:"Diamond",color:"deepskyblue",shape:"diamond",free:false},
-  {id:12,name:"Triangle",color:"orange",shape:"triangle",free:false},
-  {id:13,name:"Circle",color:"lime",shape:"circle",free:false},
-  {id:14,name:"Ruby",color:"red",shape:"diamond",free:false},
-  {id:15,name:"Emerald",color:"#00ff88",shape:"diamond",free:false},
-  {id:16,name:"Sapphire",color:"royalblue",shape:"diamond",free:false},
-  {id:17,name:"Amethyst",color:"mediumpurple",shape:"diamond",free:false},
-  {id:18,name:"Topaz",color:"#ffd700",shape:"diamond",free:false},
-  {id:19,name:"Onyx",color:"#222",shape:"diamond",free:false},
-  {id:20,name:"Flame",color:"#ff4400",shape:"triangle",free:false},
-  {id:21,name:"Storm",color:"#aaccff",shape:"triangle",free:false},
-  {id:22,name:"Toxic",color:"#aaff00",shape:"triangle",free:false},
-  {id:23,name:"Neon",color:"#ff00ff",shape:"arrow",free:false},
-  {id:24,name:"Ghost",color:"rgba(200,200,255,0.75)",shape:"circle",free:false},
-  {id:25,name:"Lava",color:"#ff6600",shape:"circle",free:false},
-  {id:26,name:"Ocean",color:"#0088ff",shape:"circle",free:false},
-  {id:27,name:"Solar",color:"#ffee00",shape:"circle",free:false},
-  {id:28,name:"Void",color:"#440066",shape:"circle",free:false},
-  {id:29,name:"Plasma",color:"#cc00ff",shape:"arrow",free:false},
-  {id:30,name:"Blaze",color:"#ff2200",shape:"arrow",free:false},
-  {id:31,name:"Frost",color:"#ccffff",shape:"arrow",free:false},
-  {id:32,name:"Thunder",color:"#ffff00",shape:"arrow",free:false},
-  {id:33,name:"Crimson",color:"crimson",shape:"rect",free:false},
-  {id:34,name:"Cobalt",color:"#0047ab",shape:"rect",free:false},
-  {id:35,name:"Copper",color:"#b87333",shape:"rect",free:false},
-  {id:36,name:"Silver",color:"silver",shape:"rect",free:false},
-  {id:37,name:"Bronze",color:"#cd7f32",shape:"rect",free:false},
-  {id:38,name:"Obsidian",color:"#1a1a2e",shape:"diamond",free:false},
+  // last 11 rocket skins
   {id:39,name:"Aurora",color:"#88ffcc",shape:"triangle",free:false},
   {id:40,name:"Inferno",shape:"rocket",body:"#e8a000",fin:"#cc3300",glow:"#ff6600",free:false},
   {id:41,name:"Glacier",shape:"rocket",body:"#88ddff",fin:"#0055aa",glow:"#00ccff",free:false},
@@ -387,10 +359,32 @@ const SKINS=[
   {id:47,name:"Rose",shape:"rocket",body:"#ff88bb",fin:"#cc2266",glow:"#ff44aa",free:false},
   {id:48,name:"Toxic R",shape:"rocket",body:"#aaff00",fin:"#446600",glow:"#88ff00",free:false},
   {id:49,name:"Void R",shape:"rocket",body:"#220033",fin:"#440066",glow:"#cc00ff",free:false},
+  // 20 new invader skins (10000 coins each)
+  {id:50,name:"Invader Green",color:"#44ff44",shape:"invader",style:0,free:false,coinPrice:10000},
+  {id:51,name:"Invader Lime",color:"#aaff00",shape:"invader",style:1,free:false,coinPrice:10000},
+  {id:52,name:"Invader Neon",color:"#00ff88",shape:"invader",style:2,free:false,coinPrice:10000},
+  {id:53,name:"Invader Jade",color:"#00cc66",shape:"invader",style:3,free:false,coinPrice:10000},
+  {id:54,name:"Invader Acid",color:"#ccff00",shape:"invader",style:4,free:false,coinPrice:10000},
+  {id:55,name:"Invader White",color:"#ffffff",shape:"invader",style:0,free:false,coinPrice:10000},
+  {id:56,name:"Invader Silver",color:"#cccccc",shape:"invader",style:1,free:false,coinPrice:10000},
+  {id:57,name:"Invader Ghost",color:"#eeeeff",shape:"invader",style:2,free:false,coinPrice:10000},
+  {id:58,name:"Invader Pearl",color:"#ffe8ff",shape:"invader",style:3,free:false,coinPrice:10000},
+  {id:59,name:"Invader Ice",color:"#aaddff",shape:"invader",style:4,free:false,coinPrice:10000},
+  {id:60,name:"Invader Cyan",color:"#00eeff",shape:"invader",style:0,free:false,coinPrice:10000},
+  {id:61,name:"Invader Teal",color:"#00cccc",shape:"invader",style:1,free:false,coinPrice:10000},
+  {id:62,name:"Invader Aqua",color:"#00ffdd",shape:"invader",style:2,free:false,coinPrice:10000},
+  {id:63,name:"Invader Sky",color:"#44bbff",shape:"invader",style:3,free:false,coinPrice:10000},
+  {id:64,name:"Invader Ocean",color:"#0088cc",shape:"invader",style:4,free:false,coinPrice:10000},
+  {id:65,name:"Invader Pink",color:"#ff44cc",shape:"invader",style:0,free:false,coinPrice:10000},
+  {id:66,name:"Invader Magenta",color:"#ff00ff",shape:"invader",style:1,free:false,coinPrice:10000},
+  {id:67,name:"Invader Violet",color:"#cc44ff",shape:"invader",style:2,free:false,coinPrice:10000},
+  {id:68,name:"Invader Purple",color:"#9933ff",shape:"invader",style:3,free:false,coinPrice:10000},
+  {id:69,name:"Invader Rose",color:"#ff6699",shape:"invader",style:4,free:false,coinPrice:10000},
 ];
 function skinPrice(skin){
   if(skin.free) return 0;
-  const paidIndex=SKINS.filter(s=>!s.free).findIndex(s=>s.id===skin.id);
+  if(skin.coinPrice) return skin.coinPrice;
+  const paidIndex=SKINS.filter(s=>!s.free&&!s.coinPrice).findIndex(s=>s.id===skin.id);
   return (paidIndex+1)*50;
 }
 
@@ -1677,6 +1671,9 @@ function drawSkinOnCanvas(c,skin,x,y,w,h){
   if(skin.shape==="rocket"){
     drawRocketShape(c,skin,x,y,w,h);return;
   }
+  if(skin.shape==="invader"){
+    drawInvader(c,skin.color||"#44ff44",skin.style||0,x,y,w,h);return;
+  }
   c.fillStyle=skin.color||"cyan";
   if(skin.shape==="rect"||!skin.shape){
     c.fillRect(x,y,w,h);
@@ -1690,6 +1687,70 @@ function drawSkinOnCanvas(c,skin,x,y,w,h){
     c.beginPath();c.moveTo(x+w,y+h/2);c.lineTo(x+w*0.4,y);c.lineTo(x+w*0.4,y+h*0.3);
     c.lineTo(x,y+h*0.3);c.lineTo(x,y+h*0.7);c.lineTo(x+w*0.4,y+h*0.7);c.lineTo(x+w*0.4,y+h);c.closePath();c.fill();
   }
+}
+
+// draws a pixel-art space invader, style 0-4
+function drawInvader(c,color,style,x,y,w,h){
+  c.fillStyle=color;
+  c.shadowColor=color;c.shadowBlur=8;
+  const px=w/8,py=h/8;
+  // each style is an 8x8 pixel grid (1=filled)
+  const grids=[
+    // style 0: skull invader (green row in image)
+    [0,1,1,0,0,1,1,0,
+     1,1,1,1,1,1,1,1,
+     1,1,0,1,1,0,1,1,
+     1,1,1,1,1,1,1,1,
+     0,1,1,1,1,1,1,0,
+     0,0,1,0,0,1,0,0,
+     0,1,0,1,1,0,1,0,
+     1,0,0,0,0,0,0,1],
+    // style 1: crab invader (white row)
+    [0,0,1,0,0,1,0,0,
+     0,0,0,1,1,0,0,0,
+     0,1,1,1,1,1,1,0,
+     1,1,0,1,1,0,1,1,
+     1,1,1,1,1,1,1,1,
+     0,1,0,0,0,0,1,0,
+     1,0,1,0,0,1,0,1,
+     0,1,0,0,0,0,1,0],
+    // style 2: squid invader (teal row)
+    [0,0,0,1,1,0,0,0,
+     0,0,1,1,1,1,0,0,
+     0,1,1,1,1,1,1,0,
+     1,1,0,1,1,0,1,1,
+     1,1,1,1,1,1,1,1,
+     0,0,1,0,0,1,0,0,
+     0,1,0,1,1,0,1,0,
+     0,0,1,0,0,1,0,0],
+    // style 3: spider invader (purple row)
+    [1,0,0,1,1,0,0,1,
+     0,1,1,1,1,1,1,0,
+     1,1,1,1,1,1,1,1,
+     1,1,0,1,1,0,1,1,
+     1,1,1,1,1,1,1,1,
+     1,0,1,1,1,1,0,1,
+     1,0,1,0,0,1,0,1,
+     0,0,1,0,0,1,0,0],
+    // style 4: alien face
+    [0,1,0,1,1,0,1,0,
+     0,0,1,1,1,1,0,0,
+     0,1,1,0,0,1,1,0,
+     1,1,1,1,1,1,1,1,
+     1,0,1,1,1,1,0,1,
+     1,0,1,0,0,1,0,1,
+     0,0,0,1,1,0,0,0,
+     0,0,1,0,0,1,0,0],
+  ];
+  const grid=grids[style%grids.length];
+  for(let row=0;row<8;row++){
+    for(let col=0;col<8;col++){
+      if(grid[row*8+col]){
+        c.fillRect(x+col*px,y+row*py,px-0.5,py-0.5);
+      }
+    }
+  }
+  c.shadowBlur=0;
 }
 
 function drawRocketShape(c,skin,x,y,w,h){
