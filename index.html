@@ -87,6 +87,7 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
     <button class="lvl-btn" id="diffMedium" onclick="selectDiff('medium')">Medium</button>
     <button class="lvl-btn" id="diffHard" onclick="selectDiff('hard')">Hard</button>
     <button class="lvl-btn" id="diffEnding" onclick="selectDiff('ending')" style="border-color:rgba(255,50,50,0.5);color:#ff8888;">Ending</button>
+    <button class="lvl-btn" id="diffCustom" onclick="openCustomLevels()" style="border-color:rgba(255,200,0,0.5);color:#ffcc00;">✏️ Erstellen</button>
   </div>
   <div id="subLevelRow"></div>
   <br>
@@ -268,6 +269,54 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
   <button onclick="goMenu()" data-i18n="mainMenu">🏠 Hauptmenü</button>
 </div>
 
+<!-- CUSTOM LEVELS LIST -->
+<div id="customScreen" class="screen" style="display:none;width:min(500px,96vw);">
+  <h2 style="margin:0 0 4px;">✏️ Eigene Level</h2>
+  <p style="color:#aaa;font-size:13px;margin:0 0 14px;">Nur für dich sichtbar</p>
+  <div id="customLevelList" style="display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto;margin-bottom:14px;"></div>
+  <button onclick="openLevelEditor(null)" style="border-color:#ffcc00;color:#ffcc00;">➕ Neues Level erstellen</button><br><br>
+  <button onclick="showScreen('levelScreen')">Zurück</button>
+</div>
+
+<!-- CUSTOM LEVEL EDITOR -->
+<div id="customEditorScreen" class="screen" style="display:none;width:min(480px,96vw);">
+  <h2 style="margin:0 0 12px;" id="editorTitle">✏️ Level erstellen</h2>
+  <div style="display:flex;flex-direction:column;gap:10px;text-align:left;max-width:360px;margin:0 auto;">
+    <div>
+      <label style="font-size:13px;color:#aaa;">Level Name</label><br>
+      <input id="edLevelName" placeholder="z.B. Mein Level" style="width:100%;padding:8px;background:#111;color:white;border:1px solid #444;border-radius:8px;font-size:14px;box-sizing:border-box;">
+    </div>
+    <div>
+      <label style="font-size:13px;color:#aaa;">Ziel-Score (Punkte bis Gewinn)</label><br>
+      <input id="edGoalScore" type="number" min="100" max="99999" value="2000" style="width:100%;padding:8px;background:#111;color:white;border:1px solid #444;border-radius:8px;font-size:14px;box-sizing:border-box;">
+    </div>
+    <div>
+      <label style="font-size:13px;color:#aaa;">Geschwindigkeit (1–20)</label><br>
+      <input id="edSpeed" type="range" min="1" max="20" value="5" oninput="document.getElementById('edSpeedVal').innerText=this.value" style="width:100%;">
+      <span id="edSpeedVal" style="color:#00ccff;">5</span>
+    </div>
+    <div>
+      <label style="font-size:13px;color:#aaa;">Spawn-Rate — niedrig = mehr Objekte (5–80)</label><br>
+      <input id="edSpawnRate" type="range" min="5" max="80" value="40" oninput="document.getElementById('edSpawnVal').innerText=this.value" style="width:100%;">
+      <span id="edSpawnVal" style="color:#00ccff;">40</span>
+    </div>
+    <div>
+      <label style="font-size:13px;color:#aaa;">Objekt-Typen</label><br>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;">
+        <label style="font-size:13px;"><input type="checkbox" id="edObjRock" checked> 🪨 Rock</label>
+        <label style="font-size:13px;"><input type="checkbox" id="edObjSpike"> 🔺 Spike</label>
+        <label style="font-size:13px;"><input type="checkbox" id="edObjBall"> ⚽ Ball</label>
+        <label style="font-size:13px;"><input type="checkbox" id="edObjLaser"> ⚡ Laser</label>
+        <label style="font-size:13px;"><input type="checkbox" id="edObjZigzag"> 💎 Zigzag</label>
+      </div>
+    </div>
+  </div>
+  <br>
+  <button onclick="saveCustomLevel()" style="border-color:#00cc66;color:#00cc66;">💾 Speichern</button>
+  <button onclick="openCustomLevels()" style="margin-left:8px;">Abbrechen</button>
+  <input type="hidden" id="edEditIndex" value="-1">
+</div>
+
 <script>
 // ===== LANGUAGE =====
 const LANG={
@@ -424,6 +473,12 @@ const BACKGROUNDS=[
   {id:"desert",  name:"Desert",     emoji:"🏜️",price:1000,desc:"Sandy dunes"},
   {id:"storm",   name:"Thunderstorm",emoji:"⛈️",price:1000,desc:"Lightning storm"},
   {id:"planet",  name:"Elias",emoji:"🪐",price:25000,desc:"Epic ringed planet"},
+  {id:"retrocity",  name:"Retro City",  emoji:"🌆",price:1000,desc:"Pink pixel city"},
+  {id:"neoncity",   name:"Neon Night",  emoji:"🌃",price:1000,desc:"Dark neon city"},
+  {id:"desertsun",  name:"Desert Sun",  emoji:"🌅",price:1000,desc:"Golden desert sunset"},
+  {id:"snowmount",  name:"Snow Mountain",emoji:"🏔️",price:1000,desc:"Icy pixel mountain"},
+  {id:"pixelforest",name:"Pixel Forest", emoji:"🌲",price:1000,desc:"Night pixel forest"},
+  {id:"pastelsky",  name:"Pastel Sky",  emoji:"☁️",price:1000,desc:"Dreamy pastel clouds"},
 ];
 
 // ===== MUSIC =====
@@ -500,6 +555,7 @@ let obstacles=[],coins=[],gems=[],spawnTimer=0,coinSpawnTimer=0,gemSpawnTimer=0;
 let sessionCoins=0,sessionGems=0;
 let activePowerUp=null,powerUpTimer=0,lastPowerUpScore=0;
 const POWER_UPS=["noObstacles","slowSpeed","lessObstacles"];
+let customGoalScore=2000;
 let rocket={x:120,y:300,w:44,h:22,speed:7};
 let keys={};
 let sensitivity=7,volume=50;
@@ -513,7 +569,7 @@ function getUser(){const us=getUsers();return us[currentUser]||null;}
 function saveUser(u){const us=getUsers();us[currentUser]=u;saveUsers(us);}
 
 const ALL_SCREENS=["loginScreen","menuScreen","levelScreen","shopScreen","skinScreen",
-  "leaderScreen","settingsScreen","pauseScreen","pauseSettingsScreen","endScreen","winScreen","adminScreen"];
+  "leaderScreen","settingsScreen","pauseScreen","pauseSettingsScreen","endScreen","winScreen","adminScreen","customScreen","customEditorScreen"];
 function showScreen(id){
   ALL_SCREENS.forEach(s=>{
     const el=document.getElementById(s);
@@ -1422,7 +1478,307 @@ function drawBackground(){
     const flareG=ctx.createRadialGradient(W*0.35,H*0.95,0,W*0.35,H*0.95,120);
     flareG.addColorStop(0,'rgba(255,255,255,0.18)');flareG.addColorStop(1,'transparent');
     ctx.fillStyle=flareG;ctx.fillRect(0,0,W,H);
+  } else if(bg==="retrocity"){
+    // Retro City — pink/purple pixel skyline
+    const W=canvas.width,H=canvas.height;
+    // sky gradient
+    const sg=ctx.createLinearGradient(0,0,0,H);
+    sg.addColorStop(0,"#ff6eb4");sg.addColorStop(0.5,"#c850c0");sg.addColorStop(1,"#4a0080");
+    ctx.fillStyle=sg;ctx.fillRect(0,0,W,H);
+    // stars
+    bgStars.forEach(s=>{ctx.fillStyle="rgba(255,220,255,0.7)";ctx.fillRect(s.x,s.y*0.5,s.s,s.s);s.x-=s.speed*0.3;if(s.x<0)s.x=W;});
+    // ground
+    ctx.fillStyle="#2a0050";ctx.fillRect(0,H*0.78,W,H*0.22);
+    ctx.fillStyle="#3d0070";ctx.fillRect(0,H*0.75,W,H*0.04);
+    // buildings back layer
+    const bldBack=[
+      [0.0,0.55,0.08,0.45],[0.07,0.35,0.07,0.65],[0.13,0.45,0.06,0.55],
+      [0.18,0.25,0.09,0.75],[0.26,0.40,0.07,0.60],[0.32,0.30,0.08,0.70],
+      [0.39,0.50,0.06,0.50],[0.44,0.20,0.10,0.80],[0.53,0.38,0.07,0.62],
+      [0.59,0.28,0.09,0.72],[0.67,0.45,0.06,0.55],[0.72,0.32,0.08,0.68],
+      [0.79,0.42,0.07,0.58],[0.85,0.22,0.08,0.78],[0.92,0.48,0.08,0.52],
+    ];
+    bldBack.forEach(([x,y,w,h])=>{
+      ctx.fillStyle="#7030a0";ctx.fillRect(x*W,y*H,w*W,h*H);
+      // windows
+      for(let wy=y*H+4;wy<H*0.75-4;wy+=8){
+        for(let wx=x*W+3;wx<(x+w)*W-3;wx+=7){
+          if(Math.random()>0.4){ctx.fillStyle="rgba(255,220,100,0.7)";ctx.fillRect(wx,wy,4,4);}
+        }
+      }
+    });
+    // buildings front layer
+    const bldFront=[
+      [0.0,0.60,0.10,0.40],[0.09,0.42,0.08,0.58],[0.16,0.55,0.07,0.45],
+      [0.22,0.35,0.10,0.65],[0.31,0.50,0.08,0.50],[0.38,0.38,0.09,0.62],
+      [0.46,0.58,0.07,0.42],[0.52,0.28,0.11,0.72],[0.62,0.48,0.08,0.52],
+      [0.69,0.36,0.09,0.64],[0.77,0.52,0.07,0.48],[0.83,0.30,0.10,0.70],
+      [0.92,0.45,0.08,0.55],
+    ];
+    bldFront.forEach(([x,y,w,h])=>{
+      ctx.fillStyle="#4a0090";ctx.fillRect(x*W,y*H,w*W,h*H);
+      for(let wy=y*H+4;wy<H*0.75-4;wy+=8){
+        for(let wx=x*W+3;wx<(x+w)*W-3;wx+=7){
+          if(Math.random()>0.5){ctx.fillStyle="rgba(180,100,255,0.8)";ctx.fillRect(wx,wy,4,4);}
+        }
+      }
+    });
+  } else if(bg==="neoncity"){
+    // Neon Night City — dark with neon lights
+    const W=canvas.width,H=canvas.height;
+    ctx.fillStyle="#050010";ctx.fillRect(0,0,W,H);
+    // neon sky glow
+    const ng=ctx.createLinearGradient(0,0,0,H*0.5);
+    ng.addColorStop(0,"rgba(255,0,150,0.15)");ng.addColorStop(1,"transparent");
+    ctx.fillStyle=ng;ctx.fillRect(0,0,W,H);
+    bgStars.forEach(s=>{ctx.fillStyle="rgba(200,200,255,0.6)";ctx.fillRect(s.x,s.y*0.4,s.s,s.s);s.x-=s.speed*0.2;if(s.x<0)s.x=W;});
+    // ground
+    ctx.fillStyle="#0a0020";ctx.fillRect(0,H*0.78,W,H*0.22);
+    // neon ground line
+    ctx.strokeStyle="#00ffff";ctx.lineWidth=2;ctx.shadowColor="#00ffff";ctx.shadowBlur=10;
+    ctx.beginPath();ctx.moveTo(0,H*0.78);ctx.lineTo(W,H*0.78);ctx.stroke();ctx.shadowBlur=0;
+    // buildings
+    const nb=[
+      [0.0,0.30,0.09],[0.08,0.15,0.10],[0.17,0.35,0.08],[0.24,0.20,0.11],
+      [0.34,0.38,0.07],[0.40,0.10,0.12],[0.51,0.32,0.08],[0.58,0.22,0.10],
+      [0.67,0.40,0.07],[0.73,0.18,0.11],[0.83,0.28,0.09],[0.91,0.35,0.09],
+    ];
+    const neonCols=["#ff00aa","#00ffff","#ff6600","#aa00ff","#00ff88"];
+    nb.forEach(([x,y,w],i)=>{
+      const col=neonCols[i%neonCols.length];
+      ctx.fillStyle="#0d0025";ctx.fillRect(x*W,y*H,w*W,(0.78-y)*H);
+      // neon outline
+      ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.shadowColor=col;ctx.shadowBlur=8;
+      ctx.strokeRect(x*W,y*H,w*W,(0.78-y)*H);ctx.shadowBlur=0;
+      // windows
+      for(let wy=y*H+6;wy<H*0.76;wy+=10){
+        for(let wx=x*W+4;wx<(x+w)*W-4;wx+=8){
+          if(Math.random()>0.5){ctx.fillStyle=col;ctx.globalAlpha=0.6;ctx.fillRect(wx,wy,4,5);ctx.globalAlpha=1;}
+        }
+      }
+    });
+  } else if(bg==="desertsun"){
+    // Desert Sunset — golden dunes
+    const W=canvas.width,H=canvas.height;
+    const sg=ctx.createLinearGradient(0,0,0,H);
+    sg.addColorStop(0,"#ffffff");sg.addColorStop(0.2,"#ffe066");sg.addColorStop(0.5,"#ffaa00");sg.addColorStop(0.8,"#cc5500");sg.addColorStop(1,"#882200");
+    ctx.fillStyle=sg;ctx.fillRect(0,0,W,H);
+    // sun
+    const sunG=ctx.createRadialGradient(W*0.5,H*0.35,0,W*0.5,H*0.35,H*0.25);
+    sunG.addColorStop(0,"rgba(255,255,200,0.9)");sunG.addColorStop(0.4,"rgba(255,220,50,0.5)");sunG.addColorStop(1,"transparent");
+    ctx.fillStyle=sunG;ctx.fillRect(0,0,W,H);
+    // dune layers
+    [[H*0.55,"#e8a000"],[H*0.62,"#cc8800"],[H*0.68,"#b07000"],[H*0.74,"#8a5500"]].forEach(([y,c])=>{
+      ctx.fillStyle=c;ctx.beginPath();ctx.moveTo(0,y);
+      for(let x=0;x<=W;x+=W/8) ctx.quadraticCurveTo(x+W/16,y-H*0.06,x+W/8,y);
+      ctx.lineTo(W,H);ctx.lineTo(0,H);ctx.closePath();ctx.fill();
+    });
+    // ground
+    ctx.fillStyle="#7a4000";ctx.fillRect(0,H*0.78,W,H*0.22);
+    // small rocks pixel style
+    [[0.1,0.76],[0.3,0.77],[0.55,0.75],[0.75,0.77],[0.9,0.76]].forEach(([x,y])=>{
+      ctx.fillStyle="#5a3000";ctx.fillRect(x*W,y*H,12,8);ctx.fillRect(x*W+4,y*H-4,6,4);
+    });
+  } else if(bg==="snowmount"){
+    // Snow Mountain — teal sky, pixel trees, snowy peak
+    const W=canvas.width,H=canvas.height;
+    const sg=ctx.createLinearGradient(0,0,0,H);
+    sg.addColorStop(0,"#44ddff");sg.addColorStop(0.5,"#22aacc");sg.addColorStop(1,"#006688");
+    ctx.fillStyle=sg;ctx.fillRect(0,0,W,H);
+    // stars
+    bgStars.forEach(s=>{ctx.fillStyle="rgba(255,255,255,0.5)";ctx.fillRect(s.x,s.y*0.4,s.s,s.s);s.x-=s.speed*0.15;if(s.x<0)s.x=W;});
+    // mountain
+    ctx.fillStyle="#556677";
+    ctx.beginPath();ctx.moveTo(W*0.3,H*0.75);ctx.lineTo(W*0.5,H*0.15);ctx.lineTo(W*0.7,H*0.75);ctx.closePath();ctx.fill();
+    ctx.fillStyle="#445566";
+    ctx.beginPath();ctx.moveTo(W*0.55,H*0.75);ctx.lineTo(W*0.72,H*0.28);ctx.lineTo(W*0.88,H*0.75);ctx.closePath();ctx.fill();
+    // snow cap
+    ctx.fillStyle="#ddeeff";
+    ctx.beginPath();ctx.moveTo(W*0.5,H*0.15);ctx.lineTo(W*0.43,H*0.32);ctx.lineTo(W*0.57,H*0.32);ctx.closePath();ctx.fill();
+    ctx.fillStyle="#ffffff";
+    ctx.beginPath();ctx.moveTo(W*0.5,H*0.15);ctx.lineTo(W*0.46,H*0.24);ctx.lineTo(W*0.54,H*0.24);ctx.closePath();ctx.fill();
+    // ground
+    ctx.fillStyle="#224433";ctx.fillRect(0,H*0.75,W,H*0.25);
+    ctx.fillStyle="#1a3328";ctx.fillRect(0,H*0.82,W,H*0.18);
+    // pixel trees
+    const treeX=[0.02,0.08,0.14,0.20,0.26,0.60,0.66,0.72,0.78,0.84,0.90,0.96];
+    treeX.forEach(x=>{
+      const tx=x*W,ty=H*0.58,th=H*0.22,tw=14;
+      ctx.fillStyle="#00aa88";
+      ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(tx-tw,ty+th);ctx.lineTo(tx+tw,ty+th);ctx.closePath();ctx.fill();
+      ctx.beginPath();ctx.moveTo(tx,ty+th*0.3);ctx.lineTo(tx-tw*1.3,ty+th*0.9);ctx.lineTo(tx+tw*1.3,ty+th*0.9);ctx.closePath();ctx.fill();
+      ctx.fillStyle="#336655";ctx.fillRect(tx-3,ty+th*0.9,6,H*0.1);
+    });
+  } else if(bg==="pixelforest"){
+    // Pixel Forest — deep blue night, teal trees
+    const W=canvas.width,H=canvas.height;
+    const sg=ctx.createLinearGradient(0,0,0,H);
+    sg.addColorStop(0,"#001833");sg.addColorStop(0.4,"#002244");sg.addColorStop(0.7,"#003355");sg.addColorStop(1,"#004466");
+    ctx.fillStyle=sg;ctx.fillRect(0,0,W,H);
+    // grid/scanline effect
+    ctx.fillStyle="rgba(0,180,255,0.04)";
+    for(let y=0;y<H;y+=6) ctx.fillRect(0,y,W,3);
+    // stars
+    bgStars.forEach(s=>{
+      ctx.fillStyle="rgba(200,240,255,0.8)";ctx.fillRect(s.x,s.y*0.5,s.s,s.s);
+      s.x-=s.speed*0.2;if(s.x<0)s.x=W;
+    });
+    // ground
+    ctx.fillStyle="#001122";ctx.fillRect(0,H*0.75,W,H*0.25);
+    ctx.fillStyle="#002233";ctx.fillRect(0,H*0.72,W,H*0.04);
+    // pixel trees — dense row
+    for(let i=0;i<20;i++){
+      const tx=(i/20)*W+10,ty=H*0.42,th=H*0.35,tw=12;
+      ctx.fillStyle=i%3===0?"#00ccaa":i%3===1?"#009988":"#00bbcc";
+      ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(tx-tw,ty+th*0.5);ctx.lineTo(tx+tw,ty+th*0.5);ctx.closePath();ctx.fill();
+      ctx.beginPath();ctx.moveTo(tx,ty+th*0.2);ctx.lineTo(tx-tw*1.4,ty+th*0.8);ctx.lineTo(tx+tw*1.4,ty+th*0.8);ctx.closePath();ctx.fill();
+      ctx.beginPath();ctx.moveTo(tx,ty+th*0.45);ctx.lineTo(tx-tw*1.7,ty+th);ctx.lineTo(tx+tw*1.7,ty+th);ctx.closePath();ctx.fill();
+      ctx.fillStyle="#003344";ctx.fillRect(tx-3,ty+th,6,H*0.08);
+    }
+  } else if(bg==="pastelsky"){
+    // Pastel Sky — pink/purple gradient, layered clouds, mountains
+    const W=canvas.width,H=canvas.height;
+    const sg=ctx.createLinearGradient(0,0,0,H);
+    sg.addColorStop(0,"#cc88ff");sg.addColorStop(0.3,"#ff88cc");sg.addColorStop(0.6,"#ffaadd");sg.addColorStop(1,"#ffddee");
+    ctx.fillStyle=sg;ctx.fillRect(0,0,W,H);
+    // stars/sparkles
+    bgStars.forEach(s=>{ctx.fillStyle="rgba(255,255,255,0.8)";ctx.fillRect(s.x,s.y*0.3,s.s,s.s);s.x-=s.speed*0.1;if(s.x<0)s.x=W;});
+    // cloud layers (back)
+    const drawCloud=(x,y,w,h,col)=>{
+      ctx.fillStyle=col;
+      ctx.beginPath();ctx.ellipse(x,y,w*0.5,h*0.5,0,0,Math.PI*2);ctx.fill();
+      ctx.beginPath();ctx.ellipse(x+w*0.3,y-h*0.1,w*0.4,h*0.45,0,0,Math.PI*2);ctx.fill();
+      ctx.beginPath();ctx.ellipse(x-w*0.3,y+h*0.05,w*0.35,h*0.4,0,0,Math.PI*2);ctx.fill();
+      ctx.beginPath();ctx.ellipse(x+w*0.6,y+h*0.05,w*0.3,h*0.35,0,0,Math.PI*2);ctx.fill();
+    };
+    [
+      [W*0.1,H*0.15,90,30,"rgba(255,200,240,0.7)"],[W*0.4,H*0.1,110,35,"rgba(255,180,230,0.7)"],
+      [W*0.75,H*0.18,80,28,"rgba(255,210,245,0.7)"],[W*0.6,H*0.35,100,32,"rgba(255,200,240,0.6)"],
+      [W*0.2,H*0.38,120,38,"rgba(255,180,230,0.6)"],[W*0.85,H*0.42,90,30,"rgba(255,210,245,0.6)"],
+    ].forEach(a=>drawCloud(...a));
+    // mountains silhouette
+    ctx.fillStyle="rgba(180,100,200,0.4)";
+    ctx.beginPath();ctx.moveTo(0,H*0.75);
+    ctx.lineTo(W*0.1,H*0.55);ctx.lineTo(W*0.25,H*0.68);ctx.lineTo(W*0.4,H*0.48);
+    ctx.lineTo(W*0.55,H*0.62);ctx.lineTo(W*0.7,H*0.44);ctx.lineTo(W*0.85,H*0.58);ctx.lineTo(W,H*0.52);
+    ctx.lineTo(W,H*0.75);ctx.closePath();ctx.fill();
+    // ground
+    ctx.fillStyle="rgba(220,150,255,0.5)";ctx.fillRect(0,H*0.75,W,H*0.25);
+    ctx.fillStyle="rgba(200,120,240,0.4)";ctx.fillRect(0,H*0.82,W,H*0.18);
   }
+}
+
+// ===== CUSTOM LEVELS =====
+function getCustomLevels(){
+  const u=getUser();
+  return u.customLevels||[];
+}
+function saveCustomLevels(levels){
+  let u=getUser();u.customLevels=levels;saveUser(u);
+}
+
+function openCustomLevels(){
+  showScreen("customScreen");
+  const levels=getCustomLevels();
+  const list=document.getElementById("customLevelList");
+  list.innerHTML="";
+  if(levels.length===0){
+    list.innerHTML="<p style='color:#666;font-size:13px;'>Noch keine eigenen Level. Erstelle dein erstes!</p>";
+    return;
+  }
+  levels.forEach((lvl,i)=>{
+    const row=document.createElement("div");
+    row.style.cssText="background:#0d0d0d;border:1px solid #2a2a2a;border-radius:10px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px;";
+    const info=document.createElement("div");
+    info.innerHTML=`<div style="font-size:15px;font-weight:bold;color:white;">${lvl.name}</div><div style="font-size:11px;color:#888;">Ziel: ${lvl.goalScore} Pkt &nbsp;|&nbsp; Speed: ${lvl.speed} &nbsp;|&nbsp; Objekte: ${lvl.objTypes.join(", ")}</div>`;
+    const btns=document.createElement("div");btns.style.cssText="display:flex;gap:6px;flex-shrink:0;";
+    const playBtn=document.createElement("button");playBtn.innerText="▶";playBtn.style.cssText="padding:6px 10px;font-size:13px;border-color:#00ccff;color:#00ccff;";
+    playBtn.onclick=()=>startCustomLevel(i);
+    const editBtn=document.createElement("button");editBtn.innerText="✏️";editBtn.style.cssText="padding:6px 10px;font-size:13px;";
+    editBtn.onclick=()=>openLevelEditor(i);
+    const delBtn=document.createElement("button");delBtn.innerText="🗑";delBtn.style.cssText="padding:6px 10px;font-size:13px;border-color:#ff4444;color:#ff4444;";
+    delBtn.onclick=()=>{if(confirm("Level löschen?")){const ls=getCustomLevels();ls.splice(i,1);saveCustomLevels(ls);openCustomLevels();}};
+    btns.appendChild(playBtn);btns.appendChild(editBtn);btns.appendChild(delBtn);
+    row.appendChild(info);row.appendChild(btns);
+    list.appendChild(row);
+  });
+}
+
+function openLevelEditor(index){
+  document.getElementById("edEditIndex").value=index===null?-1:index;
+  if(index!==null&&index>=0){
+    const lvl=getCustomLevels()[index];
+    document.getElementById("editorTitle").innerText="✏️ Level bearbeiten";
+    document.getElementById("edLevelName").value=lvl.name;
+    document.getElementById("edGoalScore").value=lvl.goalScore;
+    document.getElementById("edSpeed").value=lvl.speed;document.getElementById("edSpeedVal").innerText=lvl.speed;
+    document.getElementById("edSpawnRate").value=lvl.spawnRate;document.getElementById("edSpawnVal").innerText=lvl.spawnRate;
+    document.getElementById("edObjRock").checked=lvl.objTypes.includes("rock");
+    document.getElementById("edObjSpike").checked=lvl.objTypes.includes("spike");
+    document.getElementById("edObjBall").checked=lvl.objTypes.includes("ball");
+    document.getElementById("edObjLaser").checked=lvl.objTypes.includes("laser");
+    document.getElementById("edObjZigzag").checked=lvl.objTypes.includes("zigzag");
+  } else {
+    document.getElementById("editorTitle").innerText="✏️ Level erstellen";
+    document.getElementById("edLevelName").value="";
+    document.getElementById("edGoalScore").value=2000;
+    document.getElementById("edSpeed").value=5;document.getElementById("edSpeedVal").innerText=5;
+    document.getElementById("edSpawnRate").value=40;document.getElementById("edSpawnVal").innerText=40;
+    document.getElementById("edObjRock").checked=true;
+    document.getElementById("edObjSpike").checked=false;
+    document.getElementById("edObjBall").checked=false;
+    document.getElementById("edObjLaser").checked=false;
+    document.getElementById("edObjZigzag").checked=false;
+  }
+  showScreen("customEditorScreen");
+}
+
+function saveCustomLevel(){
+  const name=document.getElementById("edLevelName").value.trim();
+  if(!name){alert("Bitte einen Namen eingeben.");return;}
+  const objTypes=[];
+  if(document.getElementById("edObjRock").checked) objTypes.push("rock");
+  if(document.getElementById("edObjSpike").checked) objTypes.push("spike");
+  if(document.getElementById("edObjBall").checked) objTypes.push("ball");
+  if(document.getElementById("edObjLaser").checked) objTypes.push("laser");
+  if(document.getElementById("edObjZigzag").checked) objTypes.push("zigzag");
+  if(objTypes.length===0){alert("Mindestens einen Objekt-Typ wählen.");return;}
+  const lvl={
+    name,
+    goalScore:Math.max(100,parseInt(document.getElementById("edGoalScore").value)||2000),
+    speed:parseInt(document.getElementById("edSpeed").value),
+    spawnRate:parseInt(document.getElementById("edSpawnRate").value),
+    objTypes
+  };
+  const levels=getCustomLevels();
+  const idx=parseInt(document.getElementById("edEditIndex").value);
+  if(idx>=0) levels[idx]=lvl; else levels.push(lvl);
+  saveCustomLevels(levels);
+  openCustomLevels();
+}
+
+function startCustomLevel(index){
+  const lvl=getCustomLevels()[index];
+  if(!lvl) return;
+  currentDiff="custom";currentSubLevel=index;
+  customGoalScore=lvl.goalScore;
+  rockSpeed=lvl.speed;spawnRate=lvl.spawnRate;
+  rockSizeMin=20;rockSizeMax=45;
+  currentObjTypes=lvl.objTypes;
+  obstacles=[];coins=[];gems=[];spawnTimer=0;coinSpawnTimer=0;gemSpawnTimer=0;
+  score=0;gameOver=false;paused=false;gameRunning=true;
+  sessionCoins=0;sessionGems=0;
+  activePowerUp=null;powerUpTimer=0;lastPowerUpScore=0;
+  rocket={x:120,y:canvas.height/2,w:44,h:22,speed:sensitivity};
+  if(activeBackground==="matrix") initMatrix();
+  stopMenuBg();
+  menuBg.style.display="none";canvas.style.display="block";
+  showScreen(null);
+  document.getElementById("topBar").style.display="none";
+  document.getElementById("touchControls").style.display=isMobile?"flex":"none";
+  if(animId) cancelAnimationFrame(animId);
+  playBeat(0);
+  animId=requestAnimationFrame(gameLoop);
 }
 
 // ===== GAME START =====
@@ -1485,6 +1841,7 @@ function gameLoop(){
   drawHUD();
   score++;
   if(currentDiff==="ending"&&score>=5000){winGame();return;}
+  if(currentDiff==="custom"&&score>=customGoalScore){winGame();return;}
   animId=requestAnimationFrame(gameLoop);
 }
 
@@ -1886,8 +2243,9 @@ function drawHUD(){
   ctx.fillText("Score: "+score,12,22);
   ctx.restore();
 
-  if(currentDiff==="ending"){
-    const pct=Math.min(100,Math.floor(score/5000*100));
+  if(currentDiff==="ending"||currentDiff==="custom"){
+    const goal=currentDiff==="ending"?5000:customGoalScore;
+    const pct=Math.min(100,Math.floor(score/goal*100));
     // progress bar background
     const bw=160, bh=10, bx=canvas.width/2-bw/2, by=12;
     ctx.fillStyle="rgba(255,255,255,0.1)";
@@ -1929,12 +2287,20 @@ function endGame(){
   document.getElementById("touchControls").style.display="none";
   canvas.style.display="none";menuBg.style.display="block";
   if(!menuAnimId) animateMenuBg();
-  // save highscore
   let u=getUser();
-  const prev=u.highscores[currentDiff][currentSubLevel]||0;
-  if(score>prev) u.highscores[currentDiff][currentSubLevel]=score;
-  saveUser(u);
-  if(score>prev) pushScore(currentDiff,score);
+  let prev=0;
+  if(currentDiff!=="custom"){
+    prev=u.highscores[currentDiff]?.[currentSubLevel]||0;
+    if(score>prev){u.highscores[currentDiff][currentSubLevel]=score;saveUser(u);}
+    if(score>prev) pushScore(currentDiff,score);
+  } else {
+    // save custom level best score
+    if(!u.customLevels) u.customLevels=[];
+    if(u.customLevels[currentSubLevel]){
+      prev=u.customLevels[currentSubLevel].best||0;
+      if(score>prev){u.customLevels[currentSubLevel].best=score;saveUser(u);}
+    }
+  }
   document.getElementById("endScore").innerText="Score: "+score;
   document.getElementById("endHigh").innerText=t("bestOnLevel")+" "+(score>prev?score:prev);
   document.getElementById("endCoinsEarned").innerText="+"+sessionCoins+"🪙  +"+sessionGems+"💎";
@@ -1951,11 +2317,18 @@ function winGame(){
   canvas.style.display="none";menuBg.style.display="block";
   if(!menuAnimId) animateMenuBg();
   let u=getUser();
-  if(!u.highscores.ending) u.highscores.ending=Array(20).fill(0);
-  u.highscores.ending[currentSubLevel]=5000;
-  saveUser(u);
-  pushScore("ending",5000);
-  const nextExists=currentSubLevel<LEVEL_CONFIG.ending.length-1;
+  if(currentDiff==="ending"){
+    if(!u.highscores.ending) u.highscores.ending=Array(20).fill(0);
+    u.highscores.ending[currentSubLevel]=5000;
+    saveUser(u);
+    pushScore("ending",5000);
+  } else if(currentDiff==="custom"){
+    if(!u.customLevels) u.customLevels=[];
+    if(u.customLevels[currentSubLevel]){
+      u.customLevels[currentSubLevel].best=customGoalScore;saveUser(u);
+    }
+  }
+  const nextExists=currentDiff==="ending"&&currentSubLevel<LEVEL_CONFIG.ending.length-1;
   document.getElementById("winScore").innerText="Score: "+score;
   document.getElementById("winCoins").innerText="+"+sessionCoins+"🪙  +"+sessionGems+"💎";
   document.getElementById("nextLevelBtn").style.display=nextExists?"inline-block":"none";
@@ -1967,7 +2340,10 @@ function winGame(){
 function nextEndingLevel(){
   if(currentSubLevel<LEVEL_CONFIG.ending.length-1) startGame("ending",currentSubLevel+1);
 }
-function restartGame(){startGame(currentDiff,currentSubLevel);}
+function restartGame(){
+  if(currentDiff==="custom") startCustomLevel(currentSubLevel);
+  else startGame(currentDiff,currentSubLevel);
+}
 function goMenu(){
   gameRunning=false;gameOver=true;
   if(animId){cancelAnimationFrame(animId);animId=null;}
