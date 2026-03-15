@@ -380,6 +380,7 @@ const SKINS=[
   {id:67,name:"Invader Violet",color:"#cc44ff",shape:"invader",style:2,free:false,coinPrice:10000},
   {id:68,name:"Invader Purple",color:"#9933ff",shape:"invader",style:3,free:false,coinPrice:10000},
   {id:69,name:"Invader Rose",color:"#ff6699",shape:"invader",style:4,free:false,coinPrice:10000},
+  {id:70,name:"Elias",shape:"elias",free:false,coinPrice:25000},
 ];
 function skinPrice(skin){
   if(skin.free) return 0;
@@ -1674,6 +1675,9 @@ function drawSkinOnCanvas(c,skin,x,y,w,h){
   if(skin.shape==="invader"){
     drawInvader(c,skin.color||"#44ff44",skin.style||0,x,y,w,h);return;
   }
+  if(skin.shape==="elias"){
+    drawEliasShip(c,x,y,w,h);return;
+  }
   c.fillStyle=skin.color||"cyan";
   if(skin.shape==="rect"||!skin.shape){
     c.fillRect(x,y,w,h);
@@ -1750,6 +1754,40 @@ function drawInvader(c,color,style,x,y,w,h){
       }
     }
   }
+  c.shadowBlur=0;
+}
+
+// Elias skin: pixel-art spaceship (white body, blue dome, red engines)
+function drawEliasShip(c,x,y,w,h){
+  const p=(px,py,pw,ph,col)=>{
+    c.fillStyle=col;
+    c.fillRect(x+px*w/16, y+py*h/10, pw*w/16, ph*h/10);
+  };
+  // black outline shadow
+  c.shadowColor="#000";c.shadowBlur=6;
+  // main white body (ellipse-ish)
+  p(2,3,12,4,"#e8e8f0");
+  p(1,4,14,2,"#f0f0f8");
+  p(3,2,10,6,"#e8e8f0");
+  // grey underside
+  p(3,6,10,2,"#b0b0c0");
+  p(4,7,8,1,"#9090a0");
+  // red engine pods left side (2 stacked)
+  p(0,1,3,2,"#cc2200");p(0,1,3,2,"#cc2200");
+  p(0,4,3,2,"#cc2200");
+  // engine connector bars
+  p(2,2,2,1,"#661100");p(2,5,2,1,"#661100");
+  // red engine nozzles right
+  p(13,3,3,1,"#cc2200");p(13,5,3,1,"#cc2200");
+  // blue dome on top
+  p(5,1,6,3,"#6688cc");
+  p(6,0,4,2,"#7799dd");
+  p(7,0,2,1,"#aabbee"); // highlight
+  // red dome base ring
+  p(5,3,6,1,"#aa1100");
+  // blue detail buttons on body
+  p(6,5,2,2,"#3355aa");p(9,5,2,2,"#3355aa");
+  p(7,4,1,1,"#5577cc");p(10,4,1,1,"#5577cc");
   c.shadowBlur=0;
 }
 
