@@ -1841,6 +1841,7 @@ let duelPollInterval=null;
 let duelId=null;
 let duelRole=null; // 'challenger' or 'opponent'
 let duelOpponentName=null;
+let duelOppY=300,duelOppScore=0,duelOppAlive=true;
 
 const DUEL_CONFIGS={
   easy: {rockSpeed:4,spawnRate:50,rockSize:[20,38],objTypes:["rock"]},
@@ -1977,6 +1978,7 @@ function startDuelGame(duel){
   score=0;gameOver=false;paused=false;gameRunning=true;
   sessionCoins=0;sessionGems=0;
   activePowerUp=null;powerUpTimer=0;lastPowerUpScore=0;
+  duelOppY=canvas.height/2;duelOppScore=0;duelOppAlive=true;
   rocket={x:120,y:canvas.height/2,w:44,h:22,speed:sensitivity};
   if(activeBackground==="matrix") initMatrix();
   stopMenuBg();
@@ -1986,36 +1988,62 @@ function startDuelGame(duel){
   document.getElementById("touchControls").style.display=isMobile?"flex":"none";
   if(animId) cancelAnimationFrame(animId);
   playBeat(0);
-  // start polling opponent status
-  duelPollInterval=setInterval(pollOpponentDead,1500);
+  // push own position every 500ms, poll opponent every 500ms
+  duelPollInterval=setInterval(duelSyncTick,500);
   animId=requestAnimationFrame(gameLoop);
 }
 
 async function reportDuelDead(){
-  // called when this player dies in duel mode
   clearInterval(duelPollInterval);duelPollInterval=null;
   try{
     await fetchBoard();
     const duel=globalBoard.duels.find(d=>d.id===duelId);
     if(!duel) return;
-    if(duelRole==="challenger") duel.challengerAlive=false;
-    else duel.opponentAlive=false;
-    duel.challengerScore=duelRole==="challenger"?score:duel.challengerScore;
-    duel.opponentScore=duelRole==="opponent"?score:duel.opponentScore;
+    if(duelRole==="challenger"){duel.challengerAlive=false;duel.challengerScore=score;duel.challengerY=rocket.y;}
+    else{duel.opponentAlive=false;duel.opponentScore=score;duel.opponentY=rocket.y;}
     await pushBin();
   }catch(e){}
 }
 
-async function pollOpponentDead(){
+async function duelSyncTick(){
+  if(!duelId||gameOver) return;
   try{
-    await fetchBoard();
-    const duel=globalBoard.duels.find(d=>d.id===duelId);
+    // push own state
+    const r=await fetch(JSONBIN_URL+"/latest",{headers:{"X-Access-Key":JSONBIN_KEY}});
+    if(!r.ok) return;
+    const j=await r.json();const data=j.record||j;
+    const duels=Array.isArray(data.duels)?data.duels:[];
+    const duel=duels.find(d=>d.id===duelId);
     if(!duel) return;
+    // write my position
+    if(duelRole==="challenger"){duel.challengerY=rocket.y;duel.challengerScore=score;}
+    else{duel.opponentY=rocket.y;duel.opponentScore=score;}
+    // read opponent position
+    const oppY=duelRole==="challenger"?duel.opponentY:duel.challengerY;
+    const oppScore=duelRole==="challenger"?duel.opponentScore:duel.challengerScore;
     const oppAlive=duelRole==="challenger"?duel.opponentAlive:duel.challengerAlive;
-    if(!oppAlive){
-      // opponent died while we're still alive → we win
+    if(oppY!==undefined) duelOppY=oppY;
+    if(oppScore!==undefined) duelOppScore=oppScore;
+    duelOppAlive=oppAlive!==false;
+    globalBoard.duels=duels;
+    await fetch(JSONBIN_URL,{method:"PUT",headers:{"Content-Type":"application/json","X-Access-Key":JSONBIN_KEY},body:JSON.stringify({...data,duels})});
+    // if opponent died → we win (end game naturally when we die, or show win now)
+    if(!duelOppAlive&&!gameOver){
       clearInterval(duelPollInterval);duelPollInterval=null;
-      // don't end game yet, just note it — endGame will show win
+      // opponent is dead, we're still alive → instant win
+      gameOver=true;gameRunning=false;
+      if(animId){cancelAnimationFrame(animId);animId=null;}
+      stopMusic();
+      document.getElementById("touchControls").style.display="none";
+      canvas.style.display="none";menuBg.style.display="block";
+      if(!menuAnimId) animateMenuBg();
+      document.getElementById("winScore").innerText="Score: "+score+" vs "+duelOppScore;
+      document.getElementById("winCoins").innerText="⚔️ "+duelOpponentName+" ist gestorben. Du gewinnst!";
+      document.getElementById("nextLevelBtn").style.display="none";
+      showScreen("winScreen");
+      document.getElementById("topBar").style.display="flex";
+      updateTopBar();
+      duelId=null;duelRole=null;
     }
   }catch(e){}
 }
@@ -2111,6 +2139,7 @@ function gameLoop(){
   drawCoins();
   drawGems();
   drawRocket();
+  if(currentDiff==="duel") drawDuelOpponent();
   drawHUD();
   score++;
   if(currentDiff==="ending"&&score>=5000){winGame();return;}
@@ -2487,13 +2516,46 @@ function drawRocketShape(c,skin,x,y,w,h){
 
 function drawRocket(){
   const skin=SKINS.find(s=>s.id===selectedSkinId)||SKINS[0];
-  // glow around player
   ctx.save();
   ctx.shadowColor=skin.color||skin.glow||"#00ccff";
   ctx.shadowBlur=18;
   drawSkinOnCanvas(ctx,skin,rocket.x,rocket.y,rocket.w,rocket.h);
   ctx.shadowBlur=0;
   ctx.restore();
+}
+
+function drawDuelOpponent(){
+  if(!duelOpponentName) return;
+  const x=rocket.x+60; // opponent shown slightly to the right
+  const y=duelOppY;
+  const w=rocket.w,h=rocket.h;
+  // ghost effect
+  ctx.save();
+  ctx.globalAlpha=duelOppAlive?0.55:0.2;
+  ctx.shadowColor="#ff4444";ctx.shadowBlur=14;
+  // draw a simple red rocket shape for opponent
+  ctx.fillStyle="#ff4444";
+  ctx.beginPath();ctx.moveTo(x+w,y+h/2);ctx.lineTo(x+w*0.55,y+h*0.08);
+  ctx.lineTo(x+w*0.1,y+h*0.2);ctx.lineTo(x+w*0.1,y+h*0.8);
+  ctx.lineTo(x+w*0.55,y+h*0.92);ctx.closePath();ctx.fill();
+  ctx.shadowBlur=0;
+  // name label above
+  ctx.globalAlpha=duelOppAlive?0.9:0.4;
+  ctx.font="bold 11px Arial";ctx.textAlign="center";
+  ctx.fillStyle="#ff6666";
+  ctx.shadowColor="#ff0000";ctx.shadowBlur=6;
+  ctx.fillText(duelOpponentName,x+w/2,y-5);
+  // score below
+  ctx.font="10px Arial";ctx.fillStyle="rgba(255,150,150,0.8)";ctx.shadowBlur=0;
+  ctx.fillText(duelOppScore,x+w/2,y+h+12);
+  ctx.globalAlpha=1;
+  ctx.restore();
+  // own name above own rocket
+  ctx.save();
+  ctx.font="bold 11px Arial";ctx.textAlign="center";
+  ctx.fillStyle="#00ccff";ctx.shadowColor="#0088ff";ctx.shadowBlur=6;
+  ctx.fillText(currentUser,rocket.x+rocket.w/2,rocket.y-5);
+  ctx.shadowBlur=0;ctx.restore();
 }
 
 // ===== HUD =====
