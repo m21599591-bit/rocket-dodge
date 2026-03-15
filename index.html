@@ -1392,9 +1392,9 @@ function renderSkinPreview(id){
   document.getElementById("skinPreviewPrice").innerText=skin.free?"Free":skinPrice(skin)+" 🪙";
   const btn=document.getElementById("skinActionBtn");
   btn.style.display="inline-block";
-  if(isActive){btn.innerText="? In Use";btn.disabled=true;}
+  if(isActive){btn.innerText="\u2713 In Use";btn.disabled=true;}
   else if(owned){btn.innerText="Nutzen";btn.disabled=false;}
-  else{btn.innerText="Kaufen ("+skinPrice(skin)+"🪙");btn.disabled=false;}
+  else{btn.innerText="Kaufen ("+skinPrice(skin)+"\uD83E\uDE99)";btn.disabled=false;}
 }
 
 function renderFlameGrid(){
@@ -1448,9 +1448,9 @@ function selectFlamePreview(id){
   document.getElementById("skinPreviewName").innerText=f.name;
   document.getElementById("skinPreviewPrice").innerText=flamePrice(f)+"💎";
   const btn=document.getElementById("skinActionBtn");btn.style.display="inline-block";
-  if(isActive){btn.innerText="? Aktiv";btn.disabled=true;}
+  if(isActive){btn.innerText="\u2713 Aktiv";btn.disabled=true;}
   else if(owned){btn.innerText="Nutzen";btn.disabled=false;}
-  else{btn.innerText="Kaufen ("+flamePrice(f)+"💎");btn.disabled=false;}
+  else{btn.innerText="Kaufen ("+flamePrice(f)+"\uD83D\uDC8E)";btn.disabled=false;}
 }
 
 function skinAction(){
