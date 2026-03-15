@@ -2117,35 +2117,36 @@ async function duelSyncTick(){
 }
 
 async function endDuelGame(){
-  // stop sync, save my death
   clearInterval(duelPollInterval);duelPollInterval=null;
   const myScore=score;
   const id=duelId;
   const role=duelRole;
   const oppName=duelOpponentName||"Gegner";
+  // snapshot opponent state BEFORE writing (duelSyncTick kept this up to date)
+  const oppWasAlive=duelOppAlive;
+  const oppLastScore=duelOppScore;
   // mark me as dead atomically
-  let oppAlive=true,oppScore=0;
   await duelAtomicUpdate(data=>{
     const d=data.duels.find(x=>x.id===id);
     if(!d) return;
     if(role==="challenger"){d.challengerAlive=false;d.challengerScore=myScore;}
     else{d.opponentAlive=false;d.opponentScore=myScore;}
-    oppAlive=role==="challenger"?d.opponentAlive:d.challengerAlive;
-    oppScore=role==="challenger"?d.opponentScore:d.challengerScore;
   });
   duelId=null;duelRole=null;
   document.getElementById("duelLoseScore").innerText="Dein Score: "+myScore;
-  if(oppAlive!==false){
+  if(oppWasAlive){
+    // opponent still alive when we died → we lost
     document.getElementById("duelLoseMsg").innerText=oppName+" lebt noch. Du hast verloren!";
     showScreen("duelLoseScreen");
   } else {
-    if(myScore>=oppScore){
-      document.getElementById("winScore").innerText="Score: "+myScore+" vs "+oppScore;
+    // opponent already dead (duelSyncTick should have caught this, but fallback)
+    if(myScore>=oppLastScore){
+      document.getElementById("winScore").innerText="Score: "+myScore+" vs "+oppLastScore;
       document.getElementById("winCoins").innerText="⚔️ Du hast das Duell gewonnen!";
       document.getElementById("nextLevelBtn").style.display="none";
       showScreen("winScreen");
     } else {
-      document.getElementById("duelLoseMsg").innerText=oppName+" hatte mehr Punkte ("+oppScore+" vs "+myScore+").";
+      document.getElementById("duelLoseMsg").innerText=oppName+" hatte mehr Punkte ("+oppLastScore+" vs "+myScore+").";
       showScreen("duelLoseScreen");
     }
   }
