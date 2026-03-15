@@ -141,6 +141,10 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
   </div>
   <button onclick="adminGive()" style="border-color:#00cc66;color:#00cc66;margin:4px;">✓ Senden</button>
   <button onclick="adminGiveAll()" style="border-color:#ffaa00;color:#ffaa00;margin:4px;">🌍 Allen senden</button>
+  <hr style="border-color:rgba(255,255,255,0.1);margin:12px 0;">
+  <p style="font-size:12px;color:#ff6666;margin:0 0 6px;">⚠️ Gefährliche Aktionen</p>
+  <button onclick="adminResetOne()" style="border-color:#ff4444;color:#ff4444;margin:4px;">🗑️ Spieler zurücksetzen</button>
+  <button onclick="adminResetAll()" style="border-color:#ff0000;color:#ff0000;margin:4px;">💣 ALLE zurücksetzen</button>
   <p id="adminMsg" style="color:#00cc66;font-size:13px;min-height:18px;margin:8px 0 0;"></p>
   <br>
   <button onclick="closeAdmin()">Zurück</button>
@@ -959,6 +963,26 @@ async function adminGiveAll(){
   document.getElementById("adminMsg").innerText=`✓ Belohnung für ALLE gespeichert: +${coins}🪙 +${gems}💎`;
 }
 function closeAdmin(){openShop();}
+
+function adminResetOne(){
+  const target=document.getElementById("adminPlayerSelect").value.trim();
+  if(!target){alert("Bitte einen Spielernamen eingeben.");return;}
+  if(!confirm(`Wirklich alle Coins & Diamanten von "${target}" löschen?`)) return;
+  const users=getUsers();
+  if(!users[target]){document.getElementById("adminMsg").innerText="Spieler nicht gefunden.";return;}
+  users[target].coins=0;users[target].diamonds=0;
+  saveUsers(users);
+  document.getElementById("adminMsg").innerText=`✓ Coins & Diamanten von "${target}" gelöscht.`;
+}
+
+function adminResetAll(){
+  if(!confirm("Wirklich alle Coins & Diamanten von ALLEN Spielern löschen?")) return;
+  const users=getUsers();
+  Object.keys(users).forEach(name=>{users[name].coins=0;users[name].diamonds=0;});
+  saveUsers(users);
+  document.getElementById("adminMsg").innerText="✓ Alle Coins & Diamanten gelöscht.";
+  updateTopBar();
+}
 
 // ===== LEADERBOARD =====
 function openLeaderboard(){
