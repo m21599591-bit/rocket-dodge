@@ -1912,6 +1912,11 @@ function startCustomLevel(index){
 }
 
 // ===== 1v1 DUEL =====
+function open1v1Menu(){
+  document.getElementById("duelOpponent").value="";
+  selectDuelDiff('easy');
+  showScreen("duel1v1Screen");
+}
 let duelDiff='easy';
 let duelPollInterval=null;
 let duelId=null;
