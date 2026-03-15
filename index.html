@@ -22,8 +22,8 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
 #touchControls button{width:76px;height:76px;font-size:34px;border-radius:50%;border:3px solid white;background:rgba(255,255,255,0.25);color:white;cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:none;}
 #touchZoneUp.active-zone{background:rgba(255,255,255,0.04);}
 #touchZoneDown.active-zone{background:rgba(255,255,255,0.04);}
-#touchZoneUp::after{content:"▲";position:absolute;bottom:8px;left:50%;transform:translateX(-50%);font-size:28px;color:rgba(255,255,255,0.15);pointer-events:none;}
-#touchZoneDown::after{content:"▼";position:absolute;top:8px;left:50%;transform:translateX(-50%);font-size:28px;color:rgba(255,255,255,0.15);pointer-events:none;}
+#touchZoneUp::after{content:"?";position:absolute;bottom:8px;left:50%;transform:translateX(-50%);font-size:28px;color:rgba(255,255,255,0.15);pointer-events:none;}
+#touchZoneDown::after{content:"?";position:absolute;top:8px;left:50%;transform:translateX(-50%);font-size:28px;color:rgba(255,255,255,0.15);pointer-events:none;}
 .lvl-btn{display:inline-block;margin:4px;padding:8px 14px;font-size:14px;cursor:pointer;border-radius:8px;border:2px solid rgba(255,255,255,0.35);background:rgba(0,0,0,0.5);color:white;transition:all 0.15s;touch-action:manipulation;}
 .lvl-btn:hover{background:rgba(255,255,255,0.1);}
 .lvl-btn.active{border-color:#00ccff;color:#00ccff;}
@@ -48,53 +48,53 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
 <canvas id="menuBg"></canvas>
 <canvas id="game" style="display:none;"></canvas>
 <div id="touchControls">
-  <button id="btnUp">▲</button>
-  <button id="btnDown">▼</button>
-  <button id="btnMenu" onclick="pauseToMenu()" style="font-size:22px;background:rgba(0,0,0,0.5);border-color:rgba(255,255,255,0.4);">🏠</button>
+  <button id="btnUp">?</button>
+  <button id="btnDown">?</button>
+  <button id="btnMenu" onclick="pauseToMenu()" style="font-size:22px;background:rgba(0,0,0,0.5);border-color:rgba(255,255,255,0.4);">??</button>
 </div>
 
 <!-- Full-screen touch zones for mobile gameplay -->
-<div id="touchPauseBtn" style="display:none;position:absolute;top:10px;right:10px;z-index:26;width:52px;height:52px;border-radius:50%;background:rgba(0,0,0,0.6);border:2px solid rgba(255,255,255,0.3);font-size:22px;line-height:52px;text-align:center;cursor:pointer;" onclick="pauseToMenu()">🏠</div>
+<div id="touchPauseBtn" style="display:none;position:absolute;top:10px;right:10px;z-index:26;width:52px;height:52px;border-radius:50%;background:rgba(0,0,0,0.6);border:2px solid rgba(255,255,255,0.3);font-size:22px;line-height:52px;text-align:center;cursor:pointer;" onclick="pauseToMenu()">??</div>
 
 <!-- MOBILE TUTORIAL OVERLAY -->
 <div id="tutorialOverlay" style="display:none;position:absolute;top:0;left:0;width:100%;height:100%;z-index:30;background:rgba(0,0,0,0.82);flex-direction:column;align-items:center;justify-content:center;touch-action:none;">
   <div id="tutStep0" class="tut-step" style="text-align:center;padding:24px 28px;">
-    <div style="font-size:56px;margin-bottom:12px;">🚀</div>
+    <div style="font-size:56px;margin-bottom:12px;">??</div>
     <h2 style="font-size:24px;margin:0 0 8px;color:white;">Willkommen!</h2>
     <p style="color:#aaa;font-size:15px;margin:0 0 24px;">Lass uns kurz die Steuerung zeigen.</p>
-    <button onclick="tutNext(1)" style="font-size:17px;padding:12px 32px;border-color:#00ccff;color:#00ccff;">Weiter ▶</button>
+    <button onclick="tutNext(1)" style="font-size:17px;padding:12px 32px;border-color:#00ccff;color:#00ccff;">Weiter ?</button>
   </div>
   <div id="tutStep1" class="tut-step" style="display:none;text-align:center;padding:24px 28px;">
-    <div style="font-size:20px;color:#aaa;margin-bottom:16px;">Obere Hälfte tippen</div>
+    <div style="font-size:20px;color:#aaa;margin-bottom:16px;">Obere H�lfte tippen</div>
     <div style="width:min(280px,80vw);height:120px;border:2px dashed rgba(0,200,255,0.5);border-radius:12px;position:relative;margin:0 auto 8px;">
       <div style="position:absolute;top:0;left:0;width:100%;height:50%;background:rgba(0,200,255,0.1);border-radius:10px 10px 0 0;display:flex;align-items:center;justify-content:center;">
-        <span style="font-size:28px;">▲</span>
+        <span style="font-size:28px;">?</span>
       </div>
       <div style="position:absolute;top:50%;left:0;width:100%;height:50%;background:rgba(255,100,100,0.08);border-radius:0 0 10px 10px;display:flex;align-items:center;justify-content:center;">
-        <span style="font-size:28px;">▼</span>
+        <span style="font-size:28px;">?</span>
       </div>
     </div>
-    <p style="color:#aaa;font-size:14px;margin:8px 0 24px;">Untere Hälfte tippen = runter</p>
-    <button onclick="tutNext(2)" style="font-size:17px;padding:12px 32px;border-color:#00ccff;color:#00ccff;">Weiter ▶</button>
+    <p style="color:#aaa;font-size:14px;margin:8px 0 24px;">Untere H�lfte tippen = runter</p>
+    <button onclick="tutNext(2)" style="font-size:17px;padding:12px 32px;border-color:#00ccff;color:#00ccff;">Weiter ?</button>
   </div>
   <div id="tutStep2" class="tut-step" style="display:none;text-align:center;padding:24px 28px;">
-    <div style="font-size:48px;margin-bottom:12px;">🪨</div>
+    <div style="font-size:48px;margin-bottom:12px;">??</div>
     <h3 style="font-size:20px;margin:0 0 8px;color:white;">Hindernissen ausweichen</h3>
-    <p style="color:#aaa;font-size:14px;margin:0 0 6px;">Berühre kein Objekt — sonst Game Over.</p>
-    <p style="color:gold;font-size:14px;margin:0 0 24px;">🪙 Münzen einsammeln für Coins!</p>
-    <button onclick="tutNext(3)" style="font-size:17px;padding:12px 32px;border-color:#00ccff;color:#00ccff;">Weiter ▶</button>
+    <p style="color:#aaa;font-size:14px;margin:0 0 6px;">Ber�hre kein Objekt � sonst Game Over.</p>
+    <p style="color:gold;font-size:14px;margin:0 0 24px;">?? M�nzen einsammeln f�r Coins!</p>
+    <button onclick="tutNext(3)" style="font-size:17px;padding:12px 32px;border-color:#00ccff;color:#00ccff;">Weiter ?</button>
   </div>
   <div id="tutStep3" class="tut-step" style="display:none;text-align:center;padding:24px 28px;">
-    <div style="font-size:48px;margin-bottom:12px;">🏠</div>
-    <h3 style="font-size:20px;margin:0 0 8px;color:white;">Pause / Menü</h3>
-    <p style="color:#aaa;font-size:14px;margin:0 0 24px;">Der 🏠 Button oben rechts bringt dich zurück ins Menü.</p>
-    <button onclick="tutFinish()" style="font-size:18px;padding:14px 36px;border-color:#00ff88;color:#00ff88;">Los geht's! 🚀</button>
+    <div style="font-size:48px;margin-bottom:12px;">??</div>
+    <h3 style="font-size:20px;margin:0 0 8px;color:white;">Pause / Men�</h3>
+    <p style="color:#aaa;font-size:14px;margin:0 0 24px;">Der ?? Button oben rechts bringt dich zur�ck ins Men�.</p>
+    <button onclick="tutFinish()" style="font-size:18px;padding:14px 36px;border-color:#00ff88;color:#00ff88;">Los geht's! ??</button>
   </div>
 </div>
 
 <div id="topBar">
-  <span id="topCoins">🪙 0</span>
-  <span id="topDiamonds" style="font-size:15px;font-weight:bold;color:#88eeff;margin-right:auto;">💎 0</span>
+  <span id="topCoins">?? 0</span>
+  <span id="topDiamonds" style="font-size:15px;font-weight:bold;color:#88eeff;margin-right:auto;">?? 0</span>
   <button onclick="openShop()">Shop</button>
   <button onclick="openSkinCatalog()">Skins</button>
   <button onclick="openLeaderboard()">Leaderboard</button>
@@ -102,7 +102,7 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
 
 <!-- LOGIN -->
 <div id="loginScreen" class="screen">
-  <h2 style="font-size:38px;margin:0 0 8px;letter-spacing:2px;">🚀 ROCKET DODGE</h2>
+  <h2 style="font-size:38px;margin:0 0 8px;letter-spacing:2px;">?? ROCKET DODGE</h2>
   <p style="color:#888;font-size:16px;margin:0 0 22px;">Login or create an account</p>
   <input id="usernameInput" placeholder="Username" style="font-size:18px;padding:12px;width:min(260px,85vw);"><br>
   <input id="passwordInput" type="password" placeholder="Password" style="font-size:18px;padding:12px;width:min(260px,85vw);"><br>
@@ -114,103 +114,103 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
 
 <!-- MAIN MENU -->
 <div id="menuScreen" class="screen" style="display:none">
-  <h2 style="font-size:38px;margin:0 0 4px;letter-spacing:2px;">🚀 ROCKET DODGE</h2>
+  <h2 style="font-size:38px;margin:0 0 4px;letter-spacing:2px;">?? ROCKET DODGE</h2>
   <p id="menuUser" style="color:#666;font-size:15px;margin:0 0 20px;"></p>
-  <button onclick="showLevelSelect()" style="font-size:22px;padding:16px 44px;border-color:#00ccff;color:#00ccff;" data-i18n="play">▶ Spielen</button><br>
-  <button onclick="openShop()" style="font-size:18px;padding:12px 26px;" data-i18n="shop">🛒 Shop</button>
-  <button onclick="openSkinCatalog()" style="font-size:18px;padding:12px 26px;" data-i18n="skins">🎨 Skins</button><br>
-  <button onclick="openLeaderboard()" style="font-size:18px;padding:12px 26px;" data-i18n="leaderboard">🏆 Bestenliste</button>
-  <button onclick="openSettingsMenu()" style="font-size:18px;padding:12px 26px;" data-i18n="settings">⚙️ Einstellungen</button>
-  <button onclick="openFriends()" style="font-size:18px;padding:12px 26px;border-color:rgba(0,200,100,0.5);color:#00cc66;">👥 Freunde</button>
-  <button onclick="checkIncomingDuels()" style="font-size:13px;padding:8px 16px;border-color:rgba(255,100,100,0.4);color:#ff9999;margin-top:4px;">🔔 Duell-Einladungen prüfen</button>
+  <button onclick="showLevelSelect()" style="font-size:22px;padding:16px 44px;border-color:#00ccff;color:#00ccff;" data-i18n="play">? Spielen</button><br>
+  <button onclick="openShop()" style="font-size:18px;padding:12px 26px;" data-i18n="shop">?? Shop</button>
+  <button onclick="openSkinCatalog()" style="font-size:18px;padding:12px 26px;" data-i18n="skins">?? Skins</button><br>
+  <button onclick="openLeaderboard()" style="font-size:18px;padding:12px 26px;" data-i18n="leaderboard">?? Bestenliste</button>
+  <button onclick="openSettingsMenu()" style="font-size:18px;padding:12px 26px;" data-i18n="settings">?? Einstellungen</button>
+  <button onclick="openFriends()" style="font-size:18px;padding:12px 26px;border-color:rgba(0,200,100,0.5);color:#00cc66;">?? Freunde</button>
+  <button onclick="checkIncomingDuels()" style="font-size:13px;padding:8px 16px;border-color:rgba(255,100,100,0.4);color:#ff9999;margin-top:4px;">?? Duell-Einladungen pr�fen</button>
   <div id="onlineList" style="margin-top:14px;padding:8px 12px;background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.15);border-radius:10px;font-size:13px;color:#aaa;min-height:28px;text-align:left;">
-    <span style="color:#00ff88;margin-right:6px;">●</span><span id="onlineListText">Lade...</span>
+    <span style="color:#00ff88;margin-right:6px;">?</span><span id="onlineListText">Lade...</span>
   </div>
 </div>
 
 <!-- LEVEL SELECT -->
 <div id="levelScreen" class="screen" style="display:none;">
-  <h2 style="margin:0 0 6px;" data-i18n="selectDiff">Schwierigkeit wählen</h2>
+  <h2 style="margin:0 0 6px;" data-i18n="selectDiff">Schwierigkeit w�hlen</h2>
   <p style="color:#888;font-size:13px;margin:0 0 14px;" id="levelSubDesc" data-i18n="diffDesc">Jede Schwierigkeit hat 5 Sub-Level</p>
   <div id="diffRow" style="margin-bottom:14px;">
     <button class="lvl-btn active" id="diffEasy" onclick="selectDiff('easy')">Easy</button>
     <button class="lvl-btn" id="diffMedium" onclick="selectDiff('medium')">Medium</button>
     <button class="lvl-btn" id="diffHard" onclick="selectDiff('hard')">Hard</button>
     <button class="lvl-btn" id="diffEnding" onclick="selectDiff('ending')" style="border-color:rgba(255,50,50,0.5);color:#ff8888;">Ending</button>
-    <button class="lvl-btn" id="diffCustom" onclick="openCustomLevels()" style="border-color:rgba(255,200,0,0.5);color:#ffcc00;">✏️ Erstellen</button>
-    <button class="lvl-btn" id="diff1v1" onclick="open1v1Menu()" style="border-color:rgba(255,80,80,0.6);color:#ff6666;">⚔️ 1v1</button>
+    <button class="lvl-btn" id="diffCustom" onclick="openCustomLevels()" style="border-color:rgba(255,200,0,0.5);color:#ffcc00;">?? Erstellen</button>
+    <button class="lvl-btn" id="diff1v1" onclick="open1v1Menu()" style="border-color:rgba(255,80,80,0.6);color:#ff6666;">?? 1v1</button>
   </div>
   <div id="subLevelRow"></div>
   <br>
-  <button onclick="showScreen('menuScreen')" data-i18n="back">Zurück</button>
+  <button onclick="showScreen('menuScreen')" data-i18n="back">Zur�ck</button>
 </div>
 
 <!-- SHOP -->
 <div id="shopScreen" class="screen" style="display:none;">
-  <h2 style="margin:0 0 4px;">🛒 Shop</h2>
+  <h2 style="margin:0 0 4px;">?? Shop</h2>
   <div style="display:flex;gap:16px;justify-content:center;margin:0 0 10px;font-size:14px;">
-    <span id="shopCoins" style="color:gold;">🪙 0</span>
-    <span id="shopDiamonds" style="color:#88eeff;">💎 0</span>
+    <span id="shopCoins" style="color:gold;">?? 0</span>
+    <span id="shopDiamonds" style="color:#88eeff;">?? 0</span>
   </div>
   <div style="background:rgba(255,255,255,0.05);border-radius:12px;padding:10px 14px;margin:0 0 14px;border:1px solid rgba(136,238,255,0.2);">
-    <p style="margin:0 0 8px;font-size:13px;color:#88eeff;">🔄 Coins → Diamanten</p>
+    <p style="margin:0 0 8px;font-size:13px;color:#88eeff;">?? Coins ? Diamanten</p>
     <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;">
-      <button onclick="convertCoins(10,1)" style="font-size:12px;padding:5px 10px;">10🪙 → 1💎</button>
-      <button onclick="convertCoins(100,10)" style="font-size:12px;padding:5px 10px;">100🪙 → 10💎</button>
-      <button onclick="convertCoins(1000,100)" style="font-size:12px;padding:5px 10px;">1000🪙 → 100💎</button>
-      <button onclick="convertCoins(10000,1000)" style="font-size:12px;padding:5px 10px;">10000🪙 → 1000💎</button>
+      <button onclick="convertCoins(10,1)" style="font-size:12px;padding:5px 10px;">10?? ? 1??</button>
+      <button onclick="convertCoins(100,10)" style="font-size:12px;padding:5px 10px;">100?? ? 10??</button>
+      <button onclick="convertCoins(1000,100)" style="font-size:12px;padding:5px 10px;">1000?? ? 100??</button>
+      <button onclick="convertCoins(10000,1000)" style="font-size:12px;padding:5px 10px;">10000?? ? 1000??</button>
     </div>
   </div>
-  <p style="color:#aaa;font-size:12px;margin:0 0 10px;">Hintergründe kosten 💎 Diamanten</p>
+  <p style="color:#aaa;font-size:12px;margin:0 0 10px;">Hintergr�nde kosten ?? Diamanten</p>
   <div id="shopItems"></div>
   <br>
   <button onclick="closeShop()">Back</button>
   <br><br>
-  <button onclick="openAdminPin()" style="font-size:11px;padding:4px 8px;opacity:0.3;border-color:rgba(255,255,255,0.2);">⚙</button>
+  <button onclick="openAdminPin()" style="font-size:11px;padding:4px 8px;opacity:0.3;border-color:rgba(255,255,255,0.2);">?</button>
 </div>
 
 <!-- ADMIN PANEL -->
 <div id="adminScreen" class="screen" style="display:none;min-width:320px;">
-  <h2 style="margin:0 0 4px;">🔐 Admin Panel</h2>
-  <p style="color:#aaa;font-size:12px;margin:0 0 16px;">Belohnungen werden beim nächsten Login abgeholt</p>
+  <h2 style="margin:0 0 4px;">?? Admin Panel</h2>
+  <p style="color:#aaa;font-size:12px;margin:0 0 16px;">Belohnungen werden beim n�chsten Login abgeholt</p>
   <div style="margin-bottom:12px;">
-    <p style="font-size:12px;color:#aaa;margin:0 0 4px;">Spielername (oder leer lassen für "Allen vergeben")</p>
+    <p style="font-size:12px;color:#aaa;margin:0 0 4px;">Spielername (oder leer lassen f�r "Allen vergeben")</p>
     <input id="adminPlayerSelect" type="text" placeholder="Username..." style="padding:8px;border-radius:8px;background:#111;color:white;border:1px solid #444;font-size:14px;width:100%;max-width:240px;">
   </div>
   <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:10px;">
     <div>
-      <p style="font-size:12px;color:#aaa;margin:0 0 4px;">🪙 Coins</p>
+      <p style="font-size:12px;color:#aaa;margin:0 0 4px;">?? Coins</p>
       <input id="adminCoinsInput" type="number" min="0" value="100" style="width:90px;padding:6px;border-radius:6px;background:#111;color:gold;border:1px solid #555;font-size:14px;">
     </div>
     <div>
-      <p style="font-size:12px;color:#aaa;margin:0 0 4px;">💎 Diamanten</p>
+      <p style="font-size:12px;color:#aaa;margin:0 0 4px;">?? Diamanten</p>
       <input id="adminGemsInput" type="number" min="0" value="0" style="width:90px;padding:6px;border-radius:6px;background:#111;color:#88eeff;border:1px solid #555;font-size:14px;">
     </div>
   </div>
-  <button onclick="adminGive()" style="border-color:#00cc66;color:#00cc66;margin:4px;">✓ Senden</button>
-  <button onclick="adminGiveAll()" style="border-color:#ffaa00;color:#ffaa00;margin:4px;">🌍 Allen senden</button>
+  <button onclick="adminGive()" style="border-color:#00cc66;color:#00cc66;margin:4px;">? Senden</button>
+  <button onclick="adminGiveAll()" style="border-color:#ffaa00;color:#ffaa00;margin:4px;">?? Allen senden</button>
   <hr style="border-color:rgba(255,255,255,0.1);margin:12px 0;">
-  <p style="font-size:12px;color:#ff6666;margin:0 0 6px;">⚠️ Gefährliche Aktionen</p>
-  <button onclick="adminResetOne()" style="border-color:#ff4444;color:#ff4444;margin:4px;">🗑️ Spieler zurücksetzen</button>
-  <button onclick="adminResetAll()" style="border-color:#ff0000;color:#ff0000;margin:4px;">💣 ALLE zurücksetzen</button>
+  <p style="font-size:12px;color:#ff6666;margin:0 0 6px;">?? Gef�hrliche Aktionen</p>
+  <button onclick="adminResetOne()" style="border-color:#ff4444;color:#ff4444;margin:4px;">??? Spieler zur�cksetzen</button>
+  <button onclick="adminResetAll()" style="border-color:#ff0000;color:#ff0000;margin:4px;">?? ALLE zur�cksetzen</button>
   <p id="adminMsg" style="color:#00cc66;font-size:13px;min-height:18px;margin:8px 0 0;"></p>
   <hr style="border-color:rgba(255,255,255,0.1);margin:12px 0;">
-  <p style="font-size:12px;color:#aaa;margin:0 0 6px;">👥 Spieler Online-Status</p>
+  <p style="font-size:12px;color:#aaa;margin:0 0 6px;">?? Spieler Online-Status</p>
   <div id="adminOnlineList" style="max-height:160px;overflow-y:auto;text-align:left;font-size:12px;background:#0d0d0d;border-radius:8px;padding:8px;border:1px solid #222;"></div>
   <br>
-  <button onclick="closeAdmin()">Zurück</button>
+  <button onclick="closeAdmin()">Zur�ck</button>
 </div>
 
 <!-- SKIN CATALOG -->
 <div id="skinScreen" class="screen" style="display:none;width:min(600px,96vw);padding:16px;">
-  <h2 style="margin:0 0 4px;">🎨 Skin Catalog</h2>
+  <h2 style="margin:0 0 4px;">?? Skin Catalog</h2>
   <p id="skinCoins" style="color:gold;margin:0 0 8px;"></p>
   <div style="margin-bottom:10px;">
-    <button class="lvl-btn active" id="tabSkins" onclick="switchSkinTab('skins')">🚀 Skins</button>
-    <button class="lvl-btn" id="tabFlames" onclick="switchSkinTab('flames')">🔥 Antrieb</button>
+    <button class="lvl-btn active" id="tabSkins" onclick="switchSkinTab('skins')">?? Skins</button>
+    <button class="lvl-btn" id="tabFlames" onclick="switchSkinTab('flames')">?? Antrieb</button>
   </div>
   <div style="display:flex;gap:12px;align-items:flex-start;">
-    <!-- Preview panel left — fixed width, no overflow -->
+    <!-- Preview panel left � fixed width, no overflow -->
     <div id="skinPreviewPanel" style="flex:0 0 130px;min-width:130px;background:#0d0d0d;border-radius:12px;padding:10px 8px;display:flex;flex-direction:column;align-items:center;border:1px solid #333;">
       <div style="width:114px;height:64px;border-radius:6px;background:#111;overflow:hidden;position:relative;">
         <canvas id="skinPreviewCanvas" width="114" height="64" style="position:absolute;top:0;left:0;width:114px;height:64px;"></canvas>
@@ -228,7 +228,7 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
 
 <!-- LEADERBOARD -->
 <div id="leaderScreen" class="screen" style="display:none;">
-  <h2 style="margin:0 0 10px;">🏆 <span data-i18n="leaderboard">Bestenliste</span></h2>
+  <h2 style="margin:0 0 10px;">?? <span data-i18n="leaderboard">Bestenliste</span></h2>
   <div style="margin-bottom:12px;">
     <button class="lvl-btn" onclick="showLeaderTab('easy')">Easy</button>
     <button class="lvl-btn" onclick="showLeaderTab('medium')">Medium</button>
@@ -237,112 +237,112 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
   </div>
   <div id="leaderList" style="min-width:240px;text-align:left;min-height:80px;"></div>
   <br>
-  <button onclick="closeLeaderboard()" data-i18n="back">Zurück</button>
+  <button onclick="closeLeaderboard()" data-i18n="back">Zur�ck</button>
 </div>
 
 <!-- SETTINGS -->
 <div id="settingsScreen" class="screen" style="display:none">
-  <h2 style="margin:0 0 16px;">⚙️ <span data-i18n="settings">Einstellungen</span></h2>
+  <h2 style="margin:0 0 16px;">?? <span data-i18n="settings">Einstellungen</span></h2>
   <p style="margin:6px 0 2px;" data-i18n="sensitivity">Empfindlichkeit</p>
   <input type="range" id="sensitivitySlider" min="1" max="20" value="7" oninput="updateSensitivity(this.value)">
   <span id="sensVal" style="margin-left:8px;">7</span>
-  <p style="margin:12px 0 2px;" data-i18n="volume">Lautstärke</p>
+  <p style="margin:12px 0 2px;" data-i18n="volume">Lautst�rke</p>
   <input type="range" id="volumeSlider" min="0" max="100" value="50" oninput="updateVolume(this.value)">
   <span id="volVal" style="margin-left:8px;">50</span>
-  <p style="margin:16px 0 6px;" data-i18n="device">Gerät</p>
-  <button id="devicePC" onclick="setDevice('pc')" style="margin:3px;" data-i18n="pc">💻 PC</button>
-  <button id="deviceMobile" onclick="setDevice('mobile')" style="margin:3px;" data-i18n="mobile">📱 Handy</button>
+  <p style="margin:16px 0 6px;" data-i18n="device">Ger�t</p>
+  <button id="devicePC" onclick="setDevice('pc')" style="margin:3px;" data-i18n="pc">?? PC</button>
+  <button id="deviceMobile" onclick="setDevice('mobile')" style="margin:3px;" data-i18n="mobile">?? Handy</button>
   <p style="margin:16px 0 6px;" data-i18n="language">Sprache</p>
-  <button id="langDE" onclick="setLang('de')" style="margin:3px;">🇩🇪 Deutsch</button>
-  <button id="langEN" onclick="setLang('en')" style="margin:3px;">🇬🇧 English</button>
+  <button id="langDE" onclick="setLang('de')" style="margin:3px;">???? Deutsch</button>
+  <button id="langEN" onclick="setLang('en')" style="margin:3px;">???? English</button>
   <p style="margin:16px 0 6px;" data-i18n="keys">Tasten</p>
   <div style="display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap;">
     <div>
-      <div style="font-size:12px;color:#aaa;margin-bottom:4px;" data-i18n="up">⬆ Hoch</div>
+      <div style="font-size:12px;color:#aaa;margin-bottom:4px;" data-i18n="up">? Hoch</div>
       <button id="bindUpBtn" onclick="startBind('up')" style="width:90px;font-size:13px;padding:8px;"><span id="bindUpLabel"></span></button>
     </div>
     <div>
-      <div style="font-size:12px;color:#aaa;margin-bottom:4px;" data-i18n="down">⬇ Runter</div>
+      <div style="font-size:12px;color:#aaa;margin-bottom:4px;" data-i18n="down">? Runter</div>
       <button id="bindDownBtn" onclick="startBind('down')" style="width:90px;font-size:13px;padding:8px;"><span id="bindDownLabel"></span></button>
     </div>
   </div>
   <p id="bindHint" style="font-size:12px;color:#00ccff;min-height:16px;margin:6px 0 0;"></p>
   <br>
-  <button onclick="closeSettings()" data-i18n="back">Zurück</button>
+  <button onclick="closeSettings()" data-i18n="back">Zur�ck</button>
 </div>
 
 <!-- PAUSE MENU -->
 <div id="pauseScreen" class="screen" style="display:none">
-  <h2 style="margin:0 0 16px;" data-i18n="paused">⏸ Pausiert</h2>
-  <button onclick="resumeGame()" data-i18n="continue">▶ Weiter</button><br>
-  <button onclick="openPauseSettings()" data-i18n="settings">⚙️ Einstellungen</button><br>
-  <button onclick="pauseToMenu()" data-i18n="mainMenu">🏠 Hauptmenü</button>
+  <h2 style="margin:0 0 16px;" data-i18n="paused">? Pausiert</h2>
+  <button onclick="resumeGame()" data-i18n="continue">? Weiter</button><br>
+  <button onclick="openPauseSettings()" data-i18n="settings">?? Einstellungen</button><br>
+  <button onclick="pauseToMenu()" data-i18n="mainMenu">?? Hauptmen�</button>
 </div>
 
 <!-- PAUSE SETTINGS -->
 <div id="pauseSettingsScreen" class="screen" style="display:none">
-  <h2 style="margin:0 0 16px;">⚙️ <span data-i18n="settings">Einstellungen</span></h2>
+  <h2 style="margin:0 0 16px;">?? <span data-i18n="settings">Einstellungen</span></h2>
   <p style="margin:6px 0 2px;" data-i18n="sensitivity">Empfindlichkeit</p>
   <input type="range" id="pSensSlider" min="1" max="20" value="7" oninput="updateSensitivity(this.value);document.getElementById('pSensVal').innerText=this.value;">
   <span id="pSensVal" style="margin-left:8px;">7</span>
-  <p style="margin:12px 0 2px;" data-i18n="volume">Lautstärke</p>
+  <p style="margin:12px 0 2px;" data-i18n="volume">Lautst�rke</p>
   <input type="range" id="pVolSlider" min="0" max="100" value="50" oninput="updateVolume(this.value);document.getElementById('pVolVal').innerText=this.value;">
   <span id="pVolVal" style="margin-left:8px;">50</span>
-  <p style="margin:16px 0 6px;" data-i18n="device">Gerät</p>
-  <button id="pDevicePC" onclick="setDevice('pc')" style="margin:3px;" data-i18n="pc">💻 PC</button>
-  <button id="pDeviceMobile" onclick="setDevice('mobile')" style="margin:3px;" data-i18n="mobile">📱 Handy</button>
+  <p style="margin:16px 0 6px;" data-i18n="device">Ger�t</p>
+  <button id="pDevicePC" onclick="setDevice('pc')" style="margin:3px;" data-i18n="pc">?? PC</button>
+  <button id="pDeviceMobile" onclick="setDevice('mobile')" style="margin:3px;" data-i18n="mobile">?? Handy</button>
   <p style="margin:16px 0 6px;" data-i18n="language">Sprache</p>
-  <button id="pLangDE" onclick="setLang('de')" style="margin:3px;">🇩🇪 Deutsch</button>
-  <button id="pLangEN" onclick="setLang('en')" style="margin:3px;">🇬🇧 English</button>
+  <button id="pLangDE" onclick="setLang('de')" style="margin:3px;">???? Deutsch</button>
+  <button id="pLangEN" onclick="setLang('en')" style="margin:3px;">???? English</button>
   <p style="margin:16px 0 6px;" data-i18n="keys">Tasten</p>
   <div style="display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap;">
     <div>
-      <div style="font-size:12px;color:#aaa;margin-bottom:4px;" data-i18n="up">⬆ Hoch</div>
+      <div style="font-size:12px;color:#aaa;margin-bottom:4px;" data-i18n="up">? Hoch</div>
       <button id="pBindUpBtn" onclick="startBind('up')" style="width:90px;font-size:13px;padding:8px;"><span id="pBindUpLabel"></span></button>
     </div>
     <div>
-      <div style="font-size:12px;color:#aaa;margin-bottom:4px;" data-i18n="down">⬇ Runter</div>
+      <div style="font-size:12px;color:#aaa;margin-bottom:4px;" data-i18n="down">? Runter</div>
       <button id="pBindDownBtn" onclick="startBind('down')" style="width:90px;font-size:13px;padding:8px;"><span id="pBindDownLabel"></span></button>
     </div>
   </div>
   <p id="pBindHint" style="font-size:12px;color:#00ccff;min-height:16px;margin:6px 0 0;"></p>
   <br>
-  <button onclick="closePauseSettings()" data-i18n="back">Zurück</button>
+  <button onclick="closePauseSettings()" data-i18n="back">Zur�ck</button>
 </div>
 
 <!-- END SCREEN -->
 <div id="endScreen" class="screen" style="display:none">
-  <h2 style="margin:0 0 10px;" data-i18n="gameOver">💥 Game Over</h2>
+  <h2 style="margin:0 0 10px;" data-i18n="gameOver">?? Game Over</h2>
   <p id="endScore" style="font-size:20px;margin:4px 0;"></p>
   <p id="endHigh" style="color:#aaa;font-size:14px;margin:4px 0;"></p>
   <p id="endCoinsEarned" style="color:gold;font-size:15px;margin:8px 0 14px;"></p>
-  <button onclick="restartGame()" data-i18n="restart">🔄 Neustart</button>
-  <button onclick="goMenu()" data-i18n="mainMenu">🏠 Hauptmenü</button>
+  <button onclick="restartGame()" data-i18n="restart">?? Neustart</button>
+  <button onclick="goMenu()" data-i18n="mainMenu">?? Hauptmen�</button>
 </div>
 
 <!-- WIN SCREEN -->
 <div id="winScreen" class="screen" style="display:none">
-  <h2 style="margin:0 0 6px;font-size:26px;" data-i18n="won">🏆 Du hast es geschafft!</h2>
+  <h2 style="margin:0 0 6px;font-size:26px;" data-i18n="won">?? Du hast es geschafft!</h2>
   <p style="color:#00ccff;font-size:15px;margin:0 0 4px;" data-i18n="endingDone">Ending abgeschlossen</p>
   <p id="winScore" style="font-size:20px;margin:6px 0;"></p>
   <p id="winCoins" style="color:gold;font-size:15px;margin:4px 0 16px;"></p>
-  <button onclick="restartGame()" data-i18n="playAgain">🔄 Nochmal</button>
-  <button id="nextLevelBtn" onclick="nextEndingLevel()" style="border-color:#00ccff;color:#00ccff;" data-i18n="nextLevel">▶ Nächstes Level</button>
-  <button onclick="goMenu()" data-i18n="mainMenu">🏠 Hauptmenü</button>
+  <button onclick="restartGame()" data-i18n="playAgain">?? Nochmal</button>
+  <button id="nextLevelBtn" onclick="nextEndingLevel()" style="border-color:#00ccff;color:#00ccff;" data-i18n="nextLevel">? N�chstes Level</button>
+  <button onclick="goMenu()" data-i18n="mainMenu">?? Hauptmen�</button>
 </div>
 
 <!-- CUSTOM LEVELS LIST -->
 <div id="customScreen" class="screen" style="display:none;width:min(500px,96vw);">
-  <h2 style="margin:0 0 4px;">✏️ Eigene Level</h2>
-  <p style="color:#aaa;font-size:13px;margin:0 0 14px;">Nur für dich sichtbar</p>
+  <h2 style="margin:0 0 4px;">?? Eigene Level</h2>
+  <p style="color:#aaa;font-size:13px;margin:0 0 14px;">Nur f�r dich sichtbar</p>
   <div id="customLevelList" style="display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto;margin-bottom:14px;"></div>
-  <button onclick="openLevelEditor(null)" style="border-color:#ffcc00;color:#ffcc00;">➕ Neues Level erstellen</button><br><br>
-  <button onclick="showScreen('levelScreen')">Zurück</button>
+  <button onclick="openLevelEditor(null)" style="border-color:#ffcc00;color:#ffcc00;">? Neues Level erstellen</button><br><br>
+  <button onclick="showScreen('levelScreen')">Zur�ck</button>
 </div>
 
 <!-- CUSTOM LEVEL EDITOR -->
 <div id="customEditorScreen" class="screen" style="display:none;width:min(480px,96vw);">
-  <h2 style="margin:0 0 12px;" id="editorTitle">✏️ Level erstellen</h2>
+  <h2 style="margin:0 0 12px;" id="editorTitle">?? Level erstellen</h2>
   <div style="display:flex;flex-direction:column;gap:10px;text-align:left;max-width:360px;margin:0 auto;">
     <div>
       <label style="font-size:13px;color:#aaa;">Level Name</label><br>
@@ -353,35 +353,35 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
       <input id="edGoalScore" type="number" min="100" max="99999" value="2000" style="width:100%;padding:8px;background:#111;color:white;border:1px solid #444;border-radius:8px;font-size:14px;box-sizing:border-box;">
     </div>
     <div>
-      <label style="font-size:13px;color:#aaa;">Geschwindigkeit (1–20)</label><br>
+      <label style="font-size:13px;color:#aaa;">Geschwindigkeit (1�20)</label><br>
       <input id="edSpeed" type="range" min="1" max="20" value="5" oninput="document.getElementById('edSpeedVal').innerText=this.value" style="width:100%;">
       <span id="edSpeedVal" style="color:#00ccff;">5</span>
     </div>
     <div>
-      <label style="font-size:13px;color:#aaa;">Spawn-Rate — niedrig = mehr Objekte (5–80)</label><br>
+      <label style="font-size:13px;color:#aaa;">Spawn-Rate � niedrig = mehr Objekte (5�80)</label><br>
       <input id="edSpawnRate" type="range" min="5" max="80" value="40" oninput="document.getElementById('edSpawnVal').innerText=this.value" style="width:100%;">
       <span id="edSpawnVal" style="color:#00ccff;">40</span>
     </div>
     <div>
       <label style="font-size:13px;color:#aaa;">Objekt-Typen</label><br>
       <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;">
-        <label style="font-size:13px;"><input type="checkbox" id="edObjRock" checked> 🪨 Rock</label>
-        <label style="font-size:13px;"><input type="checkbox" id="edObjSpike"> 🔺 Spike</label>
-        <label style="font-size:13px;"><input type="checkbox" id="edObjBall"> ⚽ Ball</label>
-        <label style="font-size:13px;"><input type="checkbox" id="edObjLaser"> ⚡ Laser</label>
-        <label style="font-size:13px;"><input type="checkbox" id="edObjZigzag"> 💎 Zigzag</label>
+        <label style="font-size:13px;"><input type="checkbox" id="edObjRock" checked> ?? Rock</label>
+        <label style="font-size:13px;"><input type="checkbox" id="edObjSpike"> ?? Spike</label>
+        <label style="font-size:13px;"><input type="checkbox" id="edObjBall"> ? Ball</label>
+        <label style="font-size:13px;"><input type="checkbox" id="edObjLaser"> ? Laser</label>
+        <label style="font-size:13px;"><input type="checkbox" id="edObjZigzag"> ?? Zigzag</label>
       </div>
     </div>
   </div>
   <br>
-  <button onclick="saveCustomLevel()" style="border-color:#00cc66;color:#00cc66;">💾 Speichern</button>
+  <button onclick="saveCustomLevel()" style="border-color:#00cc66;color:#00cc66;">?? Speichern</button>
   <button onclick="openCustomLevels()" style="margin-left:8px;">Abbrechen</button>
   <input type="hidden" id="edEditIndex" value="-1">
 </div>
 
 <!-- 1v1 MENU -->
 <div id="duel1v1Screen" class="screen" style="display:none;width:min(420px,96vw);">
-  <h2 style="margin:0 0 6px;">⚔️ 1v1 Duell</h2>
+  <h2 style="margin:0 0 6px;">?? 1v1 Duell</h2>
   <p style="color:#aaa;font-size:13px;margin:0 0 16px;">Fordere einen Spieler heraus</p>
   <div style="display:flex;flex-direction:column;gap:10px;max-width:320px;margin:0 auto;">
     <div>
@@ -398,33 +398,33 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
     </div>
   </div>
   <br>
-  <button onclick="sendDuelInvite()" style="border-color:#ff6666;color:#ff6666;">⚔️ Einladung senden</button>
-  <button onclick="showScreen('levelScreen')" style="margin-left:8px;">Zurück</button>
+  <button onclick="sendDuelInvite()" style="border-color:#ff6666;color:#ff6666;">?? Einladung senden</button>
+  <button onclick="showScreen('levelScreen')" style="margin-left:8px;">Zur�ck</button>
 </div>
 
 <!-- 1v1 WAITING (challenger) -->
 <div id="duelWaitScreen" class="screen" style="display:none;width:min(380px,96vw);">
-  <h2 style="margin:0 0 8px;">⏳ Warten...</h2>
+  <h2 style="margin:0 0 8px;">? Warten...</h2>
   <p id="duelWaitMsg" style="color:#aaa;font-size:14px;margin:0 0 20px;"></p>
   <div style="width:40px;height:40px;border:3px solid #ff6666;border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 20px;"></div>
-  <button onclick="cancelDuel()" style="border-color:#ff4444;color:#ff4444;">✕ Abbrechen</button>
+  <button onclick="cancelDuel()" style="border-color:#ff4444;color:#ff4444;">? Abbrechen</button>
 </div>
 
 <!-- 1v1 INVITE (opponent receives) -->
 <div id="duelInviteScreen" class="screen" style="display:none;width:min(380px,96vw);">
-  <h2 style="margin:0 0 8px;">⚔️ Duell-Einladung!</h2>
+  <h2 style="margin:0 0 8px;">?? Duell-Einladung!</h2>
   <p id="duelInviteMsg" style="color:#ffcc00;font-size:16px;margin:0 0 6px;"></p>
   <p id="duelInviteDiff" style="color:#aaa;font-size:13px;margin:0 0 20px;"></p>
-  <button onclick="acceptDuel()" style="border-color:#00cc66;color:#00cc66;margin:4px;">✓ Annehmen</button>
-  <button onclick="declineDuel()" style="border-color:#ff4444;color:#ff4444;margin:4px;">✕ Ablehnen</button>
+  <button onclick="acceptDuel()" style="border-color:#00cc66;color:#00cc66;margin:4px;">? Annehmen</button>
+  <button onclick="declineDuel()" style="border-color:#ff4444;color:#ff4444;margin:4px;">? Ablehnen</button>
 </div>
 
 <!-- 1v1 LOSE SCREEN -->
 <div id="duelLoseScreen" class="screen" style="display:none;">
-  <h2 style="margin:0 0 8px;font-size:28px;">💀 Du hast verloren!</h2>
+  <h2 style="margin:0 0 8px;font-size:28px;">?? Du hast verloren!</h2>
   <p id="duelLoseMsg" style="color:#ff6666;font-size:15px;margin:0 0 6px;"></p>
   <p id="duelLoseScore" style="color:#aaa;font-size:14px;margin:0 0 20px;"></p>
-  <button onclick="goMenu()">🏠 Hauptmenü</button>
+  <button onclick="goMenu()">?? Hauptmen�</button>
 </div>
 
 <!-- 1v1 RESULT SCREEN -->
@@ -443,68 +443,68 @@ input[type=range]{width:min(160px,55vw);vertical-align:middle;}
       <div style="font-size:11px;color:#666;margin-top:4px;">Punkte</div>
     </div>
   </div>
-  <button onclick="goMenu()">🏠 Hauptmenü</button>
+  <button onclick="goMenu()">?? Hauptmen�</button>
 </div>
 
 <!-- FRIENDS SCREEN -->
 <div id="friendsScreen" class="screen" style="display:none;width:min(420px,96vw);">
-  <h2 style="margin:0 0 4px;">👥 Freunde</h2>
+  <h2 style="margin:0 0 4px;">?? Freunde</h2>
   <p id="friendsMsg" style="color:#00cc66;font-size:13px;min-height:16px;margin:0 0 10px;"></p>
   <div style="display:flex;gap:6px;margin-bottom:14px;">
     <input id="friendAddInput" placeholder="Username..." style="flex:1;padding:8px;background:#111;color:white;border:1px solid #444;border-radius:8px;font-size:14px;">
-    <button onclick="sendFriendRequest()" style="border-color:#00cc66;color:#00cc66;padding:8px 14px;">➕</button>
+    <button onclick="sendFriendRequest()" style="border-color:#00cc66;color:#00cc66;padding:8px 14px;">?</button>
   </div>
   <!-- Incoming requests -->
   <div id="friendRequestsSection" style="display:none;margin-bottom:12px;">
-    <p style="font-size:12px;color:#ffcc00;margin:0 0 6px;">📩 Anfragen</p>
+    <p style="font-size:12px;color:#ffcc00;margin:0 0 6px;">?? Anfragen</p>
     <div id="friendRequestsList"></div>
   </div>
   <!-- Friends list -->
   <p style="font-size:12px;color:#aaa;margin:0 0 6px;">Freunde</p>
   <div id="friendsList" style="display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto;"></div>
   <br>
-  <button onclick="showScreen('menuScreen')">Zurück</button>
+  <button onclick="showScreen('menuScreen')">Zur�ck</button>
 </div>
 
 <script>
 // ===== LANGUAGE =====
 const LANG={
   de:{
-    play:"▶ Spielen",shop:"🛒 Shop",skins:"🎨 Skins",leaderboard:"🏆 Bestenliste",settings:"⚙️ Einstellungen",
-    selectDiff:"Schwierigkeit wählen",diffDesc:"Jede Schwierigkeit hat 5 Sub-Level",
+    play:"? Spielen",shop:"?? Shop",skins:"?? Skins",leaderboard:"?? Bestenliste",settings:"?? Einstellungen",
+    selectDiff:"Schwierigkeit w�hlen",diffDesc:"Jede Schwierigkeit hat 5 Sub-Level",
     endingDesc:"Ending hat 20 progressiv schwieriger werdende Level",
-    back:"Zurück",sensitivity:"Empfindlichkeit",volume:"Lautstärke",
-    device:"Gerät",pc:"💻 PC",mobile:"📱 Handy",keys:"Tasten",
-    up:"⬆ Hoch",down:"⬇ Runter",language:"Sprache",
-    paused:"⏸ Pausiert",continue:"▶ Weiter",mainMenu:"🏠 Hauptmenü",
-    gameOver:"💥 Game Over",restart:"🔄 Neustart",
+    back:"Zur�ck",sensitivity:"Empfindlichkeit",volume:"Lautst�rke",
+    device:"Ger�t",pc:"?? PC",mobile:"?? Handy",keys:"Tasten",
+    up:"? Hoch",down:"? Runter",language:"Sprache",
+    paused:"? Pausiert",continue:"? Weiter",mainMenu:"?? Hauptmen�",
+    gameOver:"?? Game Over",restart:"?? Neustart",
     bestOnLevel:"Bestes auf diesem Level:",coinsEarned:"Coins verdient:",
-    loading:"⏳ Laden...",noEntries:"Noch keine Einträge.",
+    loading:"? Laden...",noEntries:"Noch keine Eintr�ge.",
     player:"Spieler",score:"Score",
-    won:"🏆 Du hast es geschafft!",endingDone:"Ending abgeschlossen",
-    nextLevel:"▶ Nächstes Level",playAgain:"🔄 Nochmal",
+    won:"?? Du hast es geschafft!",endingDone:"Ending abgeschlossen",
+    nextLevel:"? N�chstes Level",playAgain:"?? Nochmal",
     beatenCount:"Geschafft:",of:"/","levels":" Level",
-    beaten:"✓ Geschafft",yourCoins:"Deine Coins:",
-    bindHint1:"Drücke eine Taste für '",bindHint2:"'...",saved:"✓ Gespeichert",
-    hoch:"Hoch",runter:"Runter",nextBoost:"nächster Boost:",
+    beaten:"? Geschafft",yourCoins:"Deine Coins:",
+    bindHint1:"Dr�cke eine Taste f�r '",bindHint2:"'...",saved:"? Gespeichert",
+    hoch:"Hoch",runter:"Runter",nextBoost:"n�chster Boost:",
   },
   en:{
-    play:"▶ Play",shop:"🛒 Shop",skins:"🎨 Skins",leaderboard:"🏆 Leaderboard",settings:"⚙️ Settings",
+    play:"? Play",shop:"?? Shop",skins:"?? Skins",leaderboard:"?? Leaderboard",settings:"?? Settings",
     selectDiff:"Select Difficulty",diffDesc:"Each difficulty has 5 sub-levels",
     endingDesc:"Ending has 20 progressively harder levels",
     back:"Back",sensitivity:"Sensitivity",volume:"Volume",
-    device:"Device",pc:"💻 PC",mobile:"📱 Mobile",keys:"Keys",
-    up:"⬆ Up",down:"⬇ Down",language:"Language",
-    paused:"⏸ Paused",continue:"▶ Continue",mainMenu:"🏠 Main Menu",
-    gameOver:"💥 Game Over",restart:"🔄 Restart",
+    device:"Device",pc:"?? PC",mobile:"?? Mobile",keys:"Keys",
+    up:"? Up",down:"? Down",language:"Language",
+    paused:"? Paused",continue:"? Continue",mainMenu:"?? Main Menu",
+    gameOver:"?? Game Over",restart:"?? Restart",
     bestOnLevel:"Best on this level:",coinsEarned:"Coins earned:",
-    loading:"⏳ Loading...",noEntries:"No entries yet.",
+    loading:"? Loading...",noEntries:"No entries yet.",
     player:"Player",score:"Score",
-    won:"🏆 You did it!",endingDone:"Ending completed",
-    nextLevel:"▶ Next Level",playAgain:"🔄 Play Again",
+    won:"?? You did it!",endingDone:"Ending completed",
+    nextLevel:"? Next Level",playAgain:"?? Play Again",
     beatenCount:"Beaten:",of:"/","levels":" Levels",
-    beaten:"✓ Done",yourCoins:"Your coins:",
-    bindHint1:"Press a key for '",bindHint2:"'...",saved:"✓ Saved",
+    beaten:"? Done",yourCoins:"Your coins:",
+    bindHint1:"Press a key for '",bindHint2:"'...",saved:"? Saved",
     hoch:"Up",runter:"Down",nextBoost:"next boost:",
   }
 };
@@ -595,44 +595,44 @@ function skinPrice(skin){
 const FLAME_SKINS=[
   {id:0,name:"Standard",c1:"#ff6600",c2:"#ff3300",c3:"#ffaa00"},
   {id:1,name:"Blau",c1:"#0088ff",c2:"#0044cc",c3:"#88ccff"},
-  {id:2,name:"Grün",c1:"#00ff44",c2:"#00aa22",c3:"#aaffcc"},
+  {id:2,name:"Gr�n",c1:"#00ff44",c2:"#00aa22",c3:"#aaffcc"},
   {id:3,name:"Lila",c1:"#cc00ff",c2:"#8800cc",c3:"#ee88ff"},
-  {id:4,name:"Weiß",c1:"#ffffff",c2:"#ccddff",c3:"#aabbff"},
+  {id:4,name:"Wei�",c1:"#ffffff",c2:"#ccddff",c3:"#aabbff"},
   {id:5,name:"Rot",c1:"#ff0000",c2:"#cc0000",c3:"#ff8888"},
   {id:6,name:"Cyan",c1:"#00ffff",c2:"#00aacc",c3:"#aaffff"},
   {id:7,name:"Gold",c1:"#ffdd00",c2:"#cc9900",c3:"#fff0aa"},
   {id:8,name:"Pink",c1:"#ff44aa",c2:"#cc0077",c3:"#ffaadd"},
   {id:9,name:"Regenbogen",c1:"#ff0000",c2:"#00ff00",c3:"#0000ff"},
 ];
-// id0=100💎, id1=200💎, ..., id9=1000💎
+// id0=100??, id1=200??, ..., id9=1000??
 function flamePrice(f){return (f.id+1)*100;}
 
 // ===== BACKGROUNDS =====
 const BACKGROUNDS=[
-  {id:"none",    name:"Default",    emoji:"⬛",price:0,   desc:"Plain black"},
-  {id:"stars",   name:"Stars",      emoji:"🌌",price:300, desc:"Moving starfield"},
-  {id:"nebula",  name:"Nebula",     emoji:"🔮",price:350, desc:"Purple nebula clouds"},
-  {id:"matrix",  name:"Matrix",     emoji:"💚",price:400, desc:"Green code rain"},
-  {id:"sunset",  name:"Sunset",     emoji:"🌅",price:450, desc:"Orange gradient sky"},
-  {id:"ocean",   name:"Deep Ocean", emoji:"🌊",price:500, desc:"Dark blue waves"},
-  {id:"aurora",  name:"Aurora",     emoji:"🌈",price:1000,desc:"Northern lights"},
-  {id:"lava",    name:"Lava",       emoji:"🌋",price:1000,desc:"Flowing lava"},
-  {id:"cyber",   name:"Cyber City", emoji:"🏙️",price:1000,desc:"Neon city grid"},
-  {id:"void",    name:"Void",       emoji:"🕳️",price:1000,desc:"Purple void swirl"},
-  {id:"ice",     name:"Frozen",     emoji:"❄️",price:1000,desc:"Icy crystal cave"},
-  {id:"galaxy",  name:"Galaxy",     emoji:"🌀",price:1000,desc:"Spiral galaxy"},
-  {id:"toxic",   name:"Toxic",      emoji:"☢️",price:1000,desc:"Green toxic waste"},
-  {id:"blood",   name:"Blood Moon", emoji:"🔴",price:1000,desc:"Red blood moon sky"},
-  {id:"desert",  name:"Desert",     emoji:"🏜️",price:1000,desc:"Sandy dunes"},
-  {id:"storm",   name:"Thunderstorm",emoji:"⛈️",price:1000,desc:"Lightning storm"},
-  {id:"saturn",  name:"Saturn",emoji:"🪐",price:20000,desc:"Ringed planet"},
-  {id:"retrocity",  name:"Retro City",  emoji:"🌆",price:1000,desc:"Pink pixel city"},
-  {id:"neoncity",   name:"Neon Night",  emoji:"🌃",price:1000,desc:"Dark neon city"},
-  {id:"desertsun",  name:"Desert Sun",  emoji:"🌅",price:1000,desc:"Golden desert sunset"},
-  {id:"snowmount",  name:"Snow Mountain",emoji:"🏔️",price:1000,desc:"Icy pixel mountain"},
-  {id:"pixelforest",name:"Pixel Forest", emoji:"🌲",price:1000,desc:"Night pixel forest"},
-  {id:"pastelsky",  name:"Pastel Sky",  emoji:"☁️",price:1000,desc:"Dreamy pastel clouds"},
-  {id:"hyperspace", name:"Hyperspace",  emoji:"🌀",price:100, desc:"Pixel warp speed"},
+  {id:"none",    name:"Default",    emoji:"?",price:0,   desc:"Plain black"},
+  {id:"stars",   name:"Stars",      emoji:"??",price:300, desc:"Moving starfield"},
+  {id:"nebula",  name:"Nebula",     emoji:"??",price:350, desc:"Purple nebula clouds"},
+  {id:"matrix",  name:"Matrix",     emoji:"??",price:400, desc:"Green code rain"},
+  {id:"sunset",  name:"Sunset",     emoji:"??",price:450, desc:"Orange gradient sky"},
+  {id:"ocean",   name:"Deep Ocean", emoji:"??",price:500, desc:"Dark blue waves"},
+  {id:"aurora",  name:"Aurora",     emoji:"??",price:1000,desc:"Northern lights"},
+  {id:"lava",    name:"Lava",       emoji:"??",price:1000,desc:"Flowing lava"},
+  {id:"cyber",   name:"Cyber City", emoji:"???",price:1000,desc:"Neon city grid"},
+  {id:"void",    name:"Void",       emoji:"???",price:1000,desc:"Purple void swirl"},
+  {id:"ice",     name:"Frozen",     emoji:"??",price:1000,desc:"Icy crystal cave"},
+  {id:"galaxy",  name:"Galaxy",     emoji:"??",price:1000,desc:"Spiral galaxy"},
+  {id:"toxic",   name:"Toxic",      emoji:"??",price:1000,desc:"Green toxic waste"},
+  {id:"blood",   name:"Blood Moon", emoji:"??",price:1000,desc:"Red blood moon sky"},
+  {id:"desert",  name:"Desert",     emoji:"???",price:1000,desc:"Sandy dunes"},
+  {id:"storm",   name:"Thunderstorm",emoji:"??",price:1000,desc:"Lightning storm"},
+  {id:"saturn",  name:"Saturn",emoji:"??",price:20000,desc:"Ringed planet"},
+  {id:"retrocity",  name:"Retro City",  emoji:"??",price:1000,desc:"Pink pixel city"},
+  {id:"neoncity",   name:"Neon Night",  emoji:"??",price:1000,desc:"Dark neon city"},
+  {id:"desertsun",  name:"Desert Sun",  emoji:"??",price:1000,desc:"Golden desert sunset"},
+  {id:"snowmount",  name:"Snow Mountain",emoji:"???",price:1000,desc:"Icy pixel mountain"},
+  {id:"pixelforest",name:"Pixel Forest", emoji:"??",price:1000,desc:"Night pixel forest"},
+  {id:"pastelsky",  name:"Pastel Sky",  emoji:"??",price:1000,desc:"Dreamy pastel clouds"},
+  {id:"hyperspace", name:"Hyperspace",  emoji:"??",price:100, desc:"Pixel warp speed"},
 ];
 
 // ===== MUSIC =====
@@ -726,8 +726,8 @@ function updateTopBar(){
   if(!currentUser){tb.style.display="none";return;}
   if(!gameRunning) tb.style.display="flex";
   const u=getUser();
-  document.getElementById("topCoins").innerText="🪙 "+(u?u.coins:0);
-  document.getElementById("topDiamonds").innerText="💎 "+(u?u.diamonds||0:0);
+  document.getElementById("topCoins").innerText="?? "+(u?u.coins:0);
+  document.getElementById("topDiamonds").innerText="?? "+(u?u.diamonds||0:0);
 }
 
 // ===== MENU BACKGROUND =====
@@ -907,8 +907,8 @@ function renderSubLevels(){
 // ===== SHOP =====
 function openShop(){
   const u=getUser();
-  document.getElementById("shopCoins").innerText="🪙 "+(u.coins||0);
-  document.getElementById("shopDiamonds").innerText="💎 "+(u.diamonds||0);
+  document.getElementById("shopCoins").innerText="?? "+(u.coins||0);
+  document.getElementById("shopDiamonds").innerText="?? "+(u.diamonds||0);
   const container=document.getElementById("shopItems");
   container.innerHTML="";
   BACKGROUNDS.forEach(bg=>{
@@ -919,7 +919,7 @@ function openShop(){
     div.innerHTML=`<div style="font-size:36px;">${bg.emoji}</div>
       <p style="margin:4px 0;font-size:14px;">${bg.name}</p>
       <p style="color:#888;font-size:12px;margin:2px 0;">${bg.desc}</p>
-      <p style="color:#88eeff;font-size:12px;margin:2px 0 8px;">${bg.price===0?"Gratis":bg.price+" 💎"}</p>`;
+      <p style="color:#88eeff;font-size:12px;margin:2px 0 8px;">${bg.price===0?"Gratis":bg.price+" ??"}</p>`;
     const btn=document.createElement("button");
     btn.style.cssText="font-size:13px;padding:6px 12px;margin:0;";
     if(isActive){btn.innerText="Aktiv";btn.disabled=true;}
@@ -936,7 +936,7 @@ function buyBg(id){
   let u=getUser();
   if(u.shop.ownedBgs.includes(id)){activateBg(id);return;}
   if(bg.price===0){u.shop.ownedBgs.push(id);saveUser(u);activateBg(id);return;}
-  if((u.diamonds||0)<bg.price){alert("Nicht genug Diamanten 💎");return;}
+  if((u.diamonds||0)<bg.price){alert("Nicht genug Diamanten ??");return;}
   u.diamonds-=bg.price;u.shop.ownedBgs.push(id);saveUser(u);activateBg(id);
 }
 function activateBg(id){
@@ -944,7 +944,7 @@ function activateBg(id){
 }
 function convertCoins(cost,gems){
   let u=getUser();
-  if((u.coins||0)<cost){alert("Nicht genug Coins 🪙");return;}
+  if((u.coins||0)<cost){alert("Nicht genug Coins ??");return;}
   u.coins-=cost;u.diamonds=(u.diamonds||0)+gems;saveUser(u);updateTopBar();openShop();
 }
 
@@ -1018,7 +1018,7 @@ async function claimPendingRewards(){
       else{totalCoins+=r.coins||0;totalGems+=r.gems||0;}
     });
 
-    // Save to localStorage FIRST — prevents double claim even if JSONBin fails
+    // Save to localStorage FIRST � prevents double claim even if JSONBin fails
     mine.forEach(r=>claimedIds.push(r.id));
     localStorage.setItem("claimedRewardIds",JSON.stringify(claimedIds.slice(-200)));
 
@@ -1060,7 +1060,7 @@ function renderAdminOnlineList(){
   el.innerHTML=entries.map(([name,ts])=>{
     const diff=now-ts;
     const online=diff<20000;
-    const dot=online?'🟢':'🔴';
+    const dot=online?'??':'??';
     let when;
     if(online) when='gerade online';
     else if(diff<60000) when=`vor ${Math.floor(diff/1000)}s`;
@@ -1078,53 +1078,53 @@ async function adminGive(){
   const coins=parseInt(document.getElementById("adminCoinsInput").value)||0;
   const gems=parseInt(document.getElementById("adminGemsInput").value)||0;
   if(!target){adminGiveAll();return;}
-  document.getElementById("adminMsg").innerText="⏳ Wird gesendet...";
+  document.getElementById("adminMsg").innerText="? Wird gesendet...";
   await fetchBoard();
   if(!Array.isArray(globalBoard.pendingRewards)) globalBoard.pendingRewards=[];
   globalBoard.pendingRewards.push({target,coins,gems,ts:Date.now()});
   await pushBin();
-  document.getElementById("adminMsg").innerText=`✓ Belohnung für "${target}" gespeichert: +${coins}🪙 +${gems}💎`;
+  document.getElementById("adminMsg").innerText=`? Belohnung f�r "${target}" gespeichert: +${coins}?? +${gems}??`;
 }
 async function adminGiveAll(){
   const coins=parseInt(document.getElementById("adminCoinsInput").value)||0;
   const gems=parseInt(document.getElementById("adminGemsInput").value)||0;
-  document.getElementById("adminMsg").innerText="⏳ Wird gesendet...";
+  document.getElementById("adminMsg").innerText="? Wird gesendet...";
   await fetchBoard();
   if(!Array.isArray(globalBoard.pendingRewards)) globalBoard.pendingRewards=[];
   globalBoard.pendingRewards.push({target:"all",coins,gems,claimedBy:[],ts:Date.now()});
   await pushBin();
-  document.getElementById("adminMsg").innerText=`✓ Belohnung für ALLE gespeichert: +${coins}🪙 +${gems}💎`;
+  document.getElementById("adminMsg").innerText=`? Belohnung f�r ALLE gespeichert: +${coins}?? +${gems}??`;
 }
 function closeAdmin(){openShop();}
 
 function adminResetOne(){
   const target=document.getElementById("adminPlayerSelect").value.trim();
   if(!target){alert("Bitte einen Spielernamen eingeben.");return;}
-  if(!confirm(`Wirklich alle Coins & Diamanten von "${target}" löschen?`)) return;
+  if(!confirm(`Wirklich alle Coins & Diamanten von "${target}" l�schen?`)) return;
   const users=getUsers();
   if(!users[target]){document.getElementById("adminMsg").innerText="Spieler nicht gefunden.";return;}
   users[target].coins=0;users[target].diamonds=0;
   saveUsers(users);
-  document.getElementById("adminMsg").innerText=`✓ Coins & Diamanten von "${target}" gelöscht.`;
+  document.getElementById("adminMsg").innerText=`? Coins & Diamanten von "${target}" gel�scht.`;
 }
 
 function adminResetAll(){
-  if(!confirm("Wirklich alle Coins & Diamanten von ALLEN Spielern löschen?")) return;
+  if(!confirm("Wirklich alle Coins & Diamanten von ALLEN Spielern l�schen?")) return;
   // Reset alle lokalen Spieler
   const users=getUsers();
   Object.keys(users).forEach(name=>{users[name].coins=0;users[name].diamonds=0;});
   saveUsers(users);
   updateTopBar();
-  // Push globalen Reset-Befehl über JSONBin damit andere Geräte auch resettet werden
-  document.getElementById("adminMsg").innerText="⏳ Wird gesendet...";
+  // Push globalen Reset-Befehl �ber JSONBin damit andere Ger�te auch resettet werden
+  document.getElementById("adminMsg").innerText="? Wird gesendet...";
   fetchBoard().then(()=>{
     if(!Array.isArray(globalBoard.pendingRewards)) globalBoard.pendingRewards=[];
     globalBoard.pendingRewards.push({target:"all",coins:0,gems:0,reset:true,claimedBy:[],ts:Date.now()});
     return pushBin();
   }).then(()=>{
-    document.getElementById("adminMsg").innerText="✓ Alle Coins & Diamanten gelöscht (lokal + global).";
+    document.getElementById("adminMsg").innerText="? Alle Coins & Diamanten gel�scht (lokal + global).";
   }).catch(()=>{
-    document.getElementById("adminMsg").innerText="✓ Lokal gelöscht. JSONBin-Sync fehlgeschlagen.";
+    document.getElementById("adminMsg").innerText="? Lokal gel�scht. JSONBin-Sync fehlgeschlagen.";
   });
 }
 
@@ -1159,10 +1159,10 @@ async function renderFriends(){
     incoming.forEach(r=>{
       const div=document.createElement("div");
       div.style.cssText="display:flex;align-items:center;justify-content:space-between;background:rgba(255,200,0,0.08);border:1px solid rgba(255,200,0,0.2);border-radius:8px;padding:8px 10px;margin-bottom:4px;";
-      div.innerHTML=`<span style="font-size:14px;">👤 ${r.from}</span>
+      div.innerHTML=`<span style="font-size:14px;">?? ${r.from}</span>
         <span>
-          <button onclick="acceptFriend('${r.from}')" style="font-size:12px;padding:4px 10px;border-color:#00cc66;color:#00cc66;margin:0 2px;">✓</button>
-          <button onclick="declineFriend('${r.from}')" style="font-size:12px;padding:4px 10px;border-color:#ff4444;color:#ff4444;margin:0 2px;">✕</button>
+          <button onclick="acceptFriend('${r.from}')" style="font-size:12px;padding:4px 10px;border-color:#00cc66;color:#00cc66;margin:0 2px;">?</button>
+          <button onclick="declineFriend('${r.from}')" style="font-size:12px;padding:4px 10px;border-color:#ff4444;color:#ff4444;margin:0 2px;">?</button>
         </span>`;
       reqList.appendChild(div);
     });
@@ -1174,7 +1174,7 @@ async function renderFriends(){
   const list=document.getElementById("friendsList");
   list.innerHTML="";
   if(friends.length===0){
-    list.innerHTML="<p style='color:#555;font-size:13px;'>Noch keine Freunde. Füge jemanden hinzu!</p>";
+    list.innerHTML="<p style='color:#555;font-size:13px;'>Noch keine Freunde. F�ge jemanden hinzu!</p>";
     return;
   }
   // check online status via JSONBin presence
@@ -1191,8 +1191,8 @@ async function renderFriends(){
         <span style="font-size:11px;color:#555;">${online?"online":"offline"}</span>
       </span>
       <span>
-        <button onclick="startDuelFromFriend('${name}')" style="font-size:11px;padding:3px 8px;border-color:#ff6666;color:#ff6666;margin:0 2px;">⚔️</button>
-        <button onclick="removeFriend('${name}')" style="font-size:11px;padding:3px 8px;border-color:#444;color:#888;margin:0 2px;">✕</button>
+        <button onclick="startDuelFromFriend('${name}')" style="font-size:11px;padding:3px 8px;border-color:#ff6666;color:#ff6666;margin:0 2px;">??</button>
+        <button onclick="removeFriend('${name}')" style="font-size:11px;padding:3px 8px;border-color:#444;color:#888;margin:0 2px;">?</button>
       </span>`;
     list.appendChild(div);
   });
@@ -1202,7 +1202,7 @@ async function sendFriendRequest(){
   const target=document.getElementById("friendAddInput").value.trim();
   const msg=document.getElementById("friendsMsg");
   if(!target){msg.innerText="Bitte einen Namen eingeben.";msg.style.color="#ff6666";return;}
-  if(target===currentUser){msg.innerText="Du kannst dich nicht selbst hinzufügen.";msg.style.color="#ff6666";return;}
+  if(target===currentUser){msg.innerText="Du kannst dich nicht selbst hinzuf�gen.";msg.style.color="#ff6666";return;}
   const u=getUser();
   if((u.friends||[]).includes(target)){msg.innerText="Bereits befreundet.";msg.style.color="#ffcc00";return;}
   await fetchBoard();
@@ -1279,7 +1279,7 @@ function updateOnlineList(){
   const friends=u?u.friends||[]:[];
   const online=friends.filter(name=>presence[name]&&Date.now()-presence[name]<20000);
   if(online.length===0){el.innerText="Keine Freunde online";return;}
-  el.innerHTML=online.map(n=>`<span style="color:white;">${n}</span>`).join('<span style="color:#444;"> · </span>');
+  el.innerHTML=online.map(n=>`<span style="color:white;">${n}</span>`).join('<span style="color:#444;"> � </span>');
 }
 
 // check for accepted friend requests and add them locally
@@ -1310,7 +1310,7 @@ function showLeaderTab(tab){
     html="<table style='width:100%;border-collapse:collapse;font-size:14px;'>";
     html+=`<tr style='color:#888;'><th style='text-align:left;padding:4px 6px;'>#</th><th style='text-align:left;'>${t("player")}</th><th style='text-align:right;'>${t("score")}</th></tr>`;
     list.forEach((p,i)=>{
-      const medal=i===0?"🥇":i===1?"🥈":"🥉";
+      const medal=i===0?"??":i===1?"??":"??";
       const style=p.name===currentUser?"color:#00ccff;font-weight:bold;":"";
       html+=`<tr><td style='padding:3px 6px;color:#666;'>${i+1}</td><td style='${style}'>${medal}${p.name}</td><td style='text-align:right;color:gold;'>${p.score}</td></tr>`;
     });
@@ -1325,7 +1325,7 @@ let previewSkinId=0,previewFlameId=0;
 
 function openSkinCatalog(){
   const u=getUser();
-  document.getElementById("skinCoins").innerText="🪙 "+u.coins;
+  document.getElementById("skinCoins").innerText="?? "+u.coins;
   skinTab='skins';
   document.getElementById("tabSkins").className='lvl-btn active';
   document.getElementById("tabFlames").className='lvl-btn';
@@ -1361,7 +1361,7 @@ function renderSkinGrid(){
     if(!owned){
       const pr=document.createElement("div");
       pr.style.cssText="font-size:8px;color:gold;";
-      pr.innerText=skinPrice(skin)+"🪙";
+      pr.innerText=skinPrice(skin)+"??";
       cell.appendChild(pr);
     }
     cell.appendChild(swatch);cell.appendChild(lbl);
@@ -1389,12 +1389,12 @@ function renderSkinPreview(id){
   drawSkinOnCanvas(px,skin,pad,pad,pc.width-pad*2,pc.height-pad*2);
   px.restore();
   document.getElementById("skinPreviewName").innerText=skin.name;
-  document.getElementById("skinPreviewPrice").innerText=skin.free?"Free":skinPrice(skin)+" 🪙";
+  document.getElementById("skinPreviewPrice").innerText=skin.free?"Free":skinPrice(skin)+" ??";
   const btn=document.getElementById("skinActionBtn");
   btn.style.display="inline-block";
-  if(isActive){btn.innerText="✓ In Use";btn.disabled=true;}
+  if(isActive){btn.innerText="? In Use";btn.disabled=true;}
   else if(owned){btn.innerText="Nutzen";btn.disabled=false;}
-  else{btn.innerText="Kaufen ("+skinPrice(skin)+"🪙)";btn.disabled=false;}
+  else{btn.innerText="Kaufen ("+skinPrice(skin)+"??)";btn.disabled=false;}
 }
 
 function renderFlameGrid(){
@@ -1414,7 +1414,7 @@ function renderFlameGrid(){
     if(!owned){
       const pr=document.createElement("div");
       pr.style.cssText="font-size:8px;color:#88eeff;";
-      pr.innerText=flamePrice(f)+"💎";
+      pr.innerText=flamePrice(f)+"??";
       cell.appendChild(pr);
     }
     cell.appendChild(swatch);cell.appendChild(lbl);
@@ -1446,11 +1446,11 @@ function selectFlamePreview(id){
   px.closePath();px.fill();
   px.restore();
   document.getElementById("skinPreviewName").innerText=f.name;
-  document.getElementById("skinPreviewPrice").innerText=flamePrice(f)+"💎";
+  document.getElementById("skinPreviewPrice").innerText=flamePrice(f)+"??";
   const btn=document.getElementById("skinActionBtn");btn.style.display="inline-block";
-  if(isActive){btn.innerText="✓ Aktiv";btn.disabled=true;}
+  if(isActive){btn.innerText="? Aktiv";btn.disabled=true;}
   else if(owned){btn.innerText="Nutzen";btn.disabled=false;}
-  else{btn.innerText="Kaufen ("+flamePrice(f)+"💎)";btn.disabled=false;}
+  else{btn.innerText="Kaufen ("+flamePrice(f)+"??)";btn.disabled=false;}
 }
 
 function skinAction(){
@@ -1460,7 +1460,7 @@ function skinAction(){
   if(!owned){
     const skin=SKINS.find(s=>s.id===previewSkinId);
     const price=skinPrice(skin);
-    if(u.coins<price){alert("Nicht genug Coins 🪙");return;}
+    if(u.coins<price){alert("Nicht genug Coins ??");return;}
     u.coins-=price;u.ownedSkins.push(previewSkinId);saveUser(u);updateTopBar();
   }
   u=getUser();u.activeSkin=previewSkinId;saveUser(u);selectedSkinId=previewSkinId;
@@ -1471,7 +1471,7 @@ function flameAction(){
   const owned=(u.ownedFlames||[]).includes(previewFlameId);
   if(!owned){
     const price=flamePrice(FLAME_SKINS[previewFlameId]);
-    if((u.diamonds||0)<price){alert("Nicht genug Diamanten 💎");return;}
+    if((u.diamonds||0)<price){alert("Nicht genug Diamanten ??");return;}
     u.diamonds-=price;if(!u.ownedFlames)u.ownedFlames=[];u.ownedFlames.push(previewFlameId);saveUser(u);updateTopBar();
   }
   u=getUser();u.activeFlame=previewFlameId;saveUser(u);selectedFlameId=previewFlameId;
@@ -1498,8 +1498,8 @@ let isMobile=localStorage.getItem("deviceMode")==="mobile";
 let keyBindings={up:localStorage.getItem("bindUp")||"ArrowUp",down:localStorage.getItem("bindDown")||"ArrowDown"};
 let bindingTarget=null;
 function keyLabel(k){
-  if(k==="ArrowUp") return "↑ Pfeil";if(k==="ArrowDown") return "↓ Pfeil";
-  if(k==="ArrowLeft") return "← Pfeil";if(k==="ArrowRight") return "→ Pfeil";
+  if(k==="ArrowUp") return "? Pfeil";if(k==="ArrowDown") return "? Pfeil";
+  if(k==="ArrowLeft") return "? Pfeil";if(k==="ArrowRight") return "? Pfeil";
   if(k===" ") return "Space";
   return k.length===1?k.toUpperCase():k;
 }
@@ -1918,95 +1918,8 @@ function drawBackground(){
       let ly=0;while(ly<canvas.height*0.7){ly+=20+Math.random()*30;ctx.lineTo(lx+(Math.random()-0.5)*40,ly);}
       ctx.stroke();ctx.shadowBlur=0;
     }
-  } else if(bg==="planet"){
-    const t=Date.now()*0.0003;
-    const W=canvas.width,H=canvas.height;
-    // deep space bg
-    const sg=ctx.createRadialGradient(W*0.3,H*0.3,0,W*0.5,H*0.5,W*0.8);
-    sg.addColorStop(0,'#1a0040');sg.addColorStop(0.3,'#0a0030');sg.addColorStop(0.6,'#050020');sg.addColorStop(1,'#000008');
-    ctx.fillStyle=sg;ctx.fillRect(0,0,W,H);
-    // nebula clouds
-    [[W*0.15,H*0.2,220,'rgba(80,0,180,0.18)'],[W*0.8,H*0.7,280,'rgba(0,30,160,0.15)'],
-     [W*0.6,H*0.1,180,'rgba(180,0,80,0.12)'],[W*0.1,H*0.8,200,'rgba(0,60,200,0.1)']
-    ].forEach(([x,y,r,c])=>{
-      const g=ctx.createRadialGradient(x,y,0,x,y,r);
-      g.addColorStop(0,c);g.addColorStop(1,'transparent');
-      ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
-    });
-    // stars with twinkle
-    bgStars.forEach((s,i)=>{
-      const twinkle=0.4+0.6*Math.abs(Math.sin(t*3+i*0.7));
-      ctx.globalAlpha=twinkle*0.9;
-      const hue=i%3===0?200:i%3===1?280:60;
-      ctx.fillStyle=`hsl(${hue},60%,90%)`;
-      ctx.fillRect(s.x,s.y,s.s,s.s);
-      // 4-point star sparkle for bigger stars
-      if(s.s>1.5){
-        ctx.strokeStyle=`hsla(${hue},80%,95%,${twinkle*0.6})`;ctx.lineWidth=0.5;
-        ctx.beginPath();ctx.moveTo(s.x-4,s.y);ctx.lineTo(s.x+4,s.y);ctx.stroke();
-        ctx.beginPath();ctx.moveTo(s.x,s.y-4);ctx.lineTo(s.x,s.y+4);ctx.stroke();
-      }
-      s.x-=s.speed*0.2;if(s.x<-4)s.x=W+4;
-    });
-    ctx.globalAlpha=1;
-    // small red planet top-right
-    const rpx=W*0.78,rpy=H*0.12,rpr=22;
-    const rpg=ctx.createRadialGradient(rpx-rpr*0.3,rpy-rpr*0.3,rpr*0.05,rpx,rpy,rpr);
-    rpg.addColorStop(0,'#ff8888');rpg.addColorStop(0.5,'#cc2200');rpg.addColorStop(1,'#440000');
-    ctx.fillStyle=rpg;ctx.beginPath();ctx.arc(rpx,rpy,rpr,0,Math.PI*2);ctx.fill();
-    ctx.strokeStyle='rgba(255,100,50,0.3)';ctx.lineWidth=1;ctx.stroke();
-    // main planet
-    const px=W*0.5,py=H*0.52,pr=Math.min(W,H)*0.22;
-    // planet glow
-    const glowG=ctx.createRadialGradient(px,py,pr*0.5,px,py,pr*2.2);
-    glowG.addColorStop(0,'rgba(0,150,255,0.18)');glowG.addColorStop(0.5,'rgba(0,80,200,0.08)');glowG.addColorStop(1,'transparent');
-    ctx.fillStyle=glowG;ctx.fillRect(0,0,W,H);
-    // rings (behind planet — bottom half)
-    ctx.save();
-    ctx.translate(px,py);
-    const ringColors=[
-      'rgba(255,255,255,0.12)','rgba(100,180,255,0.25)','rgba(180,220,255,0.18)',
-      'rgba(255,255,255,0.08)','rgba(80,160,255,0.2)','rgba(200,230,255,0.15)',
-      'rgba(255,255,255,0.06)','rgba(60,140,255,0.18)',
-    ];
-    ringColors.forEach((col,i)=>{
-      const rx=(pr*1.35+i*pr*0.18);const ry=rx*0.28;
-      ctx.strokeStyle=col;ctx.lineWidth=i%3===1?2.5:1.2;
-      ctx.beginPath();
-      // only bottom arc (behind planet)
-      ctx.ellipse(0,0,rx,ry,0,0,Math.PI);
-      ctx.stroke();
-    });
-    ctx.restore();
-    // planet body
-    const pg=ctx.createRadialGradient(px-pr*0.3,py-pr*0.35,pr*0.05,px,py,pr);
-    pg.addColorStop(0,'#1a3a5a');pg.addColorStop(0.3,'#0a2040');pg.addColorStop(0.6,'#051530');pg.addColorStop(1,'#000510');
-    ctx.fillStyle=pg;ctx.beginPath();ctx.arc(px,py,pr,0,Math.PI*2);ctx.fill();
-    // planet surface shimmer (teal glow at bottom)
-    const shimG=ctx.createRadialGradient(px,py+pr*0.6,0,px,py+pr*0.5,pr*0.8);
-    shimG.addColorStop(0,'rgba(0,220,200,0.22)');shimG.addColorStop(1,'transparent');
-    ctx.fillStyle=shimG;ctx.beginPath();ctx.arc(px,py,pr,0,Math.PI*2);ctx.fill();
-    // planet atmosphere rim
-    const rimG=ctx.createRadialGradient(px,py,pr*0.88,px,py,pr*1.05);
-    rimG.addColorStop(0,'transparent');rimG.addColorStop(0.5,'rgba(0,180,255,0.15)');rimG.addColorStop(1,'transparent');
-    ctx.fillStyle=rimG;ctx.beginPath();ctx.arc(px,py,pr*1.05,0,Math.PI*2);ctx.fill();
-    // rings (front — top half)
-    ctx.save();
-    ctx.translate(px,py);
-    ringColors.forEach((col,i)=>{
-      const rx=(pr*1.35+i*pr*0.18);const ry=rx*0.28;
-      ctx.strokeStyle=col;ctx.lineWidth=i%3===1?2.5:1.2;
-      ctx.beginPath();
-      ctx.ellipse(0,0,rx,ry,0,Math.PI,Math.PI*2);
-      ctx.stroke();
-    });
-    ctx.restore();
-    // bottom light flare
-    const flareG=ctx.createRadialGradient(W*0.35,H*0.95,0,W*0.35,H*0.95,120);
-    flareG.addColorStop(0,'rgba(255,255,255,0.18)');flareG.addColorStop(1,'transparent');
-    ctx.fillStyle=flareG;ctx.fillRect(0,0,W,H);
   } else if(bg==="retrocity"){
-    // Retro City — pink/purple pixel skyline
+    // Retro City � pink/purple pixel skyline
     const W=canvas.width,H=canvas.height;
     // sky gradient
     const sg=ctx.createLinearGradient(0,0,0,H);
@@ -2051,7 +1964,7 @@ function drawBackground(){
       }
     });
   } else if(bg==="neoncity"){
-    // Neon Night City — dark with neon lights
+    // Neon Night City � dark with neon lights
     const W=canvas.width,H=canvas.height;
     ctx.fillStyle="#050010";ctx.fillRect(0,0,W,H);
     // neon sky glow
@@ -2085,7 +1998,7 @@ function drawBackground(){
       }
     });
   } else if(bg==="desertsun"){
-    // Desert Sunset — golden dunes
+    // Desert Sunset � golden dunes
     const W=canvas.width,H=canvas.height;
     const sg=ctx.createLinearGradient(0,0,0,H);
     sg.addColorStop(0,"#ffffff");sg.addColorStop(0.2,"#ffe066");sg.addColorStop(0.5,"#ffaa00");sg.addColorStop(0.8,"#cc5500");sg.addColorStop(1,"#882200");
@@ -2107,7 +2020,7 @@ function drawBackground(){
       ctx.fillStyle="#5a3000";ctx.fillRect(x*W,y*H,12,8);ctx.fillRect(x*W+4,y*H-4,6,4);
     });
   } else if(bg==="snowmount"){
-    // Snow Mountain — teal sky, pixel trees, snowy peak
+    // Snow Mountain � teal sky, pixel trees, snowy peak
     const W=canvas.width,H=canvas.height;
     const sg=ctx.createLinearGradient(0,0,0,H);
     sg.addColorStop(0,"#44ddff");sg.addColorStop(0.5,"#22aacc");sg.addColorStop(1,"#006688");
@@ -2137,7 +2050,7 @@ function drawBackground(){
       ctx.fillStyle="#336655";ctx.fillRect(tx-3,ty+th*0.9,6,H*0.1);
     });
   } else if(bg==="pixelforest"){
-    // Pixel Forest — deep blue night, teal trees
+    // Pixel Forest � deep blue night, teal trees
     const W=canvas.width,H=canvas.height;
     const sg=ctx.createLinearGradient(0,0,0,H);
     sg.addColorStop(0,"#001833");sg.addColorStop(0.4,"#002244");sg.addColorStop(0.7,"#003355");sg.addColorStop(1,"#004466");
@@ -2153,7 +2066,7 @@ function drawBackground(){
     // ground
     ctx.fillStyle="#001122";ctx.fillRect(0,H*0.75,W,H*0.25);
     ctx.fillStyle="#002233";ctx.fillRect(0,H*0.72,W,H*0.04);
-    // pixel trees — dense row
+    // pixel trees � dense row
     for(let i=0;i<20;i++){
       const tx=(i/20)*W+10,ty=H*0.42,th=H*0.35,tw=12;
       ctx.fillStyle=i%3===0?"#00ccaa":i%3===1?"#009988":"#00bbcc";
@@ -2163,7 +2076,7 @@ function drawBackground(){
       ctx.fillStyle="#003344";ctx.fillRect(tx-3,ty+th,6,H*0.08);
     }
   } else if(bg==="pastelsky"){
-    // Pastel Sky — pink/purple gradient, layered clouds, mountains
+    // Pastel Sky � pink/purple gradient, layered clouds, mountains
     const W=canvas.width,H=canvas.height;
     const sg=ctx.createLinearGradient(0,0,0,H);
     sg.addColorStop(0,"#cc88ff");sg.addColorStop(0.3,"#ff88cc");sg.addColorStop(0.6,"#ffaadd");sg.addColorStop(1,"#ffddee");
@@ -2202,7 +2115,7 @@ function drawBackground(){
     cg.addColorStop(0,"rgba(80,0,120,0.18)");cg.addColorStop(1,"transparent");
     ctx.fillStyle=cg;ctx.fillRect(0,0,W,H);
 
-    // warp streaks — pixel style (draw as thick dashed lines)
+    // warp streaks � pixel style (draw as thick dashed lines)
     warpStreaks.forEach(s=>{
       s.dist+=s.speed;
       if(s.dist>0.85){s.dist=Math.random()*0.05;s.len=Math.random()*0.12+0.04;s.alpha=Math.random()*0.6+0.4;}
@@ -2234,7 +2147,7 @@ function drawBackground(){
   } else if(bg==="saturn"){
     const W=canvas.width,H=canvas.height;
     const t=Date.now()*0.0003;
-    // deep space background — purple/blue gradient
+    // deep space background � purple/blue gradient
     const spaceGrad=ctx.createLinearGradient(0,0,W,H);
     spaceGrad.addColorStop(0,"#0a0018");
     spaceGrad.addColorStop(0.4,"#0d0030");
@@ -2266,7 +2179,7 @@ function drawBackground(){
       ctx.restore();
     });
 
-    // planet position — center-left, large
+    // planet position � center-left, large
     const px=W*0.42,py=H*0.5,pr=Math.min(W,H)*0.22;
 
     // ring shadow on planet (ellipse behind planet)
@@ -2276,7 +2189,7 @@ function drawBackground(){
     ctx.beginPath();ctx.ellipse(px,py+pr*0.08,pr*1.7,pr*0.38,0,Math.PI*0.05,Math.PI*1.05);ctx.stroke();
     ctx.restore();
 
-    // planet body — dark with teal glow on bottom
+    // planet body � dark with teal glow on bottom
     const planetGrad=ctx.createRadialGradient(px-pr*0.25,py-pr*0.2,pr*0.05,px,py,pr);
     planetGrad.addColorStop(0,"#1a2a2a");
     planetGrad.addColorStop(0.4,"#0d1a20");
@@ -2295,7 +2208,7 @@ function drawBackground(){
     atmGrad.addColorStop(1,"transparent");
     ctx.fillStyle=atmGrad;ctx.beginPath();ctx.arc(px,py,pr*1.1,0,Math.PI*2);ctx.fill();
 
-    // rings — drawn as ellipses, clipped so planet covers center
+    // rings � drawn as ellipses, clipped so planet covers center
     const ringData=[
       {rx:pr*2.4,ry:pr*0.52,lw:pr*0.13,col:"rgba(60,80,200,0.55)"},
       {rx:pr*2.0,ry:pr*0.44,lw:pr*0.09,col:"rgba(100,120,240,0.45)"},
@@ -2375,12 +2288,12 @@ function openCustomLevels(){
     const info=document.createElement("div");
     info.innerHTML=`<div style="font-size:15px;font-weight:bold;color:white;">${lvl.name}</div><div style="font-size:11px;color:#888;">Ziel: ${lvl.goalScore} Pkt &nbsp;|&nbsp; Speed: ${lvl.speed} &nbsp;|&nbsp; Objekte: ${lvl.objTypes.join(", ")}</div>`;
     const btns=document.createElement("div");btns.style.cssText="display:flex;gap:6px;flex-shrink:0;";
-    const playBtn=document.createElement("button");playBtn.innerText="▶";playBtn.style.cssText="padding:6px 10px;font-size:13px;border-color:#00ccff;color:#00ccff;";
+    const playBtn=document.createElement("button");playBtn.innerText="?";playBtn.style.cssText="padding:6px 10px;font-size:13px;border-color:#00ccff;color:#00ccff;";
     playBtn.onclick=()=>startCustomLevel(i);
-    const editBtn=document.createElement("button");editBtn.innerText="✏️";editBtn.style.cssText="padding:6px 10px;font-size:13px;";
+    const editBtn=document.createElement("button");editBtn.innerText="??";editBtn.style.cssText="padding:6px 10px;font-size:13px;";
     editBtn.onclick=()=>openLevelEditor(i);
-    const delBtn=document.createElement("button");delBtn.innerText="🗑";delBtn.style.cssText="padding:6px 10px;font-size:13px;border-color:#ff4444;color:#ff4444;";
-    delBtn.onclick=()=>{if(confirm("Level löschen?")){const ls=getCustomLevels();ls.splice(i,1);saveCustomLevels(ls);openCustomLevels();}};
+    const delBtn=document.createElement("button");delBtn.innerText="??";delBtn.style.cssText="padding:6px 10px;font-size:13px;border-color:#ff4444;color:#ff4444;";
+    delBtn.onclick=()=>{if(confirm("Level l�schen?")){const ls=getCustomLevels();ls.splice(i,1);saveCustomLevels(ls);openCustomLevels();}};
     btns.appendChild(playBtn);btns.appendChild(editBtn);btns.appendChild(delBtn);
     row.appendChild(info);row.appendChild(btns);
     list.appendChild(row);
@@ -2391,7 +2304,7 @@ function openLevelEditor(index){
   document.getElementById("edEditIndex").value=index===null?-1:index;
   if(index!==null&&index>=0){
     const lvl=getCustomLevels()[index];
-    document.getElementById("editorTitle").innerText="✏️ Level bearbeiten";
+    document.getElementById("editorTitle").innerText="?? Level bearbeiten";
     document.getElementById("edLevelName").value=lvl.name;
     document.getElementById("edGoalScore").value=lvl.goalScore;
     document.getElementById("edSpeed").value=lvl.speed;document.getElementById("edSpeedVal").innerText=lvl.speed;
@@ -2402,7 +2315,7 @@ function openLevelEditor(index){
     document.getElementById("edObjLaser").checked=lvl.objTypes.includes("laser");
     document.getElementById("edObjZigzag").checked=lvl.objTypes.includes("zigzag");
   } else {
-    document.getElementById("editorTitle").innerText="✏️ Level erstellen";
+    document.getElementById("editorTitle").innerText="?? Level erstellen";
     document.getElementById("edLevelName").value="";
     document.getElementById("edGoalScore").value=2000;
     document.getElementById("edSpeed").value=5;document.getElementById("edSpeedVal").innerText=5;
@@ -2425,7 +2338,7 @@ function saveCustomLevel(){
   if(document.getElementById("edObjBall").checked) objTypes.push("ball");
   if(document.getElementById("edObjLaser").checked) objTypes.push("laser");
   if(document.getElementById("edObjZigzag").checked) objTypes.push("zigzag");
-  if(objTypes.length===0){alert("Mindestens einen Objekt-Typ wählen.");return;}
+  if(objTypes.length===0){alert("Mindestens einen Objekt-Typ w�hlen.");return;}
   const lvl={
     name,
     goalScore:Math.max(100,parseInt(document.getElementById("edGoalScore").value)||2000),
@@ -2504,7 +2417,7 @@ async function duelAtomicUpdate(mutateFn){
 
 function showDuelResult(myScore, oppScore, oppNameOverride, wonOverride){
   const won = wonOverride !== undefined ? wonOverride : myScore >= oppScore;
-  document.getElementById("duelResultTitle").innerText = won ? "🏆 Du hast gewonnen!" : "💀 Du hast verloren!";
+  document.getElementById("duelResultTitle").innerText = won ? "?? Du hast gewonnen!" : "?? Du hast verloren!";
   document.getElementById("duelResultTitle").style.color = won ? "#00ff88" : "#ff4444";
   document.getElementById("duelResultMyName").innerText = currentUser;
   document.getElementById("duelResultMyScore").innerText = myScore;
@@ -2613,7 +2526,7 @@ async function acceptDuel(){
     d.status="accepted";
     return d;
   });
-  if(!accepted){alert("Einladung nicht mehr gültig.");duelId=null;duelRole=null;showScreen("menuScreen");return;}
+  if(!accepted){alert("Einladung nicht mehr g�ltig.");duelId=null;duelRole=null;showScreen("menuScreen");return;}
   startDuelGame(accepted);
 }
 
@@ -2666,7 +2579,7 @@ async function duelSyncTick(){
     const duels=Array.isArray(data.duels)?data.duels:[];
     const duel=duels.find(d=>d.id===id);
     if(!duel){duelSyncing=false;return;}
-    // write only my fields — don't touch opponent fields
+    // write only my fields � don't touch opponent fields
     if(role==="challenger"){duel.challengerY=myY;duel.challengerScore=myScore;}
     else{duel.opponentY=myY;duel.opponentScore=myScore;}
     // read opponent fields
@@ -2679,7 +2592,7 @@ async function duelSyncTick(){
     duelOppAlive=oppAlive!==false;
     globalBoard={...globalBoard,...data,duels};
     await fetch(JSONBIN_URL,{method:"PUT",headers:{"Content-Type":"application/json","X-Access-Key":JSONBIN_KEY},body:JSON.stringify(data)});
-    // opponent just died and we're still alive → instant win
+    // opponent just died and we're still alive ? instant win
     if(wasAlive&&!duelOppAlive&&!gameOver){
       clearInterval(duelPollInterval);duelPollInterval=null;
       gameOver=true;gameRunning=false;
@@ -2957,7 +2870,7 @@ function drawCoins(){
     ctx.strokeStyle="rgba(255,220,0,0.8)"; ctx.lineWidth=1.5; ctx.stroke();
     // coin symbol
     ctx.fillStyle="rgba(120,80,0,0.85)"; ctx.font="bold "+Math.round(c.r*1.2)+"px Arial";
-    ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText("¢",c.x,c.y+1);
+    ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText("�",c.x,c.y+1);
     ctx.textAlign="left"; ctx.textBaseline="alphabetic";
     ctx.restore();
   });
@@ -3262,7 +3175,7 @@ function drawHUD(){
     ctx.fillStyle="rgba(255,0,0,0.25)";ctx.fillRect(bx,by,bw,bh);
     ctx.fillStyle=`rgba(255,${Math.floor(80*(1-pct))},0,0.9)`;ctx.fillRect(bx,by,bw*pct,bh);
     ctx.fillStyle="rgba(255,100,100,0.9)";ctx.font="bold 10px Arial";ctx.textAlign="left";
-    ctx.fillText("⚠ Wand: "+(7-Math.floor(wallTouchTimer))+"s",bx,by+bh+10);
+    ctx.fillText("? Wand: "+(7-Math.floor(wallTouchTimer))+"s",bx,by+bh+10);
     ctx.restore();
   }
 
@@ -3289,7 +3202,7 @@ function drawHUD(){
   // power-up indicator
   if(activePowerUp && powerUpTimer>0){
     const secsLeft=Math.ceil(powerUpTimer/60);
-    const puLabels={noObstacles:"🚫 Keine Objekte",slowSpeed:"🐢 50% langsamer",lessObstacles:"⬇ 50% weniger Objekte"};
+    const puLabels={noObstacles:"?? Keine Objekte",slowSpeed:"?? 50% langsamer",lessObstacles:"? 50% weniger Objekte"};
     const puColors={noObstacles:"#00ff88",slowSpeed:"#ffcc00",lessObstacles:"#00ccff"};
     const label=puLabels[activePowerUp]+" "+secsLeft+"s";
     const col=puColors[activePowerUp];
@@ -3334,7 +3247,7 @@ function endGame(){
   const scoreCoins=Math.floor(score/10);
   const totalCoins=sessionCoins+scoreCoins;
   let uu=getUser();uu.coins=(uu.coins||0)+scoreCoins;saveUser(uu);updateTopBar();
-  document.getElementById("endCoinsEarned").innerText="+"+totalCoins+"🪙  +"+sessionGems+"💎  (inkl. "+scoreCoins+"🪙 für Score)";
+  document.getElementById("endCoinsEarned").innerText="+"+totalCoins+"??  +"+sessionGems+"??  (inkl. "+scoreCoins+"?? f�r Score)";
   showScreen("endScreen");
   document.getElementById("topBar").style.display="flex";
   updateTopBar();
@@ -3364,7 +3277,7 @@ function winGame(){
   const scoreCoinsW=Math.floor(score/10);
   const totalCoinsW=sessionCoins+scoreCoinsW;
   let uw=getUser();uw.coins=(uw.coins||0)+scoreCoinsW;saveUser(uw);
-  document.getElementById("winCoins").innerText="+"+totalCoinsW+"🪙  +"+sessionGems+"💎  (inkl. "+scoreCoinsW+"🪙 für Score)";
+  document.getElementById("winCoins").innerText="+"+totalCoinsW+"??  +"+sessionGems+"??  (inkl. "+scoreCoinsW+"?? f�r Score)";
   document.getElementById("nextLevelBtn").style.display=nextExists?"inline-block":"none";
   showScreen("winScreen");
   document.getElementById("topBar").style.display="flex";
