@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Traumstadt – Abstimmung</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f4f0e8;color:#222;font-family:Arial,Helvetica,sans-serif}
+.app{max-width:1000px;margin:auto;padding:18px}
+.card{background:#fff;border:2px solid #222;border-radius:10px;padding:25px;box-shadow:4px 4px 0 #222}
+.center{text-align:center}
+h1{font-size:clamp(38px,7vw,65px);margin:10px 0 15px}
+h2{font-size:clamp(27px,5vw,42px);margin:5px 0 12px}
+p{font-size:17px;line-height:1.5;color:#444}
+button{border:2px solid #222;border-radius:7px;background:#c62828;color:#fff;padding:13px 20px;font-size:16px;font-weight:800;cursor:pointer;box-shadow:2px 2px 0 #222}
+button:hover{transform:translate(-1px,-1px)}
+button:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+.big{font-size:19px;padding:15px 27px}
+input{width:min(350px,100%);padding:14px;border:2px solid #777;border-radius:7px;font-size:20px;text-align:center;margin:15px 0}
+.screen{display:none}.screen.active{display:block}
+.badge{display:inline-block;background:#eee;border:1px solid #777;border-radius:5px;padding:6px 10px;font-size:12px;font-weight:800}
+.projects{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px}
+.voteProject{position:relative;text-align:left;min-height:125px;background:#fafafa;color:#222;border:2px solid #777;border-radius:8px;box-shadow:none}
+.voteProject.sel{border-color:#c62828;background:#fff0f0;box-shadow:0 0 0 2px #f5b0b0}
+.voteProject .check{position:absolute;right:12px;top:10px;width:29px;height:29px;border-radius:50%;display:grid;place-items:center;background:#ddd;color:#222}
+.voteProject.sel .check{background:#c62828;color:#fff}
+.projectTitle{font-size:19px;font-weight:900;margin-bottom:7px;padding-right:35px}
+small{color:#555;font-size:14px}
+.status{display:flex;justify-content:space-between;align-items:center;margin-top:18px;padding:15px;background:#f5f5f5;border:1px solid #aaa;border-radius:8px}
+.dots{display:flex;gap:8px}.dot{width:14px;height:14px;background:#ccc;border-radius:50%}.dot.on{background:#c62828}
+.next{text-align:right;margin-top:20px}
+.results{display:grid;gap:14px;margin-top:22px}
+.resultRow{display:grid;grid-template-columns:230px 1fr 45px;gap:10px;align-items:center}
+.barbg{height:28px;background:#ddd;border-radius:5px;overflow:hidden}
+.bar{height:100%;width:0;background:#c62828;transition:1s}
+.winner{margin-top:22px;padding:22px;text-align:center;border:2px solid #27833b;background:#eff9f0;border-radius:8px}
+.note{padding:14px;background:#fff9cf;border:1px solid #c4b85a;border-radius:7px;margin-top:18px}
+@media(max-width:700px){.projects{grid-template-columns:1fr}.resultRow{grid-template-columns:130px 1fr 35px}.status{align-items:flex-start;gap:10px;flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<section id="start" class="screen active">
+<div class="card center">
+<span class="badge">ABSTIMMUNG</span>
+<h1>Was soll unsere Stadt bekommen?</h1>
+<p>Jetzt wird demokratisch entschieden. Jede Person bekommt <b>3 Stimmen</b> und kann 3 verschiedene Projekte auswählen.</p>
+<div class="note">Die Projekte kommen aus euren Ideen vom Plakat. Hier stimmen wir nur darüber ab, was die Gruppe am wichtigsten findet.</div>
+<br>
+<button class="big" onclick="show('setup')">Abstimmung starten →</button>
+</div>
+</section>
+
+<section id="setup" class="screen">
+<div class="card center">
+<span class="badge">1. VORBEREITUNG</span>
+<h2>Wie viele Personen stimmen ab?</h2>
+<p>Gebt die Anzahl der Personen ein, die nacheinander abstimmen.</p>
+<input id="people" type="number" min="1" max="1000" placeholder="z. B. 20">
+<br>
+<button class="big" onclick="beginVote()">Weiter →</button>
+</div>
+</section>
+
+<section id="vote" class="screen">
+<div class="card">
+<span class="badge">2. ABSTIMMUNG</span>
+<h2 id="person">Person 1</h2>
+<p>Wählt <b>genau 3 verschiedene Projekte</b> aus. Danach auf „Stimmen abgeben“ klicken und den Rechner an die nächste Person weitergeben.</p>
+<div class="projects" id="voteBox"></div>
+<div class="status">
+<b id="count">0 / 3 Stimmen</b>
+<div class="dots"><span class="dot" id="d1"></span><span class="dot" id="d2"></span><span class="dot" id="d3"></span></div>
+</div>
+<div class="next"><button id="submit" class="big" onclick="submitVote()" disabled>Stimmen abgeben</button></div>
+</div>
+</section>
+
+<section id="done" class="screen">
+<div class="card center">
+<span class="badge">3. FERTIG</span>
+<h2>Alle haben abgestimmt. 🎉</h2>
+<p>Die Stimmen sind gespeichert. Jetzt können wir gemeinsam das Ergebnis anschauen.</p>
+<button class="big" onclick="showResults()">Ergebnis anzeigen →</button>
+</div>
+</section>
+
+<section id="results" class="screen">
+<div class="card">
+<span class="badge">4. ERGEBNIS</span>
+<h2>Das Ergebnis</h2>
+<p id="meta"></p>
+<div class="results" id="resultsBox"></div>
+<div class="winner" id="winner"></div>
+<div class="note"><b>Danach diskutieren:</b> Warum hat dieses Projekt gewonnen? Welche Ideen hatten weniger Stimmen? Was könnte man trotzdem davon umsetzen?</div>
+</div>
+</section>
+
+</div>
+
+<script>
+const projects=[
+["🚌","Kostenloser ÖPNV","Bus und Bahn kostenlos machen"],
+["🛹","Großer Skatepark","Mehr Platz für Sport und Jugendliche"],
+["🌳","Neuer Stadtpark","Mehr Grün zum Treffen und Erholen"],
+["🏠","Bezahlbare Wohnungen","Wohnraum, den sich mehr Menschen leisten können"],
+["🏟️","Neues Sportzentrum","Mehr Möglichkeiten für verschiedene Sportarten"],
+["🎭","Kultur- und Jugendzentrum","Ein Ort zum Treffen, für Kultur und Freizeit"]
+];
+
+let people=0, person=1, selected=[], totals=Array(projects.length).fill(0);
+
+function show(id){
+ document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+ document.getElementById(id).classList.add("active");
+ window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function beginVote(){
+ const n=Number(document.getElementById("people").value);
+ if(!Number.isInteger(n)||n<1||n>1000){
+   alert("Bitte eine Zahl zwischen 1 und 1000 eingeben.");
+   return;
+ }
+ people=n; person=1; selected=[]; totals=Array(projects.length).fill(0);
+ renderVote(); show("vote");
+}
+
+function renderVote(){
+ document.getElementById("person").textContent="Person "+person+" von "+people;
+ const box=document.getElementById("voteBox");
+ box.innerHTML="";
+ projects.forEach((p,i)=>{
+   const b=document.createElement("button");
+   b.className="voteProject"+(selected.includes(i)?" sel":"");
+   b.innerHTML='<span class="check">'+(selected.includes(i)?"✓":"")+
+     '</span><div class="projectTitle">'+p[0]+" "+p[1]+
+     '</div><small>'+p[2]+"</small>";
+   b.onclick=()=>toggle(i);
+   box.appendChild(b);
+ });
+ updateStatus();
+}
+
+function toggle(i){
+ if(selected.includes(i)) selected=selected.filter(x=>x!==i);
+ else if(selected.length<3) selected.push(i);
+ renderVote();
+}
+
+function updateStatus(){
+ document.getElementById("count").textContent=selected.length+" / 3 Stimmen";
+ [1,2,3].forEach((n,i)=>{
+   document.getElementById("d"+n).classList.toggle("on",selected.length>i);
+ });
+ document.getElementById("submit").disabled=selected.length!==3;
+}
+
+function submitVote(){
+ if(selected.length!==3)return;
+ selected.forEach(i=>totals[i]++);
+ if(person<people){
+   person++; selected=[]; renderVote();
+ }else{
+   show("done");
+ }
+}
+
+function showResults(){
+ const ranked=projects.map((p,i)=>({p,i,v:totals[i]})).sort((a,b)=>b.v-a.v);
+ const max=Math.max(...totals);
+ const box=document.getElementById("resultsBox");
+ box.innerHTML="";
+ ranked.forEach((x,r)=>{
+   const row=document.createElement("div");
+   row.className="resultRow";
+   row.innerHTML='<div><b>'+String(r+1)+". "+x.p[0]+" "+x.p[1]+
+     '</b><div style="font-size:12px;color:#666">'+x.v+" Stimme"+
+     (x.v===1?"":"n")+'</div></div><div class="barbg"><div class="bar" data-width="'+
+     (max?x.v/max*100:0)+'%"></div></div><b>'+x.v+"</b>";
+   box.appendChild(row);
+ });
+ document.getElementById("meta").textContent=people+" Personen × 3 Stimmen = "+(people*3)+" Stimmen insgesamt.";
+ const winners=ranked.filter(x=>x.v===max);
+ document.getElementById("winner").innerHTML=winners.length===1
+   ?"🏆 <b>Die meisten Stimmen hat:</b><br><span style=\"font-size:25px\">"+winners[0].p[0]+" "+winners[0].p[1]+"</span><br>"+max+" Stimmen"
+   :"🤝 <b>Gleichstand:</b><br>"+winners.map(x=>x.p[0]+" "+x.p[1]).join(" · ")+" mit jeweils "+max+" Stimmen";
+ show("results");
+ setTimeout(()=>document.querySelectorAll(".bar").forEach(b=>b.style.width=b.dataset.width),80);
+}
+</script>
+</body>
+</html>
