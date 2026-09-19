@@ -164,10 +164,11 @@
 		.feedback-item { border-top: 1px solid var(--line); padding: 16px 0; }
 		.feedback-item:first-child { border-top: 0; padding-top: 0; }
 		.feedback-item-top { align-items: center; display: flex; gap: 12px; justify-content: space-between; }
-				.feedback-item-info { align-items: center; display: flex; gap: 12px; }
+				.feedback-item-info { align-items: center; display: flex; flex-wrap: wrap; gap: 8px 12px; }
 		.feedback-stars { color: #d48a28; font: 1rem Arial, sans-serif; letter-spacing: 0.08em; white-space: nowrap; }
 		.feedback-author, .feedback-date { color: var(--muted); font: 0.75rem Arial, sans-serif; }
 		.feedback-message { margin: 7px 0 0; white-space: pre-wrap; }
+		.feedback-item-info .delete-button { border: 1px solid var(--line); padding: 4px 8px; }
 		.feedback-status { color: var(--muted); font: 0.8rem Arial, sans-serif; min-height: 18px; }
 		footer { border-top: 1px solid var(--line); color: var(--muted); font: 0.75rem Arial, sans-serif; padding: 24px; text-align: center; }
 		@media (max-width: 600px) {
