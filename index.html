@@ -388,12 +388,10 @@
 				<div class="feedback-item">
 					<div class="feedback-item-top">
 						<span class="feedback-stars" aria-label="${item.rating} von 5 Sternen">${"★".repeat(item.rating)}${"☆".repeat(5 - item.rating)}</span>
-						<div class="feedback-item-info">
-							<span class="feedback-author">${escapeHtml(item.author || "Anonym")} · ${item.created_at ? new Date(item.created_at).toLocaleDateString("de-DE") : ""}</span>
-							<button class="delete-button" data-delete-feedback="${escapeHtml(item.id)}" type="button">Löschen</button>
-						</div>
+						<span class="feedback-author">${escapeHtml(item.author || "Anonym")} · ${item.created_at ? new Date(item.created_at).toLocaleDateString("de-DE") : ""}</span>
 					</div>
 					<p class="feedback-message">${escapeHtml(item.message)}</p>
+					<button class="delete-button" data-delete-feedback="${escapeHtml(item.id)}" type="button">Feedback löschen</button>
 				</div>
 			`).join("");
 		}
